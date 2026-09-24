@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sweet Love | Contáctanos</title>
+
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <link rel="stylesheet" href="assets/css/search.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <div id="cart-app"></div>
+
+    <div id="search-app"></div>
+
+    <div id="auth-app"></div>
+
+    <main>
+        <div class="container__all-contact">
+            <div class="contact__card">
+                <div class="info__contact">
+                    <h1>Contáctanos</h1>
+
+                    <p>¿Tienes un antojo o una idea dulce? ¡Hablemos!</p>
+
+                    <p>Estamos aquí para escuchar, crear y endulzar tus momentos especiales. Comparte con nosotros fecha, diseño, sabores o detalles únicos, y juntos haremos realidad ese pedido personalizado que tienes en mente.</p>
+
+                    <ul class="contact__details">
+                        <li>
+                            <i class="fa-solid fa-envelope"></i>
+
+                            <a href="mailto:Sweetlovemed@gmail.com">Sweetlovemed@gmail.com</a>
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-phone"></i>
+
+                            <a href="tel:+573215771432">(+57) 321 577 1432</a>
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-location-dot"></i>
+
+                            <span>Medellín, Colombia</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <form action="#" class="contact__form">
+                    <h2>Escríbenos</h2>
+
+                    <p class="form__subtitle">Te responderemos lo antes posible</p>
+
+                    <input type="text" placeholder="Nombre" autocomplete="name" required>
+
+                    <input type="tel" placeholder="Celular" autocomplete="tel" required>
+
+                    <input type="text" placeholder="Asunto" required>
+
+                    <textarea placeholder="Cuéntanos tu idea dulce" rows="5" required></textarea>
+
+                    <button type="submit" class="btn__form"><i class="fa-solid fa-paper-plane"></i>Enviar</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="site-footer"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <script src="js/products-data.js"></script>
+
+    <script src="js/stores.js"></script>
+
+    <script src="js/components/site-header.js"></script>
+
+    <script src="js/components/site-footer.js"></script>
+
+    <script src="js/components/cart-drawer.js"></script>
+
+    <script src="js/components/search-modal.js"></script>
+
+    <script src="js/components/auth-modal.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

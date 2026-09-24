@@ -1,0 +1,23 @@
+<!--
+  Archivo del proyecto Sweet Love.
+  Propósito: contiene la interfaz o lógica descrita por su nombre y ubicación.
+  Los comentarios internos explican la responsabilidad de los bloques principales.
+-->
+<script lang="ts" setup>
+import type { HTMLAttributes } from 'vue'
+import { cn } from '@/lib/utils'
+
+const props = defineProps<{
+  class?: HTMLAttributes['class']
+}>()
+</script>
+
+<template>
+  <nav
+    aria-label="breadcrumb"
+    data-slot="breadcrumb"
+    :class="cn('', props.class)"
+  >
+    <slot />
+  </nav>
+</template>

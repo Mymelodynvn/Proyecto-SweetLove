@@ -1,0 +1,33 @@
+<!--
+  Archivo del proyecto Sweet Love.
+  Propósito: contiene la interfaz o lógica descrita por su nombre y ubicación.
+  Los comentarios internos explican la responsabilidad de los bloques principales.
+-->
+<script setup lang="ts">
+import type { HTMLAttributes } from 'vue'
+
+import { IconLayoutSidebar } from '@tabler/icons-vue'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useSidebar } from './utils'
+
+const props = defineProps<{
+  class?: HTMLAttributes['class']
+}>()
+
+const { toggleSidebar } = useSidebar()
+</script>
+
+<template>
+  <Button
+    data-sidebar="trigger"
+    data-slot="sidebar-trigger"
+    variant="ghost"
+    size="icon-sm"
+    :class="cn('', props.class)"
+    @click="toggleSidebar"
+  >
+    <IconLayoutSidebar class="cn-rtl-flip" />
+    <span class="sr-only">Toggle Sidebar</span>
+  </Button>
+</template>

@@ -1,0 +1,519 @@
+# Explicación archivo por archivo - versión final
+
+Cada archivo se conserva con su responsabilidad documentada. Los recursos visuales se describen por su función; los archivos de código contienen comentarios en español en sus bloques principales.
+
+## back-sweetLove/back-sweetLove
+- `back-sweetLove/back-sweetLove/.claude/launch.json` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/.env.example` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/.github/workflows/action.yml` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/.gitignore` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/LICENSE` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/README.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/app/app.vue` — Componente o vista Vue del administrador.
+- `back-sweetLove/back-sweetLove/app/assets/css/tailwind.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/app-notifications.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/app-sidebar.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/app-topbar.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/avatar-upload.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/markdown-editor.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/markdown-preview.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/theme-toggle.vue` — Componente visual reutilizable del administrador.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialog.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogAction.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogCancel.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogDescription.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogMedia.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogTitle.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/AlertDialogTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/alert-dialog/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/Avatar.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/AvatarBadge.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/AvatarFallback.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/AvatarGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/AvatarGroupCount.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/AvatarImage.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/avatar/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/badge/Badge.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/badge/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/Breadcrumb.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbEllipsis.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbLink.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbList.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbPage.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/BreadcrumbSeparator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/breadcrumb/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/button/Button.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/button/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/Card.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardAction.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardDescription.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/CardTitle.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/card/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/Carousel.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/CarouselContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/CarouselItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/CarouselNext.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/CarouselPrevious.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/interface.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/carousel/useCarousel.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/checkbox/Checkbox.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/checkbox/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/collapsible/Collapsible.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/collapsible/CollapsibleContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/collapsible/CollapsibleTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/collapsible/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/Dialog.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogClose.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogDescription.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogOverlay.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogScrollContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogTitle.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/DialogTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dialog/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenu.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuLabel.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuRadioItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuSeparator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuShortcut.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuSub.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuSubContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuSubTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/DropdownMenuTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/dropdown-menu/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/input/Input.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/input/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/label/Label.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/label/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/pin-input/PinInput.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/pin-input/PinInputGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/pin-input/PinInputSeparator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/pin-input/PinInputSlot.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/pin-input/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/progress/Progress.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/progress/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/Select.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectItemText.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectLabel.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectScrollDownButton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectScrollUpButton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectSeparator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/SelectValue.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/select/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/separator/Separator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/separator/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/Sheet.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetClose.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetDescription.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetOverlay.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetTitle.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/SheetTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sheet/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/Sidebar.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarGroup.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarGroupAction.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarGroupContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarGroupLabel.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarInput.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarInset.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenu.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuAction.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuBadge.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuButton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuButtonChild.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuSkeleton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuSub.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuSubButton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarMenuSubItem.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarProvider.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarRail.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarSeparator.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/SidebarTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/sidebar/utils.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/skeleton/Skeleton.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/skeleton/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/switch/Switch.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/switch/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/Table.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableBody.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableCaption.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableCell.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableEmpty.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableFooter.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableHead.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableHeader.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/TableRow.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/table/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/tabs/Tabs.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tabs/TabsContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tabs/TabsList.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tabs/TabsTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tabs/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/textarea/Textarea.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/textarea/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/components/ui/tooltip/Tooltip.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tooltip/TooltipContent.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tooltip/TooltipProvider.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tooltip/TooltipTrigger.vue` — Componente reutilizable de la biblioteca de interfaz.
+- `back-sweetLove/back-sweetLove/app/components/ui/tooltip/index.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/composables/use-blog-posts.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-chart-theme.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-customers.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-orders.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-persistent-state.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-products.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-profile.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-team.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/composables/use-theme-mode.ts` — Composable reutilizable con estado y lógica del frontend del administrador.
+- `back-sweetLove/back-sweetLove/app/error.vue` — Componente o vista Vue del administrador.
+- `back-sweetLove/back-sweetLove/app/layouts/auth.vue` — Componente o vista Vue del administrador.
+- `back-sweetLove/back-sweetLove/app/layouts/default.vue` — Componente o vista Vue del administrador.
+- `back-sweetLove/back-sweetLove/app/lib/constants.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/lib/utils.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/pages/auth/forgot-password.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/auth/otp-verification.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/auth/reset-password.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/auth/sign-in.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/auth/sign-up.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/blank.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/blog/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/customers/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/error/maintenance.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/error/not-found.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/highlights/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/orders/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/payments/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/products/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/profile.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/reports/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/settings.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/shipments/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/suppliers/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/pages/team/index.vue` — Página de interfaz del administrador para la ruta indicada.
+- `back-sweetLove/back-sweetLove/app/plugins/apexcharts.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/plugins/theme.client.ts` — Archivo TypeScript de configuración o lógica del proyecto.
+- `back-sweetLove/back-sweetLove/app/utils/download-csv.ts` — Utilidad auxiliar del administrador.
+- `back-sweetLove/back-sweetLove/app/utils/format-currency.ts` — Utilidad auxiliar del administrador.
+- `back-sweetLove/back-sweetLove/app/utils/read-image-file.ts` — Utilidad auxiliar del administrador.
+- `back-sweetLove/back-sweetLove/components.json` — Archivo de configuración del proyecto.
+- `back-sweetLove/back-sweetLove/database/migracion-pedidos-normalizada.sql` — Script SQL del esquema o migración de la base de datos.
+- `back-sweetLove/back-sweetLove/database/sweetlove-normalizada.sql` — Script SQL del esquema o migración de la base de datos.
+- `back-sweetLove/back-sweetLove/database/sweetlove.sql` — Script SQL del esquema o migración de la base de datos.
+- `back-sweetLove/back-sweetLove/docs/ARQUITECTURA-CONEXION.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/CONFIGURACION-MYSQL.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/CORRECCION-ERROR-FECHAS.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/DASHBOARD-DATOS-REALES.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/EXPLICACION-ARCHIVO-POR-ARCHIVO.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/IMAGENES-PRODUCTOS.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/MAPA-FUNCIONALIDAD.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/MIGRACION-PEDIDOS.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/MODELO-BASE-DATOS.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/REVISION-COMPLETA.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/docs/REVISION-FINAL.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/.gitignore-original` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/README.md` — Documento de documentación del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/gulpfile.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/package-lock.json` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/package.json` — Archivo de configuración del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/css/theme.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-1.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-10.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-11.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-12.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-13.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-14.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-15.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-16.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-17.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-18.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-19.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-2.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-20.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-21.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-3.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-4.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-5.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-6.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-7.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-8.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-9.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar-fallback.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/avatar/avatar.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/brand/logo/dasher-logo.svg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/brand/logo/logo-icon.svg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/creditcard/mastercard.svg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-1.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-10.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-2.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-3.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-4.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-5.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-6.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-7.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-8.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/ecommerce/product-9.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-144x144.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-192x192.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-36x36.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-48x48.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-72x72.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/android-icon-96x96.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-114x114.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-120x120.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-144x144.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-152x152.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-180x180.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-57x57.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-60x60.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-72x72.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-76x76.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon-precomposed.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/apple-icon.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/browserconfig.xml` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/favicon-16x16.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/favicon-32x32.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/favicon-96x96.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/favicon.ico` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/manifest.json` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/ms-icon-144x144.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/ms-icon-150x150.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/ms-icon-310x310.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/favicon/ms-icon-70x70.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/png/dasher-ai.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/png/dasher-ui-bootstrap-5.jpg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/svg/404.svg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/images/svg/maintenance.svg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/main.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/chart.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/choice.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/color-modes.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/password.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/sidebarnav.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/js/vendors/swiper.js` — Archivo JavaScript del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/_user-variables.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/_user.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/_darkmode.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/_theme.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/_utilities.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/_variables-dark.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/_variables.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_avatar.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_badge.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_breadcrumb.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_button.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_card.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_dropdown.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_form.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_nav.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_navbar-vertical.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_navbar.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_pagination.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_progress.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_reboot.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/components/_table.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/utilities/_background.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/utilities/_border.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/utilities/_icon-shape.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/utilities/_simplebar.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/utilities/_text.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/vendor/apexChart/_apexchart.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/vendor/choices.js/_choices.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/vendor/jsvector/_jsvectormap.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme/vendor/swiper/_swiper.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/assets/scss/theme.scss` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/legacy/src/index.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/authentication/forget-password.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/authentication/otp-varification.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/authentication/reset-password.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/authentication/sign-in.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/authentication/sign-up.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/blank.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/error/404-error.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/pages/error/maintenance.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/breadcrumb.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/head/head-links.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/head/head-meta.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/header.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/scripts.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/sidebar-collapse.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/legacy/src/partials/topbar-second.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/nuxt.config.ts` — Configuración principal de Nuxt, módulos, estilos y variables de entorno.
+- `back-sweetLove/back-sweetLove/package.json` — Archivo de configuración del proyecto.
+- `back-sweetLove/back-sweetLove/pnpm-lock.yaml` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/public/favicon.ico` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/.vscode/extensions.json` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/.vscode/settings.json` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/aboutUs.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/assets/css/auth.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/assets/css/cart.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/assets/css/search.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/assets/css/style.css` — Hoja de estilos del proyecto.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/Mini donas pastel.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/cake.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/combox3.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/combox6.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/cupcakes.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/fresas.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/macarons.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/maryuri.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/maryuri1.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/minicake.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/suspiros.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/images/trufas.jpeg` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/ampliar.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/botonAgrergarAlCarrito.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/buscar.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/carrito.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/cerrar.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/eliminar.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/facebook-logo.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/facebook.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/fondo.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/footer-Simbol.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/header.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/instagram-logo.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/lateralderecho.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/logo-footer.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/logo.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/logo1.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/mas.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/menos.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/assets/recursos/perfil.png` — Recurso visual utilizado por la interfaz.
+- `back-sweetLove/back-sweetLove/public/front/blog.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/blogDetail.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/cart.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/contactUs.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/index.html` — Página HTML del frontend público original o recurso heredado.
+- `back-sweetLove/back-sweetLove/public/front/js/blog-data.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/blog-detail.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/blog.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/carousel.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/cart-page.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/checkout.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/components/auth-modal.js` — Componente JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/components/cart-drawer.js` — Componente JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/components/search-modal.js` — Componente JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/components/site-footer.js` — Componente JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/components/site-header.js` — Componente JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/main.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/products-data.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/products.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/front/js/stores.js` — Lógica JavaScript del frontend público original.
+- `back-sweetLove/back-sweetLove/public/robots.txt` — Archivo de soporte del proyecto.
+- `back-sweetLove/back-sweetLove/server/api/auth/login.post.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/auth/register.post.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/customers.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/dashboard.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/health.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/orders/[id].patch.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/orders.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/orders.post.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/payments.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/products/[id].delete.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/products/[id].put.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/products.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/products.post.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/reports.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/shipments.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/api/suppliers.get.ts` — Endpoint de la API del backend; consulta o modifica datos según su nombre.
+- `back-sweetLove/back-sweetLove/server/utils/db.ts` — Utilidad de servidor para conexión, archivos o lógica compartida.
+- `back-sweetLove/back-sweetLove/server/utils/product-image.ts` — Utilidad de servidor para conexión, archivos o lógica compartida.
+- `back-sweetLove/back-sweetLove/tsconfig.json` — Archivo de configuración del proyecto.
+
+## sweetLove
+- `sweetLove/.claude/launch.json` — Archivo de soporte del proyecto.
+- `sweetLove/.gitignore` — Archivo de soporte del proyecto.
+- `sweetLove/.vscode/settings.json` — Archivo de soporte del proyecto.
+- `sweetLove/backend/.env.example` — Archivo de soporte del proyecto.
+- `sweetLove/backend/db/connection.js` — Archivo JavaScript del proyecto.
+- `sweetLove/backend/db/verify-connection.js` — Archivo JavaScript del proyecto.
+- `sweetLove/database/migracion-pedidos-normalizada.sql` — Script SQL del esquema o migración de la base de datos.
+- `sweetLove/database/sweetlove.sql` — Script SQL del esquema o migración de la base de datos.
+- `sweetLove/docs/scriptSweetLove.docx` — Archivo de soporte del proyecto.
+- `sweetLove/frontend/.vscode/extensions.json` — Archivo de soporte del proyecto.
+- `sweetLove/frontend/.vscode/settings.json` — Archivo de soporte del proyecto.
+- `sweetLove/frontend/aboutUs.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/assets/css/auth.css` — Hoja de estilos del proyecto.
+- `sweetLove/frontend/assets/css/cart.css` — Hoja de estilos del proyecto.
+- `sweetLove/frontend/assets/css/search.css` — Hoja de estilos del proyecto.
+- `sweetLove/frontend/assets/css/style.css` — Hoja de estilos del proyecto.
+- `sweetLove/frontend/assets/images/Mini donas pastel.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/cake.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/combox3.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/combox6.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/cupcakes.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/fresas.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/macarons.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/maryuri.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/maryuri1.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/minicake.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/suspiros.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/images/trufas.jpeg` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/ampliar.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/botonAgrergarAlCarrito.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/buscar.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/carrito.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/cerrar.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/eliminar.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/facebook-logo.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/facebook.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/fondo.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/footer-Simbol.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/header.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/instagram-logo.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/lateralderecho.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/logo-footer.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/logo.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/logo1.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/mas.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/menos.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/assets/recursos/perfil.png` — Recurso visual utilizado por la interfaz.
+- `sweetLove/frontend/blog.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/blogDetail.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/cart.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/checkout.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/contactUs.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/index.html` — Página HTML del frontend público original o recurso heredado.
+- `sweetLove/frontend/js/blog-data.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/blog-detail.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/blog.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/carousel.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/cart-page.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/checkout.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/components/auth-modal.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/components/cart-drawer.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/components/search-modal.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/components/site-footer.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/components/site-header.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/main.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/products-data.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/products.js` — Archivo JavaScript del proyecto.
+- `sweetLove/frontend/js/stores.js` — Archivo JavaScript del proyecto.

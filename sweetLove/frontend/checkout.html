@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Love | Finalizar pedido</title>
+    <link rel="icon" href="assets/recursos/logo1.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <link rel="stylesheet" href="assets/css/search.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <style>
+      .checkout-form{max-width:760px;margin:40px auto;background:#fff;padding:28px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+      .checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.checkout-grid .full{grid-column:1/-1}
+      .checkout-form label{display:flex;flex-direction:column;gap:7px;font-weight:600}.checkout-form input,.checkout-form select{padding:12px 14px;border:1px solid #ddd;border-radius:10px;font:inherit}
+      .checkout-summary{margin:24px 0;padding:18px;background:#faf7f1;border-radius:12px}.checkout-message{margin-top:15px;padding:12px;border-radius:10px}.checkout-message.success{background:#eaf6ec}.checkout-message.error{background:#fdecec}
+      @media(max-width:700px){.checkout-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div id="site-header"></div>
+<div id="search-app"></div>
+<div id="auth-app"></div>
+<main class="container">
+  <section class="checkout-form">
+    <h1 class="cart-title">Finalizar pedido</h1>
+    <p class="cart-subtitle">Completa tus datos para registrar tu pedido en Sweet Love.</p>
+    <form id="checkout-form">
+      <div class="checkout-grid">
+        <label>Nombre<input name="name" required maxlength="20"></label>
+        <label>Apellido<input name="lastName" required maxlength="20"></label>
+        <label>Correo electrónico<input name="email" type="email" required maxlength="30"></label>
+        <label>Celular<input name="phone" required maxlength="15"></label>
+        <label class="full">Dirección<input name="address" required maxlength="30"></label>
+        <label class="full">Medio de pago<select name="paymentMethod"><option value="Nequi">Nequi</option><option value="Daviplata">Daviplata</option><option value="Tarjeta">Tarjeta</option></select></label>
+      </div>
+      <div class="checkout-summary">
+        <strong>Resumen</strong>
+        <p id="checkout-items"></p>
+        <p id="checkout-total"></p>
+      </div>
+      <button class="btn-checkout" type="submit">Confirmar pedido</button>
+      <a class="btn-continue" href="cart.html">Volver al carrito</a>
+      <div id="checkout-message" class="checkout-message" hidden></div>
+    </form>
+  </section>
+  <div id="site-footer"></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<script src="js/products-data.js"></script>
+<script src="js/stores.js"></script>
+<script src="js/components/site-header.js"></script>
+<script src="js/components/site-footer.js"></script>
+<script src="js/components/search-modal.js"></script>
+<script src="js/components/auth-modal.js"></script>
+<script src="js/main.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>

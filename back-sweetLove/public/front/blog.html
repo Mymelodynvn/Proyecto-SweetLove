@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sweet Love | Blog</title>
+
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <link rel="stylesheet" href="assets/css/search.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <div id="cart-app"></div>
+
+    <div id="search-app"></div>
+
+    <div id="auth-app"></div>
+
+    <main>
+        <div class="container__blog">
+            <div class="blog__intro">
+                <h1>Nuestro Blog</h1>
+
+                <p>Recetas, tips de repostería e historias dulces para inspirarte en cada celebración.</p>
+            </div>
+
+            <div id="blog-app" v-cloak>
+                <div class="blog__categories">
+                    <button v-for="category in categories" :key="category" type="button" class="blog__category" :class="{ 'blog__category--active': category === activeCategory }" @click="activeCategory = category">{{ category }}</button>
+                </div>
+
+                <article v-if="featuredPost && activeCategory === 'Todos'" class="blog__featured">
+                    <div class="blog__featured-media">
+                        <img :src="featuredPost.image" :alt="featuredPost.alt">
+
+                        <span class="blog__chip">Destacado</span>
+                    </div>
+
+                    <div class="blog__featured-content">
+                        <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ featuredPost.date }} · Por {{ featuredPost.author }}</span>
+
+                        <h2>{{ featuredPost.title }}</h2>
+
+                        <p>{{ featuredPost.excerpt }}</p>
+
+                        <a :href="postLink(featuredPost)" class="btn__text">Leer artículo</a>
+                    </div>
+                </article>
+
+                <div class="blog__grid">
+                    <article v-for="post in filteredPosts" :key="post.id" class="blog__card">
+                        <div class="blog__card-media">
+                            <img :src="post.image" :alt="post.alt">
+
+                            <span class="blog__chip">{{ post.category }}</span>
+                        </div>
+
+                        <div class="blog__card-content">
+                            <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ post.date }}</span>
+
+                            <h3>{{ post.title }}</h3>
+
+                            <p>{{ post.excerpt }}</p>
+
+                            <a :href="postLink(post)" class="blog__read-more">Leer más<i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <section class="blog__newsletter">
+                <div class="blog__newsletter-text">
+                    <h2>Endulza tu correo</h2>
+
+                    <p>Suscríbete y recibe recetas, promociones y novedades antes que nadie. Prometemos solo enviarte cosas dulces.</p>
+                </div>
+
+                <form action="#" class="blog__newsletter-form">
+                    <input type="email" placeholder="Tu correo electrónico" autocomplete="email" required>
+
+                    <button type="submit">Suscribirme</button>
+                </form>
+            </section>
+        </div>
+
+        <div id="site-footer"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <script src="js/products-data.js"></script>
+
+    <script src="js/stores.js"></script>
+
+    <script src="js/components/site-header.js"></script>
+
+    <script src="js/components/site-footer.js"></script>
+
+    <script src="js/components/cart-drawer.js"></script>
+
+    <script src="js/components/search-modal.js"></script>
+
+    <script src="js/components/auth-modal.js"></script>
+
+    <script src="js/main.js"></script>
+
+    <script src="js/blog-data.js"></script>
+
+    <script src="js/blog.js"></script>
+</body>
+
+</html>

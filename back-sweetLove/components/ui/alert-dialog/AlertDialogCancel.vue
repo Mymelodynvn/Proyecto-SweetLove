@@ -1,0 +1,42 @@
+<!--
+  Archivo del proyecto Sweet Love.
+  Propósito: contiene la interfaz o lógica descrita por su nombre y ubicación.
+  Los comentarios internos explican la responsabilidad de los bloques principales.
+-->
+<script setup lang="ts">
+import type { AlertDialogCancelProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
+import type { ButtonVariants } from '@/components/ui/button'
+import { reactiveOmit } from '@vueuse/core'
+import { AlertDialogCancel } from 'reka-ui'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
+
+const props = withDefaults(
+  defineProps<AlertDialogCancelProps & {
+    class?: HTMLAttributes['class']
+    variant?: ButtonVariants['variant']
+    size?: ButtonVariants['size']
+  }>(),
+  {
+    variant: 'outline',
+    size: 'default',
+  },
+)
+
+const delegatedProps = reactiveOmit(props, 'class', 'variant', 'size')
+</script>
+
+<template>
+  <AlertDialogCancel
+    data-slot="alert-dialog-cancel"
+    v-bind="delegatedProps"
+    :class="cn(
+      '',
+      buttonVariants({ variant, size }),
+      props.class,
+    )"
+  >
+    <slot />
+  </AlertDialogCancel>
+</template>
