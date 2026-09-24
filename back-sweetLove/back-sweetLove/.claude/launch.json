@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sweet-love-admin",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set PATH=C:\\Users\\User\\AppData\\Local\\nvm\\v22.16.0;%PATH% && pnpm dev"
+      ],
+      "port": 3000
+    }
+  ]
+}
