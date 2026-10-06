@@ -1,8 +1,4 @@
-/**
- * Pruebas de la API que no necesitan base de datos: comprueban que la
- * seguridad y la validación actúan ANTES de llegar a MySQL.
- * Ejecutar con: npm test
- */
+// Pruebas de la API que no necesitan base de datos: comprueban que la seguridad y la validación actúan ANTES de llegar a MySQL
 import { after, before, describe, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createApp } from '../src/app.js'
@@ -18,12 +14,7 @@ before(async () => {
 
 after(() => server.close())
 
-/**
- * Envía una petición JSON a la API de prueba.
- * @param {string} path Ruta, p. ej. "/api/orders".
- * @param {{method?: string, body?: object, headers?: object}} [options] Método, cuerpo y cabeceras.
- * @returns {Promise<Response>} Respuesta HTTP.
- */
+// Envía una petición JSON a la API de prueba, recibe path, options
 const call = (path, { method = 'GET', body, headers = {} } = {}) =>
   fetch(baseUrl + path, {
     method,

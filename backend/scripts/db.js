@@ -1,16 +1,4 @@
-/**
- * Herramienta de línea de comandos para la base de datos (proceso separado de la API).
- * Lee los archivos SQL de la carpeta /database en la raíz del proyecto.
- *
- *   npm run db:init      Crea la base, aplica schema.sql y carga seed.sql (datos de demostración).
- *                        Se niega a correr si la base ya tiene tablas; usa `-- --force` para recrearla.
- *   npm run db:migrate   Aplica, en orden, las migraciones de /database/migrations que falten.
- *   npm run db:status    Muestra qué migraciones están aplicadas y cuáles pendientes.
- *   npm run db:baseline -- 001   Marca como aplicadas (sin ejecutarlas) las migraciones hasta ese número.
- *                        Sirve para una base que ya tenía esos cambios hechos a mano.
- *
- * El control de migraciones se guarda en la tabla `schema_migrations`.
- */
+// Herramienta de línea de comandos para la base de datos (proceso separado de la API)
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -21,11 +9,7 @@ import { getSslOptions } from '../src/config/database.js'
 const DATABASE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'database')
 const MIGRATIONS_DIR = join(DATABASE_DIR, 'migrations')
 
-/**
- * Abre una conexión que permite ejecutar archivos SQL con varias sentencias.
- * @param {boolean} withDatabase Si es false, se conecta sin elegir base (para poder crearla).
- * @returns {Promise<import('mysql2/promise').Connection>} Conexión abierta.
- */
+// Abre una conexión que permite ejecutar archivos SQL con varias sentencias, recibe withDatabase
 const connect = (withDatabase) =>
   mysql.createConnection({
     host: config.database.host,
@@ -37,11 +21,7 @@ const connect = (withDatabase) =>
     multipleStatements: true,
   })
 
-/**
- * Crea la tabla de control de migraciones si todavía no existe.
- * @param {import('mysql2/promise').Connection} connection Conexión abierta a la base.
- * @returns {Promise<void>}
- */
+// Crea la tabla de control de migraciones si todavía no existe, recibe connection
 const ensureMigrationsTable = async (connection) => {
   await connection.query(
     `CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -51,28 +31,16 @@ const ensureMigrationsTable = async (connection) => {
   )
 }
 
-/**
- * Lista los nombres de los archivos de migración (.sql) ordenados.
- * @returns {Promise<string[]>} Nombres, p. ej. ["001_pedidos_normalizados.sql", ...].
- */
+// Lista los nombres de los archivos de migración (.sql) ordenados
 const listMigrationFiles = async () => (await readdir(MIGRATIONS_DIR)).filter((name) => name.endsWith('.sql')).sort()
 
-/**
- * Devuelve el conjunto de migraciones ya aplicadas.
- * @param {import('mysql2/promise').Connection} connection Conexión abierta a la base.
- * @returns {Promise<Set<string>>} Nombres aplicados.
- */
+// Devuelve el conjunto de migraciones ya aplicadas, recibe connection
 const appliedMigrations = async (connection) => {
   const [rows] = await connection.query('SELECT name FROM schema_migrations')
   return new Set(rows.map((row) => row.name))
 }
 
-/**
- * Comando `init`: crea la base y carga esquema y datos de demostración.
- * Una base nueva ya nace con el esquema actual, así que se marcan todas las migraciones como aplicadas.
- * @param {boolean} force Permite recrear una base que ya tiene tablas (BORRA sus datos).
- * @returns {Promise<void>}
- */
+// Comando `init`: crea la base y carga esquema y datos de demostración, recibe force
 const init = async (force) => {
   const server = await connect(false)
   await server.query(
@@ -99,10 +67,7 @@ const init = async (force) => {
   console.log(`Base "${config.database.name}" creada con esquema y datos de demostración.`)
 }
 
-/**
- * Comando `migrate`: aplica las migraciones pendientes en orden.
- * @returns {Promise<void>}
- */
+// Comando `migrate`: aplica las migraciones pendientes en orden
 const migrate = async () => {
   const connection = await connect(true)
   await ensureMigrationsTable(connection)
@@ -121,10 +86,7 @@ const migrate = async () => {
   console.log(count ? `${count} migración(es) aplicada(s).` : 'No hay migraciones pendientes.')
 }
 
-/**
- * Comando `status`: muestra el estado de cada migración.
- * @returns {Promise<void>}
- */
+// Comando `status`: muestra el estado de cada migración
 const status = async () => {
   const connection = await connect(true)
   await ensureMigrationsTable(connection)
@@ -135,12 +97,7 @@ const status = async () => {
   await connection.end()
 }
 
-/**
- * Comando `baseline`: registra como aplicadas las migraciones cuyo nombre empieza con un
- * número menor o igual al indicado, SIN ejecutarlas. Úsalo solo si esos cambios ya existen en la base.
- * @param {string} upTo Número de la última migración que ya está aplicada (p. ej. "001").
- * @returns {Promise<void>}
- */
+// Comando `baseline`: marca como aplicadas las migraciones hasta ese número, sin ejecutarlas, recibe upTo
 const baseline = async (upTo) => {
   if (!/^\d+$/.test(upTo ?? '')) throw new Error('Indica el número de migración. Ejemplo: npm run db:baseline -- 001')
 

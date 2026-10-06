@@ -90,7 +90,7 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 
 ## Cómo agregar un endpoint
 
-1. **Modelo** (`models/`): la consulta SQL, una función con JSDoc.
+1. **Modelo** (`models/`): la consulta SQL, una función con un comentario corto encima.
 2. **Controlador** (`controllers/`): valida la entrada con `utils/validate.js`, llama al modelo y responde.
    Si hay varios pasos que deben ir juntos, créales un **servicio** (`services/`).
 3. **Ruta** (`routes/index.js`): decláralo y, si es del panel, agrega `requireAdmin`.
