@@ -1,7 +1,4 @@
-/**
- * use-profile.ts — perfil de la persona administradora.
- * El perfil se guarda en localStorage (no existe tabla de perfil en la base de datos).
- */
+// use-profile.ts — perfil de la persona administradora
 export interface ProfileData {
   name: string
   role: string
@@ -13,10 +10,10 @@ export interface ProfileData {
   facebookUrl: string
 }
 
-/** Clave de localStorage donde se guarda el perfil. */
+// Clave de localStorage donde se guarda el perfil
 const PROFILE_STORAGE_KEY = 'sweet-love-admin-profile'
 
-/** Perfil por defecto, usado hasta que se guarde uno propio. */
+// Perfil por defecto, usado hasta que se guarde uno propio
 const DEFAULT_PROFILE: ProfileData = {
   name: 'Maryuri de Mendoza',
   role: 'CEO & Fundadora',
@@ -29,17 +26,14 @@ const DEFAULT_PROFILE: ProfileData = {
   facebookUrl: 'https://www.facebook.com/sweetlove',
 }
 
-/**
- * Composable del perfil.
- * @returns Estado `profile`, iniciales, primer nombre y las funciones loadFromStorage y save.
- */
+// Composable del perfil
 export const useProfile = () => {
   const profile = useState<ProfileData>('profile', () => ({ ...DEFAULT_PROFILE }))
 
-  /** Palabras que no cuentan para las iniciales (de, del, la...). */
+  // Palabras que no cuentan para las iniciales (de, del, la...)
   const NAME_CONNECTORS = new Set(['de', 'del', 'la', 'las', 'los', 'y'])
 
-  /** Iniciales del nombre (máximo dos), ignorando conectores como "de". */
+  // Iniciales del nombre (máximo dos), ignorando conectores como "de"
   const initials = computed(() =>
     profile.value.name
       .split(' ')
@@ -49,10 +43,10 @@ export const useProfile = () => {
       .join(''),
   )
 
-  /** Primer nombre, para saludos y la barra superior. */
+  // Primer nombre, para saludos y la barra superior
   const firstName = computed(() => profile.value.name.split(' ')[0] ?? '')
 
-  /** Lee el perfil guardado y lo mezcla con el predeterminado; si está dañado, lo descarta. */
+  // Lee el perfil guardado y lo mezcla con el predeterminado; si está dañado, lo descarta
   const loadFromStorage = () => {
     const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
     if (!stored) return
@@ -68,10 +62,7 @@ export const useProfile = () => {
     }
   }
 
-  /**
-   * Actualiza el perfil en pantalla y lo guarda en localStorage.
-   * @param {ProfileData} updated Perfil completo con los cambios.
-   */
+  // Actualiza el perfil en pantalla y lo guarda en localStorage, recibe updated
   const save = (updated: ProfileData) => {
     profile.value = { ...updated }
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile.value))

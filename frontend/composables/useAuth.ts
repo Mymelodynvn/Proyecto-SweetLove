@@ -1,13 +1,6 @@
-/**
- * @file composables/useAuth.ts
- * @description Composable global para gestionar la sesión del usuario y la navegación por roles.
- * La sesión real vive en una cookie httpOnly del servidor; aquí solo se refleja
- * el usuario autenticado para la interfaz.
- *
- * @project Sweet Love E-Commerce
- * @module Composables
- */
+// Composable global para gestionar la sesión del usuario y la navegación por roles
 
+// Usuario con sesión iniciada, tal como lo devuelve el backend (sin contraseña)
 export interface UserSession {
     idUser: number
     nombre: string
@@ -16,14 +9,16 @@ export interface UserSession {
     idRol: number
 }
 
+// Composable de autenticación: estado del usuario actual y acciones de sesión
 export const useAuth = () => {
     const user = useState<UserSession | null>('auth_user', () => null)
 
+    // Guarda el usuario autenticado en el estado global (o lo limpia con null), recibe userData
     const setUser = (userData: UserSession | null) => {
         user.value = userData
     }
 
-    /** Sincroniza el usuario con la sesión del servidor (también durante el SSR). */
+    // Sincroniza el usuario con la sesión del servidor (también durante el SSR)
     const loadUser = async () => {
         try {
             const response = await useRequestFetch()<{ user: UserSession | null }>('/api/auth/me')
@@ -33,6 +28,7 @@ export const useAuth = () => {
         }
     }
 
+    // Cierra la sesión en el servidor, limpia el usuario y lleva a la pantalla de acceso
     const logout = async () => {
         try {
             await $fetch('/api/auth/logout', { method: 'POST' })

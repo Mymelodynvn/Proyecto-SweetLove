@@ -1,8 +1,4 @@
-/**
- * use-products.ts — catálogo de productos del panel.
- * Lee y modifica los productos mediante la API (/api/products). Las imágenes se envían
- * como Data URL; el backend las guarda como archivos y devuelve su ruta.
- */
+// use-products.ts — catálogo de productos del panel
 export interface Product {
   id: number
   name: string
@@ -17,37 +13,31 @@ export interface Product {
   supplierId?: number | null
 }
 
-/** Campos que el formulario permite editar (el id y el rating no se editan). */
+// Campos que el formulario permite editar (el id y el rating no se editan)
 export type ProductFormData = Omit<Product, 'id' | 'rating'>
-/** Estado de existencias que se muestra en la interfaz. */
+// Estado de existencias que se muestra en la interfaz
 export type ProductStatus = 'Disponible' | 'Poco stock' | 'Agotado'
-/** Categorías ofrecidas en el formulario y el filtro (aún no se guardan en la base). */
+// Categorías ofrecidas en el formulario y el filtro (aún no se guardan en la base)
 export const PRODUCT_CATEGORIES = ['Repostería', 'Tortas', 'Cupcakes', 'Cheesecakes', 'Galletas', 'Brownies', 'Postres']
-/** Emojis ofrecidos para identificar un producto sin imagen. */
+// Emojis ofrecidos para identificar un producto sin imagen
 export const PRODUCT_EMOJIS = ['🎂', '🍰', '🧁', '🍮', '🍓', '🍪', '🍫', '🥧', '🍩']
-/** Unidades a partir de las cuales (o por debajo) un producto se marca como "Poco stock". */
+// Unidades a partir de las cuales (o por debajo) un producto se marca como "Poco stock"
 const LOW_STOCK_THRESHOLD = 5
 
-/**
- * Calcula el estado de existencias de un producto.
- * @param product Producto a evaluar.
- * @returns "Agotado" (0 unidades), "Poco stock" (5 o menos) o "Disponible".
- */
+// Calcula el estado de existencias de un producto, recibe product
 export const productStatus = (product: Product): ProductStatus => {
   if (product.stock === 0) return 'Agotado'
   if (product.stock <= LOW_STOCK_THRESHOLD) return 'Poco stock'
   return 'Disponible'
 }
 
-/**
- * Composable de productos: estado compartido y operaciones sobre la API.
- * @returns Estado `products` y las funciones load, addProduct, updateProduct, removeProduct, duplicateProduct y refresh.
- */
+// Composable de productos: estado compartido y operaciones sobre la API
 export const useProducts = () => {
   const products = useState<Product[]>('products-db', () => [])
-  /** Carga el catálogo una sola vez desde la API; si falla, deja la lista vacía y avisa en consola. */
+  // Indica si los productos ya se pidieron al servidor (evita repetir la carga)
   const loaded = useState('products-db-loaded', () => false)
 
+  // Carga el catálogo una sola vez desde la API; si falla, deja la lista vacía y avisa en consola
   const load = async () => {
     if (loaded.value) return
     try {
@@ -61,11 +51,7 @@ export const useProducts = () => {
     }
   }
 
-  /**
-   * Crea un producto en el servidor y recarga la lista.
-   * @param data Datos del formulario.
-   * @returns El producto creado según el servidor.
-   */
+  // Crea un producto en el servidor y recarga la lista, recibe data
   const addProduct = async (data: ProductFormData) => {
     // La creación debe pasar por la API para que el registro quede guardado en MySQL.
     const response = await $fetch<{ producto: Record<string, unknown> }>('/api/products', {
@@ -76,11 +62,7 @@ export const useProducts = () => {
     return response.producto
   }
 
-  /**
-   * Actualiza un producto en el servidor y recarga la lista.
-   * @param productId Identificador del producto.
-   * @param data Nuevos datos.
-   */
+  // Actualiza un producto en el servidor y recarga la lista, recibe productId, data
   const updateProduct = async (productId: number, data: ProductFormData) => {
     // La actualización se realiza directamente sobre la API y MySQL.
     await $fetch(`/api/products/${productId}`, {
@@ -90,28 +72,21 @@ export const useProducts = () => {
     await refresh()
   }
 
-  /**
-   * Elimina un producto en el servidor y, si resulta bien, lo quita de la lista.
-   * Si tiene pedidos asociados, el servidor lo rechaza y el producto se conserva.
-   * @param productId Identificador del producto.
-   */
+  // Elimina un producto en el servidor y, si resulta bien, lo quita de la lista, recibe productId
   const removeProduct = async (productId: number) => {
     try { await $fetch(`/api/products/${productId}`, { method: 'DELETE' }) }
     catch (error) { console.warn('No se pudo eliminar el producto en MySQL.', error); return }
     products.value = products.value.filter((product) => product.id !== productId)
   }
 
-  /**
-   * Crea una copia del producto con " (copia)" al final del nombre.
-   * @param productId Identificador del producto a duplicar.
-   */
+  // Crea una copia del producto con " (copia)" al final del nombre, recibe productId
   const duplicateProduct = async (productId: number) => {
     const source = products.value.find((product) => product.id === productId)
     if (!source) return
     await addProduct({ ...source, name: `${source.name} (copia)` })
   }
 
-  /** Vuelve a pedir el catálogo al servidor; si falla, conserva la lista actual. */
+  // Vuelve a pedir el catálogo al servidor; si falla, conserva la lista actual
   const refresh = async () => {
     try { products.value = await $fetch<Product[]>('/api/products') } catch { /* se conserva la información actual */ }
   }

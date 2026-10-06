@@ -1,11 +1,8 @@
-/**
- * use-orders.ts — pedidos del panel.
- * Carga los pedidos desde la API (/api/orders) y permite cambiar su estado.
- */
+// use-orders.ts — pedidos del panel
 export type OrderStatus = 'Pendiente' | 'En preparación' | 'Enviado' | 'Completado' | 'Cancelado'
-/** Lista de estados, en el orden en que se ofrecen en la interfaz. */
+// Lista de estados, en el orden en que se ofrecen en la interfaz
 export const ORDER_STATUSES: OrderStatus[] = ['Pendiente', 'En preparación', 'Enviado', 'Completado', 'Cancelado']
-/** Pedido tal como lo entrega la API (con los productos ya resumidos en texto). */
+// Pedido tal como lo entrega la API (con los productos ya resumidos en texto)
 export interface Order {
   id: string
   customer: string
@@ -17,25 +14,19 @@ export interface Order {
   status: OrderStatus
   paymentStatus?: string
 }
-/**
- * Composable de pedidos: estado compartido y operaciones.
- * @returns Estado `orders`, la función de carga y updateOrderStatus.
- */
+// Composable de pedidos: estado compartido y operaciones
 export const useOrders = () => {
   const orders = useState<Order[]>('orders-db', () => [])
-  /** Carga los pedidos una sola vez desde la API; si falla, deja la lista vacía y avisa en consola. */
+  // Indica si los pedidos ya se pidieron al servidor (evita repetir la carga)
   const loaded = useState('orders-db-loaded', () => false)
+  // Carga los pedidos una sola vez desde la API; si falla, deja la lista vacía y avisa en consola
   const load = async () => {
     if (loaded.value) return
     try { orders.value = await $fetch<Order[]>('/api/orders') }
     catch (error) { console.warn('No se pudieron cargar pedidos desde MySQL.', error) }
     finally { loaded.value = true }
   }
-  /**
-   * Cambia el estado de un pedido en el servidor y, si resulta bien, también en pantalla.
-   * @param {string} orderId Identificador del pedido (p. ej. "#SL0003").
-   * @param {OrderStatus} status Nuevo estado.
-   */
+  // Cambia el estado de un pedido en el servidor y, si resulta bien, también en pantalla, recibe orderId, status
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
     // Se envía el número sin "#SL": el proxy de Nuxt decodifica "%23" a "#", que cortaría la URL.
     const numericId = Number(orderId.replace(/^#SL/, ''))

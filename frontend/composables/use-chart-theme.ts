@@ -1,12 +1,6 @@
-/**
- * use-chart-theme.ts — colores de las gráficas.
- * Adapta ejes, cuadrícula y tooltip de ApexCharts al tema claro u oscuro activo.
- */
+// use-chart-theme.ts — colores de las gráficas
 // Configura colores de ejes, leyendas y cuadrícula de ApexCharts según el tema.
-/**
- * Devuelve la configuración de colores de gráficas, que cambia reactivamente con el tema.
- * @returns Objeto `chartTheme` con foreColor, gridColor y tooltipTheme.
- */
+// Devuelve la configuración de colores de gráficas, que cambia reactivamente con el tema
 export const useChartTheme = () => {
   const { isDark } = useThemeMode()
 

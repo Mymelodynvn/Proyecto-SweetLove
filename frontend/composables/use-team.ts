@@ -1,8 +1,4 @@
-/**
- * use-team.ts — equipo de trabajo del panel.
- * Miembros, roles y permisos. No existe tabla de equipo en la base de datos, así que se
- * guardan en localStorage del navegador (ver usePersistentState).
- */
+// use-team.ts — equipo de trabajo del panel
 export type PermissionKey =
   | 'dashboard'
   | 'reports'
@@ -13,13 +9,13 @@ export type PermissionKey =
   | 'team'
   | 'settings'
 
-/** Permiso con su etiqueta legible. */
+// Permiso con su etiqueta legible
 export interface PermissionDefinition {
   key: PermissionKey
   label: string
 }
 
-/** Catálogo de permisos disponibles. */
+// Catálogo de permisos disponibles
 export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'dashboard', label: 'Ver panel y estadísticas' },
   { key: 'reports', label: 'Ver reportes' },
@@ -31,17 +27,17 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'settings', label: 'Configuración de la tienda' },
 ]
 
-/** Roles posibles dentro del equipo. */
+// Roles posibles dentro del equipo
 export type TeamRoleName = 'Administrador' | 'Gerente' | 'Vendedor' | 'Repostero'
 
-/** Rol con su descripción y los permisos que otorga por defecto. */
+// Rol con su descripción y los permisos que otorga por defecto
 export interface RoleDefinition {
   name: TeamRoleName
   description: string
   permissions: PermissionKey[]
 }
 
-/** Catálogo de roles y sus permisos predeterminados. */
+// Catálogo de roles y sus permisos predeterminados
 export const TEAM_ROLES: RoleDefinition[] = [
   {
     name: 'Administrador',
@@ -65,24 +61,20 @@ export const TEAM_ROLES: RoleDefinition[] = [
   },
 ]
 
-/**
- * Permisos que otorga un rol por defecto.
- * @param roleName Nombre del rol.
- * @returns Copia de la lista de permisos (vacía si el rol no existe).
- */
+// Permisos que otorga un rol por defecto, recibe roleName
 export const rolePermissions = (roleName: TeamRoleName): PermissionKey[] => {
   const role = TEAM_ROLES.find((definition) => definition.name === roleName)
   return role ? [...role.permissions] : []
 }
 
-/** Registro de actividad reciente de un miembro. */
+// Registro de actividad reciente de un miembro
 export interface MemberActivity {
   title: string
   detail: string
   date: string
 }
 
-/** Miembro del equipo. */
+// Miembro del equipo
 export interface TeamMember {
   id: number
   name: string
@@ -99,13 +91,10 @@ export interface TeamMember {
   isOwner: boolean
 }
 
-/** Campos editables desde el formulario (el resto lo asigna el sistema). */
+// Campos editables desde el formulario (el resto lo asigna el sistema)
 export type TeamMemberFormData = Omit<TeamMember, 'id' | 'joinedDate' | 'activity' | 'isOwner'>
 
-/**
- * Equipo de ejemplo, usado la primera vez.
- * @returns Lista inicial de miembros.
- */
+// Equipo de ejemplo, usado la primera vez
 const DEFAULT_TEAM = (): TeamMember[] => [
   {
     id: 1,
@@ -174,14 +163,11 @@ const DEFAULT_TEAM = (): TeamMember[] => [
   },
 ]
 
-/** Fecha de hoy en formato corto, para registrar el ingreso de un miembro. */
+// Fecha de hoy en formato corto, para registrar el ingreso de un miembro
 const formatJoinDate = () =>
   new Date().toLocaleDateString('es-CO', { month: 'short', year: 'numeric' })
 
-/**
- * Composable del equipo.
- * @returns Estado `members` y las funciones addMember, updateMember, toggleMemberActive y removeMember.
- */
+// Composable del equipo
 export const useTeam = () => {
   const { state: members, loadFromStorage, persist } = usePersistentState<TeamMember[]>(
     'team-members',
@@ -189,23 +175,16 @@ export const useTeam = () => {
     DEFAULT_TEAM,
   )
 
-  /** Siguiente identificador libre (máximo actual + 1). */
+  // Siguiente identificador libre (máximo actual + 1)
   const nextId = () => members.value.reduce((maxId, member) => Math.max(maxId, member.id), 0) + 1
 
-  /**
-   * Agrega un miembro nuevo y guarda el cambio.
-   * @param data Datos del formulario.
-   */
+  // Agrega un miembro nuevo y guarda el cambio, recibe data
   const addMember = (data: TeamMemberFormData) => {
     members.value.push({ ...data, id: nextId(), joinedDate: formatJoinDate(), activity: [], isOwner: false })
     persist()
   }
 
-  /**
-   * Actualiza un miembro existente y guarda el cambio.
-   * @param memberId Identificador del miembro.
-   * @param data Nuevos datos.
-   */
+  // Actualiza un miembro existente y guarda el cambio, recibe memberId, data
   const updateMember = (memberId: number, data: TeamMemberFormData) => {
     const target = members.value.find((member) => member.id === memberId)
     if (!target) return
@@ -213,10 +192,7 @@ export const useTeam = () => {
     persist()
   }
 
-  /**
-   * Activa o desactiva a un miembro y guarda el cambio.
-   * @param memberId Identificador del miembro.
-   */
+  // Activa o desactiva a un miembro y guarda el cambio, recibe memberId
   const toggleMemberActive = (memberId: number) => {
     const target = members.value.find((member) => member.id === memberId)
     if (!target || target.isOwner) return
@@ -224,10 +200,7 @@ export const useTeam = () => {
     persist()
   }
 
-  /**
-   * Elimina a un miembro y guarda el cambio.
-   * @param memberId Identificador del miembro.
-   */
+  // Elimina a un miembro y guarda el cambio, recibe memberId
   const removeMember = (memberId: number) => {
     members.value = members.value.filter((member) => member.id !== memberId || member.isOwner)
     persist()

@@ -1,4 +1,4 @@
-/** apexcharts.ts — registra el componente de gráficas ApexChart. */
+// apexcharts.ts — registra el componente de gráficas ApexChart
 import { defineAsyncComponent } from 'vue'
 
 // Se registra en servidor y cliente para que SSR pueda resolver la etiqueta; el
