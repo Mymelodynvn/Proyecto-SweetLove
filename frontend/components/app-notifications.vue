@@ -1,7 +1,4 @@
-<!--
-  app-notifications.vue — campana de notificaciones de la barra superior.
-  Las notificaciones son de ejemplo (aún no vienen de la base de datos).
--->
+<!-- app-notifications.vue — campana de notificaciones de la barra superior -->
 <script setup lang="ts">
 import { IconAlertTriangle, IconBell, IconShoppingCart, IconStar } from '@tabler/icons-vue'
 import type { Component } from 'vue'
@@ -64,22 +61,18 @@ const notifications = ref<NotificationItem[]>([
   },
 ])
 
-/** Cantidad de notificaciones sin leer (se muestra en la insignia). */
+// Cantidad de notificaciones sin leer (se muestra en la insignia)
 const unreadCount = computed(() =>
   notifications.value.filter((notification) => !notification.read).length,
 )
 
-/**
- * Marca una notificación como leída sin cerrar el menú.
- * @param notification Notificación elegida.
- * @param selectEvent Evento de selección del menú (se cancela para no cerrarlo).
- */
+// Marca una notificación como leída sin cerrar el menú, recibe notification, selectEvent
 const markAsRead = (notification: NotificationItem, selectEvent: Event) => {
   selectEvent.preventDefault()
   notification.read = true
 }
 
-/** Marca todas las notificaciones como leídas. */
+// Marca todas las notificaciones como leídas
 const markAllAsRead = () => {
   for (const notification of notifications.value) {
     notification.read = true

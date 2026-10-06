@@ -1,7 +1,4 @@
-<!--
-  markdown-editor.vue — editor de texto Markdown con barra de formato (negrita, cursiva, listas...).
-  Usa v-model con el texto en Markdown.
--->
+<!-- markdown-editor.vue — editor de texto Markdown con barra de formato (negrita, cursiva, listas...) -->
 <script setup lang="ts">
 import {
   IconBlockquote,
@@ -37,21 +34,13 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const textareaComponent = ref<ComponentPublicInstance | null>(null)
 
-/**
- * Obtiene el elemento <textarea> real dentro del componente de la interfaz.
- * @returns El textarea, o null si aún no está montado.
- */
+// Obtiene el elemento <textarea> real dentro del componente de la interfaz
 const textareaElement = () => {
   const rootElement = textareaComponent.value?.$el
   return rootElement instanceof HTMLTextAreaElement ? rootElement : null
 }
 
-/**
- * Emite el nuevo texto y vuelve a seleccionar el rango indicado, para seguir escribiendo.
- * @param updatedValue Texto completo actualizado.
- * @param selectionStart Inicio de la selección.
- * @param selectionEnd Fin de la selección.
- */
+// Emite el nuevo texto y vuelve a seleccionar el rango indicado, para seguir escribiendo, recibe updatedValue, selectionStart, selectionEnd
 const applySelection = (updatedValue: string, selectionStart: number, selectionEnd: number) => {
   emit('update:modelValue', updatedValue)
   nextTick(() => {

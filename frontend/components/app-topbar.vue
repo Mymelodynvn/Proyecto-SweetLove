@@ -1,6 +1,4 @@
-<!--
-  app-topbar.vue — barra superior: buscador, tema, notificaciones y menú de la cuenta (perfil, ajustes, ver tienda y cerrar sesión).
--->
+<!-- app-topbar.vue — barra superior: buscador, tema, notificaciones y menú de la cuenta (perfil, ajustes, ver tienda y cerrar sesión) -->
 <script setup lang="ts">
 import { IconBuildingStore, IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-vue'
 import { SidebarTrigger } from '~/components/ui/sidebar'
@@ -18,7 +16,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 
 const { profile, initials: profileInitials, firstName } = useProfile()
-/** Cierra la sesión en el servidor y vuelve a la pantalla de acceso. */
+// Cierra la sesión en el servidor y vuelve a la pantalla de acceso
 const { logout } = useAuth()
 </script>
 

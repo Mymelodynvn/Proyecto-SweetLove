@@ -1,6 +1,4 @@
-<!--
-  theme-toggle.vue — botón para alternar entre tema claro y oscuro.
--->
+<!-- theme-toggle.vue — botón para alternar entre tema claro y oscuro -->
 <script setup lang="ts">
 import { IconMoon, IconSun } from '@tabler/icons-vue'
 import { Button } from '~/components/ui/button'

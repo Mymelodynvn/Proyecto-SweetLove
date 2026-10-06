@@ -1,6 +1,4 @@
-<!--
-  error.vue — pantalla de error global (404, 500...) con botón para volver al inicio.
--->
+<!-- error.vue — pantalla de error global (404, 500...) con botón para volver al inicio -->
 <script setup lang="ts">
 import type { NuxtError } from '#app'
 import { IconCake } from '@tabler/icons-vue'
@@ -8,7 +6,7 @@ import { Button } from '~/components/ui/button'
 
 const props = defineProps<{ error: NuxtError }>()
 
-/** Limpia el error actual y lleva a la persona al inicio. */
+// Limpia el error actual y lleva a la persona al inicio
 const goHome = () => clearError({ redirect: '/' })
 
 useHead({ title: `Error ${props.error.statusCode} | Sweet Love Admin` })

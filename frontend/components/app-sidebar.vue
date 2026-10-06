@@ -1,7 +1,4 @@
-<!--
-  app-sidebar.vue — menú lateral del panel.
-  Agrupa los módulos de la tienda, la cuenta y páginas de ejemplo, y abre automáticamente la sección de la ruta actual.
--->
+<!-- app-sidebar.vue — menú lateral del panel -->
 <script setup lang="ts">
 import {
   IconCake,
@@ -116,16 +113,12 @@ const pageSections: NavSection[] = [
   },
 ]
 
-/** Enlaces sueltos al final del menú. */
+// Enlaces sueltos al final del menú
 const extraLinks: NavLink[] = [
   { title: 'Página en blanco', to: '/blank', icon: IconFile },
 ]
 
-/**
- * Indica si una sección del menú debe verse abierta (contiene la ruta actual).
- * @param section Sección del menú.
- * @returns {boolean}
- */
+// Indica si una sección del menú debe verse abierta (contiene la ruta actual), recibe section
 const isSectionOpen = (section: NavSection) =>
   section.children.some((child) => child.to === route.path)
 </script>

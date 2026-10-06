@@ -1,6 +1,4 @@
-<!--
-  auth.vue — layout de las pantallas de acceso (sin barra lateral).
--->
+<!-- auth.vue — layout de las pantallas de acceso (sin barra lateral) -->
 <script setup lang="ts">
 import { IconCake } from '@tabler/icons-vue'
 </script>

@@ -1,15 +1,13 @@
-<!--
-  markdown-preview.vue — vista previa de Markdown.
-  Convierte el texto a HTML (marked) y lo limpia con DOMPurify para evitar código malicioso.
--->
+<!-- markdown-preview.vue — vista previa de Markdown -->
 <script setup lang="ts">
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 
 const props = defineProps<{ markdown: string }>()
 
-// DOMPurify necesita un DOM del navegador; este componente se renderiza dentro de
-// client-only contexts (dialogs, editor preview), so SSR returns empty.
+// DOMPurify necesita un DOM del navegador. Este componente solo se usa en zonas que
+// se dibujan en el cliente (diálogos y vista previa del editor), así que durante el
+// renderizado en servidor (SSR) devuelve un texto vacío.
 const renderedHtml = computed(() => {
   if (!import.meta.client) return ''
   const parsedHtml = marked.parse(props.markdown ?? '', { async: false })

@@ -1,7 +1,4 @@
-<!--
-  default.vue — layout del panel: barra lateral, barra superior y contenido.
-  Al montarse, carga el perfil guardado en el navegador.
--->
+<!-- default.vue — layout del panel: barra lateral, barra superior y contenido -->
 <script setup lang="ts">
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
 

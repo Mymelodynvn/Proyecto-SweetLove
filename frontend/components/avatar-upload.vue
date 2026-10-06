@@ -1,7 +1,4 @@
-<!--
-  avatar-upload.vue — selector de foto de perfil.
-  Lee la imagen elegida, la reduce y la entrega al padre como Data URL (v-model).
--->
+<!-- avatar-upload.vue — selector de foto de perfil -->
 <script setup lang="ts">
 import { IconPhotoUp, IconX } from '@tabler/icons-vue'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
@@ -17,11 +14,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string | null] }>()
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadError = ref('')
 
-/**
- * Procesa el archivo elegido: lo reduce y lo emite como nuevo valor.
- * Si no se puede leer, muestra un mensaje de error.
- * @param changeEvent Evento `change` del input de archivo.
- */
+// Procesa el archivo elegido: lo reduce y lo emite como nuevo valor, recibe changeEvent
 const handleFileSelection = async (changeEvent: Event) => {
   uploadError.value = ''
   const input = changeEvent.target
@@ -33,7 +26,7 @@ const handleFileSelection = async (changeEvent: Event) => {
   }
   catch (readError) {
     uploadError.value = 'No se pudo leer la imagen. Intenta con otro archivo.'
-    console.warn('Avatar image could not be processed.', readError)
+    console.warn('No se pudo procesar la imagen del avatar.', readError)
   }
   finally {
     input.value = ''
