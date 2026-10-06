@@ -1,13 +1,7 @@
-/**
- * Modelo de pedidos: consultas SQL sobre `pedido`, `itempedido`, `pago` y `envio`.
- * Relación: usuario 1 ─< pedido 1 ─< itempedido >─ producto; pedido 1 ─< pago 1 ─< envio.
- */
+// Modelo de pedidos: consultas SQL sobre `pedido`, `itempedido`, `pago` y `envio`
 import { getPool } from '../config/database.js'
 
-/**
- * Lista los pedidos con una fila por producto (el controlador las agrupa por pedido).
- * @returns {Promise<object[]>} Filas con orderId, customer, phone, address, productName, quantity, amount, date, dbStatus y paymentStatus.
- */
+// Lista los pedidos con una fila por producto (el controlador las agrupa por pedido)
 export const findAllWithItems = async () => {
   const [rows] = await getPool().query(`
     SELECT
@@ -32,24 +26,13 @@ export const findAllWithItems = async () => {
   return rows
 }
 
-/**
- * Cambia el estado de un pedido.
- * @param {number} idPedido Identificador del pedido.
- * @param {string} status Nuevo estado (ya validado).
- * @returns {Promise<number>} Filas afectadas (0 si el pedido no existe).
- */
+// Cambia el estado de un pedido, recibe idPedido, status
 export const updateStatus = async (idPedido, status) => {
   const [result] = await getPool().execute('UPDATE pedido SET estadoPedido = ? WHERE idPedido = ?', [status, idPedido])
   return result.affectedRows
 }
 
-/**
- * Inserta la cabecera de un pedido nuevo en estado "Pendiente".
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} total Total del pedido.
- * @param {number} idUser Cliente que compra.
- * @returns {Promise<number>} Identificador del pedido.
- */
+// Inserta la cabecera de un pedido nuevo en estado "Pendiente", recibe connection, total, idUser
 export const insertOrder = async (connection, total, idUser) => {
   const [result] = await connection.execute(
     "INSERT INTO pedido (precioTotal, fecha, estadoPedido, idUser) VALUES (?, CURDATE(), 'Pendiente', ?)",
@@ -58,13 +41,7 @@ export const insertOrder = async (connection, total, idUser) => {
   return result.insertId
 }
 
-/**
- * Inserta una línea (producto) de un pedido.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} idPedido Pedido al que pertenece.
- * @param {{productId:number, quantity:number, unitPrice:number, subtotal:number}} item Línea validada.
- * @returns {Promise<void>}
- */
+// Inserta una línea (producto) de un pedido, recibe connection, idPedido, item
 export const insertItem = async (connection, idPedido, item) => {
   await connection.execute(
     'INSERT INTO itempedido (cantidad, precioUnitario, subTotal, idPedido, idProducto) VALUES (?, ?, ?, ?, ?)',
@@ -72,14 +49,7 @@ export const insertItem = async (connection, idPedido, item) => {
   )
 }
 
-/**
- * Registra el pago inicial (estado "Pendiente") de un pedido.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} idPedido Pedido pagado.
- * @param {number} amount Monto.
- * @param {string} provider Medio de pago (Nequi, Tarjeta...).
- * @returns {Promise<number>} Identificador del pago.
- */
+// Registra el pago inicial (estado "Pendiente") de un pedido, recibe connection, idPedido, amount, provider
 export const insertPayment = async (connection, idPedido, amount, provider) => {
   const [result] = await connection.execute(
     "INSERT INTO pago (proveedorPago, monto, estadoPago, idPedido) VALUES (?, ?, 'Pendiente', ?)",
@@ -88,12 +58,7 @@ export const insertPayment = async (connection, idPedido, amount, provider) => {
   return result.insertId
 }
 
-/**
- * Crea el envío inicial (estado "Pendiente") asociado a un pago.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} idPago Pago al que se asocia el envío.
- * @returns {Promise<void>}
- */
+// Crea el envío inicial (estado "Pendiente") asociado a un pago, recibe connection, idPago
 export const insertShipment = async (connection, idPago) => {
   await connection.execute(
     "INSERT INTO envio (idPago, idEstado) VALUES (?, (SELECT idEstado FROM estadoenvio WHERE nombre = 'Pendiente' LIMIT 1))",

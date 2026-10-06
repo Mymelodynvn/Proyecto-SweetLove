@@ -1,12 +1,7 @@
-/**
- * Modelo de productos: consultas SQL sobre la tabla `producto`.
- */
+// Modelo de productos: consultas SQL sobre la tabla `producto`
 import { getPool } from '../config/database.js'
 
-/**
- * Lista todo el catálogo ordenado por identificador.
- * @returns {Promise<object[]>} Productos con id, name, description, price, stock, image, active y supplierId.
- */
+// Lista todo el catálogo ordenado por identificador
 export const findAll = async () => {
   const [rows] = await getPool().query(`
     SELECT idProducto AS id, nombre AS name, descripcion AS description,
@@ -18,11 +13,7 @@ export const findAll = async () => {
   return rows
 }
 
-/**
- * Obtiene un producto por identificador con los mismos alias que `findAll`.
- * @param {number} id Identificador del producto.
- * @returns {Promise<object|undefined>} El producto o undefined si no existe.
- */
+// Obtiene un producto por identificador con los mismos alias que `findAll`, recibe id
 export const findById = async (id) => {
   const [rows] = await getPool().query(
     `SELECT idProducto AS id, nombre AS name, descripcion AS description,
@@ -34,11 +25,7 @@ export const findById = async (id) => {
   return rows[0]
 }
 
-/**
- * Inserta un producto nuevo (la imagen se asigna después con `setImage`).
- * @param {{name:string, description:string, price:number, stock:number, active:boolean, supplierId:number|null}} data Datos del producto.
- * @returns {Promise<number>} Identificador del producto creado.
- */
+// Inserta un producto nuevo (la imagen se asigna después con `setImage`), recibe data
 export const create = async (data) => {
   const [result] = await getPool().execute(
     `INSERT INTO producto (nombre, descripcion, precio, cantidad, imagen, estado, idProveedor)
@@ -48,22 +35,12 @@ export const create = async (data) => {
   return result.insertId
 }
 
-/**
- * Guarda la ruta de la imagen de un producto.
- * @param {number} id Identificador del producto.
- * @param {string|null} imagePath Ruta pública de la imagen o null.
- * @returns {Promise<void>}
- */
+// Guarda la ruta de la imagen de un producto, recibe id, imagePath
 export const setImage = async (id, imagePath) => {
   await getPool().execute('UPDATE producto SET imagen = ? WHERE idProducto = ?', [imagePath, id])
 }
 
-/**
- * Actualiza todos los campos editables de un producto.
- * @param {number} id Identificador del producto.
- * @param {{name:string, description:string, price:number, stock:number, image:string|null, active:boolean, supplierId:number|null}} data Nuevos valores.
- * @returns {Promise<number>} Filas afectadas (0 si el producto no existe).
- */
+// Actualiza todos los campos editables de un producto, recibe id, data
 export const update = async (id, data) => {
   const [result] = await getPool().execute(
     `UPDATE producto
@@ -74,23 +51,13 @@ export const update = async (id, data) => {
   return result.affectedRows
 }
 
-/**
- * Elimina un producto. MySQL rechaza el borrado si tiene pedidos asociados.
- * @param {number} id Identificador del producto.
- * @returns {Promise<number>} Filas eliminadas (0 si no existía).
- */
+// Elimina un producto, recibe id
 export const remove = async (id) => {
   const [result] = await getPool().execute('DELETE FROM producto WHERE idProducto = ?', [id])
   return result.affectedRows
 }
 
-/**
- * Lee un producto y lo bloquea (`FOR UPDATE`) dentro de una transacción
- * para que dos pedidos simultáneos no descuenten el mismo stock.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} id Identificador del producto.
- * @returns {Promise<{idProducto:number, precio:number, cantidad:number, estado:number}|undefined>} Producto bloqueado.
- */
+// Lee un producto y lo bloquea (FOR UPDATE) para que dos pedidos no descuenten el mismo stock, recibe connection, id
 export const lockForSale = async (connection, id) => {
   const [rows] = await connection.query(
     'SELECT idProducto, precio, cantidad, estado FROM producto WHERE idProducto = ? FOR UPDATE',
@@ -99,13 +66,7 @@ export const lockForSale = async (connection, id) => {
   return rows[0]
 }
 
-/**
- * Descuenta unidades vendidas del inventario.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {number} id Identificador del producto.
- * @param {number} quantity Unidades a descontar.
- * @returns {Promise<void>}
- */
+// Descuenta unidades vendidas del inventario, recibe connection, id, quantity
 export const decreaseStock = async (connection, id, quantity) => {
   await connection.execute('UPDATE producto SET cantidad = cantidad - ? WHERE idProducto = ?', [quantity, id])
 }

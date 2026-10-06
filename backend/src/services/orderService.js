@@ -1,9 +1,4 @@
-/**
- * Servicio de pedidos: reglas de negocio del checkout.
- * Crear un pedido toca varias tablas (usuario, pedido, itempedido, producto,
- * pago, envio), por eso todo ocurre dentro de una única transacción: o se
- * guarda completo o no se guarda nada.
- */
+// Servicio de pedidos: reglas de negocio del checkout
 import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { getPool } from '../config/database.js'
@@ -12,13 +7,7 @@ import * as userModel from '../models/userModel.js'
 import * as productModel from '../models/productModel.js'
 import * as orderModel from '../models/orderModel.js'
 
-/**
- * Busca al cliente por correo y lo crea si no existe; si existe actualiza sus datos de entrega.
- * Un cliente creado así no tiene contraseña utilizable: debe registrarse para poder iniciar sesión.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {{name:string, lastName:string, email:string, phone:string, address:string}} customer Datos del comprador.
- * @returns {Promise<number>} Identificador del usuario (cliente).
- */
+// Busca al cliente por correo y lo crea si no existe; si existe actualiza sus datos de entrega, recibe connection, customer
 const findOrCreateCustomer = async (connection, customer) => {
   const existing = await userModel.findByEmail(customer.email, connection)
 
@@ -47,13 +36,7 @@ const findOrCreateCustomer = async (connection, customer) => {
   )
 }
 
-/**
- * Valida cada producto del carrito contra la base (existe, está activo y hay stock)
- * y toma el precio desde la base de datos, nunca desde el navegador.
- * @param {import('mysql2/promise').PoolConnection} connection Conexión con transacción abierta.
- * @param {Array<{productId:number, quantity:number}>} items Líneas del carrito.
- * @returns {Promise<Array<{productId:number, quantity:number, unitPrice:number, subtotal:number}>>} Líneas validadas.
- */
+// Valida cada producto del carrito (existe, activo, con stock) y toma el precio de la base, recibe connection, items
 const validateItems = async (connection, items) => {
   const validated = []
 
@@ -77,14 +60,7 @@ const validateItems = async (connection, items) => {
   return validated
 }
 
-/**
- * Registra un pedido completo: cliente, cabecera, líneas, descuento de stock, pago y envío inicial.
- * @param {object} input Datos ya validados por el controlador.
- * @param {{name:string, lastName:string, email:string, phone:string, address:string}} input.customer Comprador.
- * @param {Array<{productId:number, quantity:number}>} input.items Productos del carrito.
- * @param {string} input.paymentMethod Medio de pago elegido.
- * @returns {Promise<{ok:true, idPedido:number, total:number, cantidadProductos:number}>} Resumen del pedido creado.
- */
+// Registra un pedido completo: cliente, cabecera, líneas, descuento de stock, pago y envío inicial, recibe customer, items, paymentMethod
 export const createOrder = async ({ customer, items, paymentMethod }) => {
   const connection = await getPool().getConnection()
 

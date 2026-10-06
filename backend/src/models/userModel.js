@@ -1,16 +1,7 @@
-/**
- * Modelo de usuarios: todas las consultas SQL sobre la tabla `usuario`.
- * Los modelos solo hablan con la base de datos; las reglas de negocio viven
- * en servicios y controladores.
- */
+// Modelo de usuarios: todas las consultas SQL sobre la tabla `usuario`
 import { getPool } from '../config/database.js'
 
-/**
- * Busca un usuario por correo (sin distinguir mayúsculas) incluyendo el hash de su contraseña.
- * @param {string} email Correo ya normalizado en minúsculas.
- * @param {import('mysql2/promise').Pool|import('mysql2/promise').PoolConnection} [db] Conexión opcional (para transacciones).
- * @returns {Promise<object|undefined>} Fila del usuario o undefined si no existe.
- */
+// Busca un usuario por correo (sin distinguir mayúsculas) incluyendo el hash de su contraseña, recibe email, db
 export const findByEmail = async (email, db = getPool()) => {
   const [rows] = await db.query(
     'SELECT idUser, nombre, apellido, email, contrasena, idRol FROM usuario WHERE LOWER(TRIM(email)) = ? LIMIT 1',
@@ -19,11 +10,7 @@ export const findByEmail = async (email, db = getPool()) => {
   return rows[0]
 }
 
-/**
- * Busca un usuario por identificador, sin exponer la contraseña.
- * @param {number} idUser Identificador del usuario.
- * @returns {Promise<object|undefined>} Datos públicos del usuario o undefined.
- */
+// Busca un usuario por identificador, sin exponer la contraseña, recibe idUser
 export const findById = async (idUser) => {
   const [rows] = await getPool().query(
     'SELECT idUser, nombre, apellido, email, idRol FROM usuario WHERE idUser = ? LIMIT 1',
@@ -32,19 +19,7 @@ export const findById = async (idUser) => {
   return rows[0]
 }
 
-/**
- * Crea un usuario con el rol indicado por nombre (p. ej. "Cliente").
- * @param {object} data Datos del nuevo usuario.
- * @param {string} data.nombre Nombre.
- * @param {string} data.apellido Apellido.
- * @param {string} data.email Correo normalizado.
- * @param {string} [data.celular] Teléfono.
- * @param {string} [data.direccion] Dirección.
- * @param {string} data.contrasenaHash Hash bcrypt de la contraseña.
- * @param {string} data.rol Nombre del rol en la tabla `rol`.
- * @param {import('mysql2/promise').Pool|import('mysql2/promise').PoolConnection} [db] Conexión opcional.
- * @returns {Promise<number>} Identificador del usuario creado.
- */
+// Crea un usuario con el rol indicado por nombre (p. ej. "Cliente"), recibe data, db
 export const create = async (data, db = getPool()) => {
   const [result] = await db.execute(
     `INSERT INTO usuario (nombre, apellido, email, celular, direccion, contrasena, idRol)
@@ -54,13 +29,7 @@ export const create = async (data, db = getPool()) => {
   return result.insertId
 }
 
-/**
- * Actualiza los datos de contacto y entrega de un usuario existente.
- * @param {number} idUser Identificador del usuario.
- * @param {{nombre:string, apellido:string, celular:string, direccion:string}} data Nuevos datos.
- * @param {import('mysql2/promise').Pool|import('mysql2/promise').PoolConnection} [db] Conexión opcional.
- * @returns {Promise<void>}
- */
+// Actualiza los datos de contacto y entrega de un usuario existente, recibe idUser, data, db
 export const updateContact = async (idUser, data, db = getPool()) => {
   await db.execute('UPDATE usuario SET nombre = ?, apellido = ?, celular = ?, direccion = ? WHERE idUser = ?', [
     data.nombre,
@@ -71,10 +40,7 @@ export const updateContact = async (idUser, data, db = getPool()) => {
   ])
 }
 
-/**
- * Lista los clientes con el total de pedidos y lo gastado (excluye pedidos cancelados).
- * @returns {Promise<object[]>} Filas con id, name, email, phone, city, orderCount y totalSpent.
- */
+// Lista los clientes con el total de pedidos y lo gastado (excluye pedidos cancelados)
 export const findCustomersWithTotals = async () => {
   const [rows] = await getPool().query(`
     SELECT

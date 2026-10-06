@@ -1,12 +1,7 @@
-/**
- * Modelo de pagos: consulta de la tabla `pago`.
- */
+// Modelo de pagos: consulta de la tabla `pago`
 import { getPool } from '../config/database.js'
 
-/**
- * Lista todos los pagos, del más reciente al más antiguo.
- * @returns {Promise<object[]>} Filas con id, provider, amount, status y orderId.
- */
+// Lista todos los pagos, del más reciente al más antiguo
 export const findAll = async () => {
   const [rows] = await getPool().query(`
     SELECT

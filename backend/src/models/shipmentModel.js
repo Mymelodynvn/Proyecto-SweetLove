@@ -1,12 +1,7 @@
-/**
- * Modelo de envíos: consulta de `envio` junto con su estado descriptivo (`estadoenvio`).
- */
+// Modelo de envíos: consulta de `envio` junto con su estado descriptivo (`estadoenvio`)
 import { getPool } from '../config/database.js'
 
-/**
- * Lista los envíos, del más reciente al más antiguo.
- * @returns {Promise<object[]>} Filas con id, paymentId, statusId y status.
- */
+// Lista los envíos, del más reciente al más antiguo
 export const findAll = async () => {
   const [rows] = await getPool().query(`
     SELECT

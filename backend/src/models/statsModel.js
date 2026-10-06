@@ -1,23 +1,13 @@
-/**
- * Modelo de estadísticas: consultas agregadas que alimentan el dashboard y los
- * reportes del panel. Solo calcula con datos reales de MySQL; no inventa cifras.
- */
+// Modelo de estadísticas: consultas agregadas que alimentan el dashboard y los reportes del panel
 import { getPool } from '../config/database.js'
 
-/**
- * Ejecuta una consulta y devuelve únicamente sus filas.
- * @param {string} sql Consulta SQL de solo lectura.
- * @returns {Promise<object[]>} Filas resultantes.
- */
+// Ejecuta una consulta y devuelve únicamente sus filas, recibe sql
 const rows = async (sql) => {
   const [result] = await getPool().query(sql)
   return result
 }
 
-/**
- * Totales generales de pedidos: cantidad, valor, ingresos aprobados, cancelados y ticket promedio.
- * @returns {Promise<object>} Una fila con totalOrders, orderValue, approvedRevenue, cancelledOrders y averageOrder.
- */
+// Totales generales de pedidos: cantidad, valor, ingresos aprobados, cancelados y ticket promedio
 export const orderSummary = async () => {
   const [summary] = await rows(`
     SELECT
@@ -31,11 +21,7 @@ export const orderSummary = async () => {
   return summary ?? {}
 }
 
-/**
- * Ventas por producto (unidades e ingresos), excluyendo pedidos cancelados.
- * @param {number} [limit] Máximo de productos a devolver; sin valor devuelve todos.
- * @returns {Promise<object[]>} Filas con name, units y revenue, de mayor a menor ingreso.
- */
+// Ventas por producto (unidades e ingresos), excluyendo pedidos cancelados, recibe limit
 export const productSales = (limit) =>
   rows(`
     SELECT pr.nombre AS name, COALESCE(SUM(ip.cantidad), 0) AS units, COALESCE(SUM(ip.subTotal), 0) AS revenue
@@ -48,10 +34,7 @@ export const productSales = (limit) =>
     ${limit ? `LIMIT ${Number(limit)}` : ''}
   `)
 
-/**
- * Ingresos agrupados por ciudad (dirección del cliente), top 6.
- * @returns {Promise<object[]>} Filas con city y revenue.
- */
+// Ingresos agrupados por ciudad (dirección del cliente), top 6
 export const citySales = () =>
   rows(`
     SELECT
@@ -65,10 +48,7 @@ export const citySales = () =>
     LIMIT 6
   `)
 
-/**
- * Los 5 pedidos más recientes.
- * @returns {Promise<object[]>} Filas con id, amount, date, status y customer.
- */
+// Los 5 pedidos más recientes
 export const recentOrders = () =>
   rows(`
     SELECT
@@ -83,10 +63,7 @@ export const recentOrders = () =>
     LIMIT 5
   `)
 
-/**
- * Los 5 productos más vendidos con su stock actual.
- * @returns {Promise<object[]>} Filas con name, sales, revenue y stock.
- */
+// Los 5 productos más vendidos con su stock actual
 export const topProducts = () =>
   rows(`
     SELECT
@@ -102,10 +79,7 @@ export const topProducts = () =>
     LIMIT 5
   `)
 
-/**
- * Ingresos aprobados de los últimos 7 días con actividad.
- * @returns {Promise<object[]>} Filas con day y revenue.
- */
+// Ingresos aprobados de los últimos 7 días con actividad
 export const weeklyRevenue = () =>
   rows(`
     SELECT
@@ -119,10 +93,7 @@ export const weeklyRevenue = () =>
     ORDER BY pd.fecha ASC
   `)
 
-/**
- * Cantidad de pedidos por estado.
- * @returns {Promise<object[]>} Filas con status y count.
- */
+// Cantidad de pedidos por estado
 export const ordersByStatus = () =>
   rows(`
     SELECT estadoPedido AS status, COUNT(*) AS count
@@ -131,10 +102,7 @@ export const ordersByStatus = () =>
     ORDER BY count DESC
   `)
 
-/**
- * Pagos agrupados por medio de pago.
- * @returns {Promise<object[]>} Filas con name, count y amount.
- */
+// Pagos agrupados por medio de pago
 export const paymentMethods = () =>
   rows(`
     SELECT COALESCE(pa.proveedorPago, 'Sin especificar') AS name, COUNT(*) AS count, COALESCE(SUM(pa.monto), 0) AS amount
@@ -143,10 +111,7 @@ export const paymentMethods = () =>
     ORDER BY amount DESC
   `)
 
-/**
- * Clientes ordenados por lo gastado (incluye clientes sin pedidos).
- * @returns {Promise<object[]>} Filas con name, orderCount y totalSpent.
- */
+// Clientes ordenados por lo gastado (incluye clientes sin pedidos)
 export const customerRanking = () =>
   rows(`
     SELECT
