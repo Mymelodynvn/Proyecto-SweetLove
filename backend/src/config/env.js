@@ -1,14 +1,9 @@
-/**
- * Configuración central del backend.
- * Lee las variables de entorno (archivo .env) una sola vez y las expone en un
- * objeto inmutable. Si falta algo crítico para producción, el servidor se
- * detiene al arrancar en lugar de fallar más tarde con errores confusos.
- */
+// Configuración central del backend
 import 'dotenv/config'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-/** Secreto con el que se firma la cookie de sesión (mínimo 32 caracteres). */
+// Secreto con el que se firma la cookie de sesión (mínimo 32 caracteres)
 const sessionSecret =
   process.env.SESSION_SECRET ||
   // Solo en desarrollo/pruebas se permite un valor por defecto.
@@ -18,7 +13,7 @@ if (sessionSecret.length < 32) {
   throw new Error('Configuración incompleta: define SESSION_SECRET con al menos 32 caracteres.')
 }
 
-/** Convierte una lista "a,b,c" de la variable CORS_ORIGIN en un arreglo limpio. */
+// Convierte una lista "a,b,c" de la variable CORS_ORIGIN en un arreglo limpio
 const parseList = (value) =>
   String(value || '')
     .split(',')

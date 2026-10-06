@@ -1,24 +1,14 @@
-/**
- * Conexión a MySQL.
- * Mantiene un único pool de conexiones reutilizable por todos los modelos.
- */
+// Conexión a MySQL
 import mysql from 'mysql2/promise'
 import { config } from './env.js'
 
 let pool
 
-/**
- * Opciones TLS para conectarse a MySQL cifrado.
- * Se validan el certificado y el nombre del servidor (rejectUnauthorized) con TLS 1.2 o superior.
- * @returns {{minVersion: string, rejectUnauthorized: boolean}|undefined} Opciones, o undefined si DATABASE_SSL no está activo.
- */
+// Opciones TLS para conectarse a MySQL cifrado
 export const getSslOptions = () =>
   config.database.ssl ? { minVersion: 'TLSv1.2', rejectUnauthorized: true } : undefined
 
-/**
- * Devuelve el pool de conexiones, creándolo la primera vez que se necesita.
- * @returns {import('mysql2/promise').Pool} Pool compartido de MySQL.
- */
+// Devuelve el pool de conexiones, creándolo la primera vez que se necesita
 export const getPool = () => {
   if (!pool) {
     pool = mysql.createPool({
