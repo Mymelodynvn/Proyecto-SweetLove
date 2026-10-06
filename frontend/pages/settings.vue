@@ -1,7 +1,4 @@
-<!--
-  settings.vue — ajustes de la tienda y del panel (formularios de ejemplo).
-  Los valores todavía no se guardan en el servidor ni en el navegador.
--->
+<!-- settings.vue — ajustes de la tienda y del panel (formularios de ejemplo) -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'

@@ -1,6 +1,4 @@
-<!--
-  blank.vue — página en blanco de ejemplo para crear nuevas pantallas.
--->
+<!-- blank.vue — página en blanco de ejemplo para crear nuevas pantallas -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 

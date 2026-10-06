@@ -1,7 +1,4 @@
-<!--
-  orders/index.vue — pedidos.
-  Lista, filtra por estado, exporta a CSV y permite cambiar el estado de cada pedido (/api/orders).
--->
+<!-- orders/index.vue — pedidos -->
 <script setup lang="ts">
 import { IconDownload, IconMapPin, IconPhone, IconUser } from '@tabler/icons-vue'
 import type { Order, OrderStatus } from '~/composables/use-orders'
@@ -41,18 +38,18 @@ const { orders, loadFromStorage, updateOrderStatus } = useOrders()
 
 onMounted(loadFromStorage)
 
-/** Opciones del filtro de estado ("Todos" más cada estado posible). */
+// Opciones del filtro de estado ("Todos" más cada estado posible)
 const statusFilters = ['Todos', ...ORDER_STATUSES]
 const selectedStatus = ref('Todos')
 
-/** Pedidos que cumplen el filtro de estado elegido. */
+// Pedidos que cumplen el filtro de estado elegido
 const filteredOrders = computed(() =>
   selectedStatus.value === 'Todos'
     ? orders.value
     : orders.value.filter((order) => order.status === selectedStatus.value),
 )
 
-/** Descarga en CSV los pedidos que se están viendo. */
+// Descarga en CSV los pedidos que se están viendo
 const exportOrders = () => {
   downloadCsv('pedidos.csv', [
     ['Pedido', 'Cliente', 'Productos', 'Monto', 'Fecha', 'Estado'],
@@ -72,17 +69,14 @@ const selectedOrder = ref<Order | null>(null)
 const isDetailDialogOpen = ref(false)
 const detailStatus = ref<OrderStatus>('Pendiente')
 
-/**
- * Abre el detalle de un pedido, listo para cambiar su estado.
- * @param order Pedido elegido.
- */
+// Abre el detalle de un pedido, listo para cambiar su estado, recibe order
 const openOrderDetail = (order: Order) => {
   selectedOrder.value = order
   detailStatus.value = order.status
   isDetailDialogOpen.value = true
 }
 
-/** Guarda el nuevo estado del pedido en el servidor y cierra el diálogo. */
+// Guarda el nuevo estado del pedido en el servidor y cierra el diálogo
 const saveOrderStatus = () => {
   if (selectedOrder.value) {
     updateOrderStatus(selectedOrder.value.id, detailStatus.value)

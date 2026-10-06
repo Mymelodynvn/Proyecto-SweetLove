@@ -1,6 +1,4 @@
-<!--
-  otp-verification.vue — pantalla de código de verificación (solo interfaz).
--->
+<!-- otp-verification.vue — pantalla de código de verificación (solo interfaz) -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'

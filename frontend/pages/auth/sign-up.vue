@@ -1,6 +1,4 @@
-<!--
-  sign-up.vue — pantalla de registro (solo interfaz; las cuentas de clientes se crean desde la tienda).
--->
+<!-- sign-up.vue — pantalla de registro (solo interfaz; las cuentas de clientes se crean desde la tienda) -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'

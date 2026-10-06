@@ -1,6 +1,4 @@
-<!--
-  not-found.vue — pantalla 404 (página no encontrada).
--->
+<!-- not-found.vue — pantalla 404 (página no encontrada) -->
 <script setup lang="ts">
 import { Button } from '~/components/ui/button'
 

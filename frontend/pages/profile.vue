@@ -1,7 +1,4 @@
-<!--
-  profile.vue — perfil de la persona administradora.
-  El perfil se guarda en el navegador; las estadísticas salen de /api/dashboard.
--->
+<!-- profile.vue — perfil de la persona administradora -->
 <script setup lang="ts">
 import {
   IconBrandFacebook,
@@ -44,7 +41,7 @@ watch(isEditDialogOpen, (isOpen) => {
   }
 })
 
-/** Guarda los cambios del formulario de perfil y cierra el diálogo. */
+// Guarda los cambios del formulario de perfil y cierra el diálogo
 const submitProfile = () => {
   save(editForm.value)
   isEditDialogOpen.value = false

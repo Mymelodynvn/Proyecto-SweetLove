@@ -1,7 +1,4 @@
-<!--
-  customers/index.vue — clientes.
-  Lista los clientes de /api/customers y muestra sus pedidos en un detalle.
--->
+<!-- customers/index.vue — clientes -->
 <script setup lang="ts">
 import { IconMapPin, IconPhone, IconSearch } from '@tabler/icons-vue'
 import { Card, CardContent } from '~/components/ui/card'
@@ -58,10 +55,7 @@ onMounted(loadOrders)
 const selectedCustomer = ref<Customer | null>(null)
 const isDetailDialogOpen = ref(false)
 
-/**
- * Abre el detalle de un cliente.
- * @param customer Cliente elegido.
- */
+// Abre el detalle de un cliente, recibe customer
 const openCustomerDetail = (customer: Customer) => {
   selectedCustomer.value = customer
   isDetailDialogOpen.value = true

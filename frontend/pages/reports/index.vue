@@ -1,7 +1,4 @@
-<!--
-  Módulo de reportes de Sweet Love.
-  Todos los indicadores se obtienen mediante consultas reales a MySQL.
--->
+<!-- Módulo de reportes de Sweet Love -->
 <script setup lang="ts">
 import { IconCoin, IconDownload, IconReceipt, IconRepeat, IconShoppingCart, IconShoppingCartX, IconUsers } from '@tabler/icons-vue'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -23,13 +20,10 @@ const { data } = await useFetch<{
   }),
 })
 
-/**
- * Da formato de pesos colombianos a un monto.
- * @param value Monto.
- */
+// Da formato de pesos colombianos a un monto, recibe value
 const formatMoney = (value: number) => formatCop(value)
 
-/** Descarga los indicadores principales en un archivo CSV. */
+// Descarga los indicadores principales en un archivo CSV
 const exportReport = () => {
   downloadCsv('reporte-sweet-love.csv', [
     ['Indicador', 'Valor'],

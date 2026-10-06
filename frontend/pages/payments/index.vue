@@ -1,17 +1,11 @@
-<!--
-  Página de pagos del administrador.
-  Consume la tabla pago mediante la API /api/payments.
--->
+<!-- Página de pagos del administrador -->
 <script setup lang="ts">
 import { Card, CardContent } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 useHead({ title: 'Pagos | Sweet Love Admin' })
 const { data, pending } = await useFetch<Array<{ id:number; provider:string; amount:number; status:string; orderId:number }>>('/api/payments', { default: () => [] })
-/**
- * Clases de color de la etiqueta según el estado del pago.
- * @param status Estado (Aprobado, Pendiente u otro).
- */
+// Clases de color de la etiqueta según el estado del pago, recibe status
 const statusClass = (status: string) => status === 'Aprobado' ? 'bg-primary/15 text-primary border-transparent' : status === 'Pendiente' ? 'bg-chart-5/40 text-foreground border-transparent' : 'bg-destructive/10 text-destructive border-transparent'
 </script>
 <template>

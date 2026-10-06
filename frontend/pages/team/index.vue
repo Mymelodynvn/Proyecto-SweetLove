@@ -1,7 +1,4 @@
-<!--
-  team/index.vue — equipo de trabajo.
-  Miembros, roles y permisos (guardados en el navegador; no hay tabla de equipo en la base de datos).
--->
+<!-- team/index.vue — equipo de trabajo -->
 <script setup lang="ts">
 import {
   IconCheck,
@@ -75,10 +72,7 @@ const roleBadgeClass: Record<TeamRoleName, string> = {
   Repostero: 'bg-chart-3/30 text-foreground border-transparent',
 }
 
-/**
- * Iniciales de un nombre (máximo dos letras).
- * @param name Nombre completo.
- */
+// Iniciales de un nombre (máximo dos letras), recibe name
 const memberInitials = (name: string) =>
   name
     .split(' ')
@@ -87,21 +81,15 @@ const memberInitials = (name: string) =>
     .map((part) => part.charAt(0).toUpperCase())
     .join('')
 
-/**
- * Texto legible de un permiso.
- * @param permissionKey Clave del permiso.
- */
+// Texto legible de un permiso, recibe permissionKey
 const permissionLabel = (permissionKey: PermissionKey) =>
   PERMISSIONS.find((permission) => permission.key === permissionKey)?.label ?? permissionKey
 
-/**
- * Descripción de lo que puede hacer un rol.
- * @param roleName Nombre del rol.
- */
+// Descripción de lo que puede hacer un rol, recibe roleName
 const roleDescription = (roleName: TeamRoleName) =>
   TEAM_ROLES.find((role) => role.name === roleName)?.description ?? ''
 
-/** Formulario vacío para un miembro nuevo (rol Vendedor con sus permisos por defecto). */
+// Formulario vacío para un miembro nuevo (rol Vendedor con sus permisos por defecto)
 const EMPTY_FORM = (): TeamMemberFormData => ({
   name: '',
   email: '',
@@ -117,7 +105,7 @@ const editingMemberId = ref<number | null>(null)
 const editingIsOwner = ref(false)
 const memberForm = ref<TeamMemberFormData>(EMPTY_FORM())
 
-/** Abre el diálogo para agregar un miembro. */
+// Abre el diálogo para agregar un miembro
 const openCreateDialog = () => {
   editingMemberId.value = null
   editingIsOwner.value = false
@@ -125,10 +113,7 @@ const openCreateDialog = () => {
   isFormDialogOpen.value = true
 }
 
-/**
- * Abre el diálogo con los datos de un miembro existente.
- * @param member Miembro a editar.
- */
+// Abre el diálogo con los datos de un miembro existente, recibe member
 const openEditDialog = (member: TeamMember) => {
   editingMemberId.value = member.id
   editingIsOwner.value = member.isOwner
@@ -145,7 +130,7 @@ const openEditDialog = (member: TeamMember) => {
 }
 
 // Al seleccionar un rol se restablecen los permisos predeterminados; después pueden
-// still be adjusted individually afterwards.
+// ajustarse de forma individual.
 const applyRoleDefaults = (selectedValue: unknown) => {
   const role = TEAM_ROLES.find((definition) => definition.name === selectedValue)
   if (!role) return
@@ -153,17 +138,11 @@ const applyRoleDefaults = (selectedValue: unknown) => {
   memberForm.value.permissions = [...role.permissions]
 }
 
-/**
- * Indica si el formulario tiene activado un permiso.
- * @param permissionKey Clave del permiso.
- */
+// Indica si el formulario tiene activado un permiso, recibe permissionKey
 const isPermissionGranted = (permissionKey: PermissionKey) =>
   memberForm.value.permissions.includes(permissionKey)
 
-/**
- * Activa o desactiva un permiso individual en el formulario.
- * @param permissionKey Clave del permiso.
- */
+// Activa o desactiva un permiso individual en el formulario, recibe permissionKey
 const togglePermission = (permissionKey: PermissionKey) => {
   if (isPermissionGranted(permissionKey)) {
     memberForm.value.permissions = memberForm.value.permissions.filter((key) => key !== permissionKey)
@@ -173,7 +152,7 @@ const togglePermission = (permissionKey: PermissionKey) => {
   }
 }
 
-/** Agrega el miembro (si es nuevo) o actualiza el existente, y cierra el diálogo. */
+// Agrega el miembro (si es nuevo) o actualiza el existente, y cierra el diálogo
 const submitMemberForm = () => {
   if (editingMemberId.value === null) {
     addMember(memberForm.value)
@@ -187,10 +166,7 @@ const submitMemberForm = () => {
 const previewMember = ref<TeamMember | null>(null)
 const isPreviewDialogOpen = ref(false)
 
-/**
- * Abre la tarjeta de detalle de un miembro.
- * @param member Miembro a ver.
- */
+// Abre la tarjeta de detalle de un miembro, recibe member
 const openPreviewDialog = (member: TeamMember) => {
   previewMember.value = member
   isPreviewDialogOpen.value = true
@@ -199,16 +175,13 @@ const openPreviewDialog = (member: TeamMember) => {
 const memberPendingDeletion = ref<TeamMember | null>(null)
 const isDeleteDialogOpen = ref(false)
 
-/**
- * Pide confirmación antes de eliminar un miembro.
- * @param member Miembro a eliminar.
- */
+// Pide confirmación antes de eliminar un miembro, recibe member
 const requestDeletion = (member: TeamMember) => {
   memberPendingDeletion.value = member
   isDeleteDialogOpen.value = true
 }
 
-/** Elimina el miembro seleccionado tras la confirmación. */
+// Elimina el miembro seleccionado tras la confirmación
 const confirmDeletion = () => {
   if (memberPendingDeletion.value) {
     removeMember(memberPendingDeletion.value.id)

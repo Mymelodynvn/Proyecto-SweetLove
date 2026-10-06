@@ -1,6 +1,4 @@
-<!--
-  forgot-password.vue — pantalla de recuperación de contraseña (solo interfaz, sin envío de correo todavía).
--->
+<!-- forgot-password.vue — pantalla de recuperación de contraseña (solo interfaz, sin envío de correo todavía) -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'

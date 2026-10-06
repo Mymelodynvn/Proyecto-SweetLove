@@ -1,6 +1,4 @@
-<!--
-  maintenance.vue — pantalla de sitio en mantenimiento.
--->
+<!-- maintenance.vue — pantalla de sitio en mantenimiento -->
 <script setup lang="ts">
 import { IconTool } from '@tabler/icons-vue'
 import { Button } from '~/components/ui/button'

@@ -1,7 +1,4 @@
-<!--
-  products/index.vue — catálogo de productos.
-  Buscar, filtrar, crear, editar, duplicar y eliminar productos (/api/products). Las imágenes se reducen en el navegador y el backend las guarda como archivos.
--->
+<!-- products/index.vue — catálogo de productos -->
 <script setup lang="ts">
 import { IconDots, IconPhotoUp, IconPlus, IconSearch, IconStarFilled, IconX } from '@tabler/icons-vue'
 import type { Product, ProductFormData, ProductStatus } from '~/composables/use-products'
@@ -60,7 +57,7 @@ onMounted(loadFromStorage)
 
 const searchTerm = ref('')
 const selectedCategory = ref('Todas')
-/** Opciones del filtro de categoría ("Todas" más las categorías conocidas). */
+// Opciones del filtro de categoría ("Todas" más las categorías conocidas)
 const filterCategories = ['Todas', ...PRODUCT_CATEGORIES]
 
 const filteredProducts = computed(() =>
@@ -77,7 +74,7 @@ const statusBadgeClass: Record<ProductStatus, string> = {
   Agotado: 'bg-destructive/10 text-destructive border-transparent',
 }
 
-/** Formulario vacío para un producto nuevo. */
+// Formulario vacío para un producto nuevo
 const EMPTY_FORM = (): ProductFormData => ({
   name: '',
   emoji: '🎂',
@@ -91,11 +88,7 @@ const EMPTY_FORM = (): ProductFormData => ({
 const imageFileInput = ref<HTMLInputElement | null>(null)
 const imageError = ref('')
 
-/**
- * Procesa la imagen elegida (la reduce y la deja en el formulario).
- * Si no se puede leer, muestra un mensaje.
- * @param changeEvent Evento `change` del input de archivo.
- */
+// Procesa la imagen elegida (la reduce y la deja en el formulario), recibe changeEvent
 const handleImageSelection = async (changeEvent: Event) => {
   imageError.value = ''
   const input = changeEvent.target
@@ -112,7 +105,7 @@ const handleImageSelection = async (changeEvent: Event) => {
   }
 }
 
-/** Quita la imagen del formulario. */
+// Quita la imagen del formulario
 const removeImage = () => {
   productForm.value.image = null
 }
@@ -121,17 +114,14 @@ const isFormDialogOpen = ref(false)
 const editingProductId = ref<number | null>(null)
 const productForm = ref<ProductFormData>(EMPTY_FORM())
 
-/** Abre el diálogo para crear un producto con el formulario vacío. */
+// Abre el diálogo para crear un producto con el formulario vacío
 const openCreateDialog = () => {
   editingProductId.value = null
   productForm.value = EMPTY_FORM()
   isFormDialogOpen.value = true
 }
 
-/**
- * Abre el diálogo con los datos de un producto existente.
- * @param product Producto a editar.
- */
+// Abre el diálogo con los datos de un producto existente, recibe product
 const openEditDialog = (product: Product) => {
   editingProductId.value = product.id
   productForm.value = {
@@ -146,10 +136,7 @@ const openEditDialog = (product: Product) => {
   isFormDialogOpen.value = true
 }
 
-/**
- * Crea o actualiza el producto en el servidor según corresponda.
- * Si falla, avisa a la persona; si sale bien, cierra el diálogo.
- */
+// Crea o actualiza el producto en el servidor según corresponda
 const submitProductForm = async () => {
   const data: ProductFormData = {
     ...productForm.value,
@@ -173,16 +160,13 @@ const submitProductForm = async () => {
 const productPendingDeletion = ref<Product | null>(null)
 const isDeleteDialogOpen = ref(false)
 
-/**
- * Pide confirmación antes de eliminar un producto.
- * @param product Producto a eliminar.
- */
+// Pide confirmación antes de eliminar un producto, recibe product
 const requestDeletion = (product: Product) => {
   productPendingDeletion.value = product
   isDeleteDialogOpen.value = true
 }
 
-/** Elimina el producto en el servidor tras la confirmación. */
+// Elimina el producto en el servidor tras la confirmación
 const confirmDeletion = async () => {
   if (productPendingDeletion.value) {
     try {

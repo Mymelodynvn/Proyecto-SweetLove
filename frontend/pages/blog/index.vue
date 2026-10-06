@@ -1,7 +1,4 @@
-<!--
-  blog/index.vue — administración del blog.
-  Crear, editar, leer, publicar y borrar artículos (guardados en el navegador).
--->
+<!-- blog/index.vue — administración del blog -->
 <script setup lang="ts">
 import { IconCalendar, IconDots, IconPlus } from '@tabler/icons-vue'
 import type { BlogPost, BlogPostFormData, PostStatus } from '~/composables/use-blog-posts'
@@ -55,7 +52,7 @@ const statusBadgeClass: Record<PostStatus, string> = {
   Borrador: 'bg-chart-5/40 text-foreground border-transparent',
 }
 
-/** Formulario vacío para un artículo nuevo. */
+// Formulario vacío para un artículo nuevo
 const EMPTY_FORM = (): BlogPostFormData => ({
   title: '',
   excerpt: '',
@@ -68,17 +65,14 @@ const isFormDialogOpen = ref(false)
 const editingPostId = ref<number | null>(null)
 const postForm = ref<BlogPostFormData>(EMPTY_FORM())
 
-/** Abre el diálogo para escribir un artículo nuevo. */
+// Abre el diálogo para escribir un artículo nuevo
 const openCreateDialog = () => {
   editingPostId.value = null
   postForm.value = EMPTY_FORM()
   isFormDialogOpen.value = true
 }
 
-/**
- * Abre el diálogo con los datos de un artículo existente.
- * @param post Artículo a editar.
- */
+// Abre el diálogo con los datos de un artículo existente, recibe post
 const openEditDialog = (post: BlogPost) => {
   editingPostId.value = post.id
   postForm.value = {
@@ -94,16 +88,13 @@ const openEditDialog = (post: BlogPost) => {
 const readingPost = ref<BlogPost | null>(null)
 const isReadDialogOpen = ref(false)
 
-/**
- * Abre el diálogo de lectura de un artículo.
- * @param post Artículo a leer.
- */
+// Abre el diálogo de lectura de un artículo, recibe post
 const openReadDialog = (post: BlogPost) => {
   readingPost.value = post
   isReadDialogOpen.value = true
 }
 
-/** Crea el artículo (si es nuevo) o actualiza el existente, y cierra el diálogo. */
+// Crea el artículo (si es nuevo) o actualiza el existente, y cierra el diálogo
 const submitPostForm = () => {
   if (editingPostId.value === null) {
     addPost(postForm.value)
@@ -117,16 +108,13 @@ const submitPostForm = () => {
 const postPendingDeletion = ref<BlogPost | null>(null)
 const isDeleteDialogOpen = ref(false)
 
-/**
- * Pide confirmación antes de borrar un artículo.
- * @param post Artículo a borrar.
- */
+// Pide confirmación antes de borrar un artículo, recibe post
 const requestDeletion = (post: BlogPost) => {
   postPendingDeletion.value = post
   isDeleteDialogOpen.value = true
 }
 
-/** Borra el artículo seleccionado tras la confirmación. */
+// Borra el artículo seleccionado tras la confirmación
 const confirmDeletion = () => {
   if (postPendingDeletion.value) {
     removePost(postPendingDeletion.value.id)

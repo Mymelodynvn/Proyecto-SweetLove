@@ -1,6 +1,4 @@
-<!--
-  reset-password.vue — pantalla para definir una contraseña nueva (solo interfaz).
--->
+<!-- reset-password.vue — pantalla para definir una contraseña nueva (solo interfaz) -->
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'

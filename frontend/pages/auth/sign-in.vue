@@ -1,7 +1,4 @@
-<!--
-  sign-in.vue — inicio de sesión del panel.
-  Valida credenciales contra /api/auth/login; si es administrador, entra al panel.
--->
+<!-- sign-in.vue — inicio de sesión del panel -->
 <script setup lang="ts">
 import { IconEye, IconEyeOff } from '@tabler/icons-vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -15,14 +12,11 @@ definePageMeta({ layout: 'auth' })
 useHead({ title: 'Iniciar sesión | Sweet Love Admin' })
 const email = ref('')
 const password = ref('')
-/** Muestra u oculta la contraseña escrita, para poder verificar lo que se teclea. */
+// Muestra u oculta la contraseña escrita, para poder verificar lo que se teclea
 const showPassword = ref(false)
 const loginError = ref('')
 
-/**
- * Envía el correo y la contraseña. Si son correctos guarda el usuario y navega al panel (administrador) o al inicio.
- * Si fallan, muestra el mensaje del servidor.
- */
+// Envía el correo y la contraseña
 const handleLogin = async () => {
   loginError.value = ''
   try {

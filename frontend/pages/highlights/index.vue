@@ -1,7 +1,4 @@
-<!--
-  highlights/index.vue — productos destacados.
-  Ordena el catálogo por unidades vendidas (datos de /api/dashboard).
--->
+<!-- highlights/index.vue — productos destacados -->
 <script setup lang="ts">
 import { IconCrown, IconRepeat, IconStarFilled, IconUserPlus } from '@tabler/icons-vue'
 import type { CustomerTier } from '~/composables/use-customers'
@@ -35,7 +32,7 @@ const tierBadgeClass: Record<CustomerTier, string> = {
   Nuevo: 'bg-secondary text-secondary-foreground border-transparent',
 }
 
-/** Medallas para los tres primeros lugares. */
+// Medallas para los tres primeros lugares
 const RANK_MEDALS = ['🥇', '🥈', '🥉']
 
 // Las ventas se obtienen del mismo servicio que alimenta el dashboard.
@@ -43,15 +40,11 @@ const { data: dashboardData } = await useFetch<{ productSales: Array<{ name: str
   default: () => ({ productSales: [] }),
 })
 
-/**
- * Unidades vendidas de un producto, según el dashboard.
- * @param productName Nombre del producto.
- * @returns {number} Unidades (0 si no ha vendido).
- */
+// Unidades vendidas de un producto, según el dashboard, recibe productName
 const productSalesCount = (productName: string) =>
   dashboardData.value?.productSales.find((product) => product.name === productName)?.units ?? 0
 
-/** Productos ordenados de más a menos vendidos. */
+// Productos ordenados de más a menos vendidos
 const bestSellingProducts = computed(() =>
   [...products.value].sort((first, second) => productSalesCount(second.name) - productSalesCount(first.name)),
 )

@@ -1,12 +1,4 @@
-<!--
-  @file pages/admin/index.vue
-  @description Panel de administración principal (Dashboard) de la plataforma Sweet Love.
-  Consume los indicadores generales desde la API (/api/dashboard) respaldada por MySQL y los
-  visualiza mediante tarjetas de métricas, gráficos interactivos (ApexCharts) y tablas de datos.
-
-  @project Sweet Love E-Commerce
-  @module Admin/Dashboard
--->
+<!-- @file pages/admin/index.vue @description Panel de administración principal (Dashboard) de la plataforma Sweet Love -->
 <script setup lang="ts">
 import {
   IconCoin,
@@ -23,7 +15,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { BRAND_COLORS } from '~/lib/constants'
 
-/** Estructura para un pedido reciente dentro del dashboard */
+// Estructura para un pedido reciente dentro del dashboard
 interface DashboardOrder {
   id: string
   amount: number
@@ -32,7 +24,7 @@ interface DashboardOrder {
   customer: string
 }
 
-/** Estructura de producto para el reporte de stock e ingresos */
+// Estructura de producto para el reporte de stock e ingresos
 interface DashboardProduct {
   name: string
   sales: number
@@ -40,7 +32,7 @@ interface DashboardProduct {
   stock: number
 }
 
-/** Estructura general de respuesta entregada por el endpoint /api/dashboard */
+// Estructura general de respuesta entregada por el endpoint /api/dashboard
 interface DashboardData {
   orders: number
   revenue: number
@@ -53,7 +45,7 @@ interface DashboardData {
   weeklyRevenue: Array<{ day: string; revenue: number }>
 }
 
-/** Configuración de tarjetas de métricas cuantitativas */
+// Configuración de tarjetas de métricas cuantitativas
 interface StatCard {
   label: string
   value: string
@@ -65,9 +57,7 @@ interface StatCard {
 
 const { chartTheme } = useChartTheme()
 
-/**
- * Consulta asíncrona de datos del dashboard desde la API REST.
- */
+// Consulta asíncrona de datos del dashboard desde la API REST
 const { data, pending, error, refresh } = await useFetch<DashboardData>('/api/dashboard', {
   default: () => ({
     orders: 0,
@@ -84,16 +74,10 @@ const { data, pending, error, refresh } = await useFetch<DashboardData>('/api/da
 
 useHead({ title: 'Panel | Sweet Love Admin' })
 
-/**
- * Convierte valores numéricos a formato de moneda local (COP).
- * @param {number} value - Monto en pesos
- * @returns {string} Texto formateado
- */
+// Convierte valores numéricos a formato de moneda local (COP), recibe value
 const formatMoney = (value: number): string => formatCop(Number(value) || 0)
 
-/**
- * Mapeo de estados de pedido almacenados en BD a estilos de Badges.
- */
+// Mapeo de estados de pedido almacenados en BD a estilos de Badges
 const orderStatusClass: Record<string, string> = {
   Enviado: 'bg-primary/15 text-primary border-transparent',
   Pendiente: 'bg-chart-5/40 text-foreground border-transparent',
@@ -102,29 +86,21 @@ const orderStatusClass: Record<string, string> = {
   'En preparación': 'bg-muted text-foreground border-transparent',
 }
 
-/**
- * Evalúa el nivel de existencias y retorna una etiqueta descriptiva.
- * @param {number} stock - Unidades disponibles
- * @returns {string} Estado del stock
- */
+// Evalúa el nivel de existencias y retorna una etiqueta descriptiva, recibe stock
 const stockStatus = (stock: number): string => {
   if (stock <= 0) return 'Agotado'
   if (stock <= 5) return 'Poco stock'
   return 'En stock'
 }
 
-/**
- * Clases CSS según la disponibilidad del producto.
- */
+// Clases CSS según la disponibilidad del producto
 const stockBadgeClass: Record<string, string> = {
   'En stock': 'bg-primary/15 text-primary border-transparent',
   'Poco stock': 'bg-chart-5/40 text-foreground border-transparent',
   Agotado: 'bg-destructive/10 text-destructive border-transparent',
 }
 
-/**
- * Métricas calculadas para las tarjetas superiores del panel.
- */
+// Métricas calculadas para las tarjetas superiores del panel
 const stats = computed<StatCard[]>(() => [
   {
     label: 'Pedidos',
@@ -152,11 +128,7 @@ const stats = computed<StatCard[]>(() => [
   },
 ])
 
-/**
- * Normaliza cadenas de texto en objetos Date nativos de JavaScript.
- * @param {string} value - Cadena de fecha ISO o DD/MM/YYYY
- * @returns {Date|null}
- */
+// Normaliza cadenas de texto en objetos Date nativos de JavaScript, recibe value
 const parseDateValue = (value: string): Date | null => {
   const normalized = String(value ?? '').trim()
   if (!normalized) return null
@@ -177,7 +149,7 @@ const parseDateValue = (value: string): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-/** Categorías de días formateadas para el eje X del gráfico de área */
+// Categorías de días formateadas para el eje X del gráfico de área
 const chartCategories = computed(() => data.value.weeklyRevenue.map((entry) => {
   const date = parseDateValue(entry.day)
   return date
@@ -185,7 +157,7 @@ const chartCategories = computed(() => data.value.weeklyRevenue.map((entry) => {
     : '—'
 }))
 
-/** Opciones de renderizado para el gráfico de área de ApexCharts */
+// Opciones de renderizado para el gráfico de área de ApexCharts
 const incomeChartOptions = computed(() => ({
   chart: { type: 'area', height: 300, toolbar: { show: false }, fontFamily: 'inherit', foreColor: chartTheme.value.foreColor },
   dataLabels: { enabled: false },
@@ -204,14 +176,14 @@ const incomeChartSeries = computed(() => [
 
 const productSalesTotal = computed(() => data.value.productSales.reduce((sum, item) => sum + item.revenue, 0))
 
-/** Lista procesada para el gráfico tipo Donut con colores de marca */
+// Lista procesada para el gráfico tipo Donut con colores de marca
 const productSalesList = computed(() => data.value.productSales.map((product, index) => {
   const palette = [BRAND_COLORS.green, BRAND_COLORS.rose, BRAND_COLORS.pinkDeep, BRAND_COLORS.greenDark]
   const percent = productSalesTotal.value > 0 ? (product.revenue / productSalesTotal.value) * 100 : 0
   return { ...product, percent, color: palette[index % palette.length] }
 }))
 
-/** Configuración visual del gráfico Donut */
+// Configuración visual del gráfico Donut
 const donutChartOptions = computed(() => ({
   chart: { type: 'donut', fontFamily: 'inherit', foreColor: chartTheme.value.foreColor },
   labels: productSalesList.value.map((product) => product.name),
@@ -225,18 +197,14 @@ const donutChartOptions = computed(() => ({
 
 const donutChartSeries = computed(() => productSalesList.value.map((product) => product.percent))
 
-/** Sugerencias breves para la sección de Carrusel */
+// Sugerencias breves para la sección de Carrusel
 const ideas = [
   { title: 'Revisa los pedidos pendientes', description: 'Consulta los pedidos que requieren seguimiento desde el módulo de pedidos.' },
   { title: 'Mantén actualizado el catálogo', description: 'Ajusta precios y existencias desde Productos cuando cambien.' },
   { title: 'Revisa los pagos', description: 'Contrasta los estados de los pagos antes de entregar un pedido.' },
 ]
 
-/**
- * Formatea cadenas de fechas para la tabla de pedidos.
- * @param {string} value - Fecha sin formato
- * @returns {string} Fecha legible
- */
+// Formatea cadenas de fechas para la tabla de pedidos, recibe value
 const formatDate = (value: string): string => {
   const date = parseDateValue(value)
   if (!date) return 'Fecha no disponible'
@@ -244,7 +212,7 @@ const formatDate = (value: string): string => {
   return new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }).format(date)
 }
 
-/** Productos destacados con la etiqueta de stock calculada */
+// Productos destacados con la etiqueta de stock calculada
 const topProducts = computed(() => data.value.topProducts.map((product) => ({
   ...product,
   stockLabel: stockStatus(product.stock),

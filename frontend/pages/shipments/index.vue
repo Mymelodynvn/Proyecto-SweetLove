@@ -1,17 +1,11 @@
-<!--
-  Página de envíos del administrador.
-  Consume la relación envio → estadoenvio mediante la API /api/shipments.
--->
+<!-- Página de envíos del administrador -->
 <script setup lang="ts">
 import { Card, CardContent } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 useHead({ title: 'Envíos | Sweet Love Admin' })
 const { data, pending } = await useFetch<Array<{ id:number; paymentId:number; statusId:number; status:string }>>('/api/shipments', { default: () => [] })
-/**
- * Clases de color de la etiqueta según el estado del envío.
- * @param status Estado (Entregado, En camino o Pendiente).
- */
+// Clases de color de la etiqueta según el estado del envío, recibe status
 const statusClass = (status: string) => status === 'Entregado' ? 'bg-primary/15 text-primary border-transparent' : status === 'En camino' ? 'bg-secondary text-secondary-foreground border-transparent' : 'bg-chart-5/40 text-foreground border-transparent'
 </script>
 <template>

@@ -1,7 +1,4 @@
-<!--
-  Página de proveedores del administrador.
-  Consume la tabla proveedor mediante la API /api/suppliers.
--->
+<!-- Página de proveedores del administrador -->
 <script setup lang="ts">
 import { Card, CardContent } from '~/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
