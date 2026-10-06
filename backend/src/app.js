@@ -1,10 +1,4 @@
-/**
- * Construye la aplicación Express (sin abrir el puerto), de modo que las
- * pruebas puedan arrancarla en un puerto temporal.
- *
- * Flujo de una petición:
- *   cliente -> CORS -> JSON -> sesión -> rutas (/api) -> controlador -> servicio -> modelo -> MySQL
- */
+// Construye la aplicación Express (sin abrir el puerto), de modo que las pruebas puedan arrancarla en un puerto temporal
 import express from 'express'
 import cors from 'cors'
 import cookieSession from 'cookie-session'
@@ -13,10 +7,7 @@ import routes from './routes/index.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 import { UPLOADS_ROOT } from './utils/product-image.js'
 
-/**
- * Crea y configura la aplicación Express.
- * @returns {import('express').Express} Aplicación lista para escuchar.
- */
+// Crea y configura la aplicación Express
 export const createApp = () => {
   const app = express()
 

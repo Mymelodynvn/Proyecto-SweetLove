@@ -1,23 +1,16 @@
-/**
- * Controlador de autenticación: registro, inicio/cierre de sesión y usuario actual.
- * La sesión se guarda en una cookie firmada y httpOnly (req.session).
- */
+// Controlador de autenticación: registro, inicio/cierre de sesión y usuario actual
 import bcrypt from 'bcryptjs'
 import { HttpError } from '../utils/httpError.js'
 import { cleanText, parseEmail } from '../utils/validate.js'
 import * as userModel from '../models/userModel.js'
 
-/** Largo mínimo de contraseña aceptado al registrarse. */
+// Largo mínimo de contraseña aceptado al registrarse
 const MIN_PASSWORD_LENGTH = 8
 
-/** Hash de relleno: se compara aunque el correo no exista para no revelar, por tiempo de respuesta, qué correos están registrados. */
+// Hash de relleno: se compara aunque el correo no exista para no revelar, por tiempo de respuesta, qué correos están registrados
 const DUMMY_HASH = bcrypt.hashSync('sweetlove-dummy', 10)
 
-/**
- * Reduce un registro de usuario a los datos que se pueden enviar al navegador.
- * @param {{idUser:number, nombre:string, apellido:string, email:string, idRol:number|null}} user Fila de la tabla usuario.
- * @returns {{idUser:number, nombre:string, apellido:string, email:string, idRol:number|null}} Datos públicos (sin contraseña).
- */
+// Reduce un registro de usuario a los datos que se pueden enviar al navegador, recibe user
 const toPublicUser = (user) => ({
   idUser: user.idUser,
   nombre: user.nombre,
@@ -26,13 +19,7 @@ const toPublicUser = (user) => ({
   idRol: user.idRol,
 })
 
-/**
- * POST /api/auth/register — crea una cuenta de cliente.
- * Body: { fullName | nombre, email, password }. Responde 201 si se creó.
- * @param {import('express').Request} req Petición con los datos del formulario.
- * @param {import('express').Response} res Respuesta HTTP.
- * @returns {Promise<void>}
- */
+// POST /api/auth/register — crea una cuenta de cliente, recibe req, res
 export const register = async (req, res) => {
   const fullName = cleanText(req.body?.fullName ?? req.body?.nombre)
   const email = parseEmail(req.body?.email ?? req.body?.correo)
@@ -57,13 +44,7 @@ export const register = async (req, res) => {
   res.status(201).json({ message: 'Usuario registrado exitosamente' })
 }
 
-/**
- * POST /api/auth/login — valida credenciales y abre la sesión.
- * Body: { email, password }. Compara solo contra el hash bcrypt almacenado.
- * @param {import('express').Request} req Petición con correo y contraseña.
- * @param {import('express').Response} res Respuesta HTTP con el usuario autenticado.
- * @returns {Promise<void>}
- */
+// POST /api/auth/login — valida credenciales y abre la sesión, recibe req, res
 export const login = async (req, res) => {
   const email = cleanText(req.body?.email ?? req.body?.correo).toLowerCase()
   const password = String(req.body?.password ?? req.body?.contrasena ?? '')
@@ -80,24 +61,13 @@ export const login = async (req, res) => {
   res.json({ message: 'Inicio de sesión exitoso', user: toPublicUser(user) })
 }
 
-/**
- * POST /api/auth/logout — cierra la sesión eliminando la cookie.
- * @param {import('express').Request} req Petición con la sesión actual.
- * @param {import('express').Response} res Respuesta HTTP.
- * @returns {void}
- */
+// POST /api/auth/logout — cierra la sesión eliminando la cookie, recibe req, res
 export const logout = (req, res) => {
   req.session = null
   res.json({ ok: true })
 }
 
-/**
- * GET /api/auth/me — devuelve el usuario de la sesión actual, o `{ user: null }` si no hay sesión.
- * El frontend la usa para saber quién está autenticado al cargar una página.
- * @param {import('express').Request} req Petición con la sesión actual.
- * @param {import('express').Response} res Respuesta HTTP.
- * @returns {Promise<void>}
- */
+// GET /api/auth/me — devuelve el usuario de la sesión actual, o `{ user: null }` si no hay sesión, recibe req, res
 export const me = async (req, res) => {
   if (!req.session?.idUser) return void res.json({ user: null })
 

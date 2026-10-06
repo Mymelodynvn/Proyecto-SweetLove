@@ -1,7 +1,4 @@
-/**
- * Punto de entrada del backend: abre el puerto HTTP.
- * Uso: `npm start` (producción) o `npm run dev` (reinicia al guardar).
- */
+// Punto de entrada del backend: abre el puerto HTTP
 import { createApp } from './app.js'
 import { config } from './config/env.js'
 

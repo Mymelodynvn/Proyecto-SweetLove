@@ -1,33 +1,19 @@
-/**
- * Controlador del panel administrativo: clientes, pagos, envíos, proveedores,
- * dashboard y reportes. Son consultas de solo lectura que dan forma a los datos
- * que muestra el panel.
- */
+// Controlador del panel administrativo: clientes, pagos, envíos, proveedores, dashboard y reportes
 import * as userModel from '../models/userModel.js'
 import * as paymentModel from '../models/paymentModel.js'
 import * as shipmentModel from '../models/shipmentModel.js'
 import * as supplierModel from '../models/supplierModel.js'
 import * as statsModel from '../models/statsModel.js'
 
-/** Pedidos desde los que un cliente se considera "VIP". */
+// Pedidos desde los que un cliente se considera "VIP"
 const VIP_MIN_ORDERS = 6
-/** Pedidos desde los que un cliente se considera "Frecuente". */
+// Pedidos desde los que un cliente se considera "Frecuente"
 const FREQUENT_MIN_ORDERS = 2
 
-/**
- * Calcula un porcentaje seguro (0 si el total es 0).
- * @param {number} part Parte.
- * @param {number} total Total.
- * @returns {number} Porcentaje entre 0 y 100.
- */
+// Calcula un porcentaje seguro (0 si el total es 0), recibe part, total
 const percent = (part, total) => (total > 0 ? (part / total) * 100 : 0)
 
-/**
- * GET /api/customers — clientes con su nivel (VIP, Frecuente, Nuevo) según cantidad de pedidos.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con la lista de clientes.
- * @returns {Promise<void>}
- */
+// GET /api/customers — clientes con su nivel (VIP, Frecuente, Nuevo) según cantidad de pedidos, recibe res
 export const customers = async (_req, res) => {
   const rows = await userModel.findCustomersWithTotals()
 
@@ -44,12 +30,7 @@ export const customers = async (_req, res) => {
   )
 }
 
-/**
- * GET /api/payments — pagos registrados con su pedido.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con la lista de pagos.
- * @returns {Promise<void>}
- */
+// GET /api/payments — pagos registrados con su pedido, recibe res
 export const payments = async (_req, res) => {
   const rows = await paymentModel.findAll()
 
@@ -64,12 +45,7 @@ export const payments = async (_req, res) => {
   )
 }
 
-/**
- * GET /api/shipments — envíos con su estado descriptivo.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con la lista de envíos.
- * @returns {Promise<void>}
- */
+// GET /api/shipments — envíos con su estado descriptivo, recibe res
 export const shipments = async (_req, res) => {
   const rows = await shipmentModel.findAll()
 
@@ -83,12 +59,7 @@ export const shipments = async (_req, res) => {
   )
 }
 
-/**
- * GET /api/suppliers — proveedores registrados.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con la lista de proveedores.
- * @returns {Promise<void>}
- */
+// GET /api/suppliers — proveedores registrados, recibe res
 export const suppliers = async (_req, res) => {
   const rows = await supplierModel.findAll()
 
@@ -103,14 +74,7 @@ export const suppliers = async (_req, res) => {
   )
 }
 
-/**
- * GET /api/dashboard — resumen del panel: totales, ventas por producto y ciudad,
- * pedidos recientes, productos destacados e ingresos de la semana.
- * Las consultas son independientes, así que se ejecutan en paralelo.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con los indicadores.
- * @returns {Promise<void>}
- */
+// GET /api/dashboard — resumen del panel (totales, ventas, pedidos recientes e ingresos de la semana), recibe res
 export const dashboard = async (_req, res) => {
   const [summary, productSales, citySales, recentOrders, topProducts, weeklyRevenue] = await Promise.all([
     statsModel.orderSummary(),
@@ -148,12 +112,7 @@ export const dashboard = async (_req, res) => {
   })
 }
 
-/**
- * GET /api/reports — indicadores (KPIs) y series del módulo de reportes.
- * @param {import('express').Request} _req Petición (sin uso).
- * @param {import('express').Response} res Respuesta con KPIs y tablas.
- * @returns {Promise<void>}
- */
+// GET /api/reports — indicadores (KPIs) y series del módulo de reportes, recibe res
 export const reports = async (_req, res) => {
   const [summary, productSales, ordersByStatus, paymentMethods, customerRanking] = await Promise.all([
     statsModel.orderSummary(),

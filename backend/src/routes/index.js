@@ -1,10 +1,4 @@
-/**
- * Mapa completo de la API (/api). Cada ruta indica quién puede usarla:
- *  - pública: la tienda (catálogo, checkout, login, registro);
- *  - administrador: todo lo que muestra o modifica el panel.
- * Mantener las reglas de acceso aquí, y no en una lista aparte, evita dejar
- * una ruta nueva abierta por olvido: lo que no declara `requireAdmin` se nota.
- */
+// Mapa completo de la API (/api)
 import { Router } from 'express'
 import rateLimit from 'express-rate-limit'
 import { requireAdmin } from '../middleware/auth.js'
@@ -14,7 +8,7 @@ import * as orders from '../controllers/orderController.js'
 import * as panel from '../controllers/panelController.js'
 import * as health from '../controllers/healthController.js'
 
-/** Limita los intentos de login/registro por IP para frenar adivinación de contraseñas. */
+// Limita los intentos de login/registro por IP para frenar adivinación de contraseñas
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
