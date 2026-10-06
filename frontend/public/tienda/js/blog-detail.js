@@ -1,10 +1,10 @@
 /**
- * Archivo del proyecto Sweet Love.
- * Propósito: contiene la lógica correspondiente al módulo indicado por su nombre.
- * Los comentarios y nombres de funciones mantienen la intención del código en español.
+ * blog-detail.js — detalle de un artículo del blog.
+ * Lee el artículo pedido en la URL (?post=id) y calcula artículos relacionados.
  */
 if (document.querySelector("#blog-detail-app")) {
     Vue.createApp({
+        /** Estado: lista de artículos y el identificador solicitado en la URL. */
         data() {
             return {
                 posts: blogPosts,
@@ -13,10 +13,12 @@ if (document.querySelector("#blog-detail-app")) {
         },
 
         computed: {
+            /** Artículo que se está leyendo (undefined si el identificador no existe). */
             post() {
                 return this.posts.find((blogPost) => blogPost.id === this.requestedId);
             },
 
+            /** Hasta 3 artículos relacionados: de la misma categoría si hay; si no, otros cualesquiera. */
             relatedPosts() {
                 if (!this.post) {
                     return [];
@@ -30,6 +32,11 @@ if (document.querySelector("#blog-detail-app")) {
         },
 
         methods: {
+            /**
+             * Construye el enlace al detalle de un artículo.
+             * @param {object} post Artículo del blog.
+             * @returns {string} URL relativa de blogDetail.html.
+             */
             postLink(post) {
                 return `blogDetail.html?post=${post.id}`;
             }

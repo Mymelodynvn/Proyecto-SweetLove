@@ -1,7 +1,6 @@
 /**
- * Archivo del proyecto Sweet Love.
- * Propósito: contiene la lógica correspondiente al módulo indicado por su nombre.
- * Los comentarios y nombres de funciones mantienen la intención del código en español.
+ * site-footer.js — pie de página de la tienda.
+ * Contiene datos de contacto, redes sociales y el aviso de derechos reservados.
  */
 const SiteFooter = {
     template: `

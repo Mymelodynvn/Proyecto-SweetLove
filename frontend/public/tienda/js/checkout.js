@@ -1,3 +1,4 @@
+/** checkout.js — envío del pedido a la API. */
 /**
  * Envía el carrito completo a la API para crear un solo pedido.
  *

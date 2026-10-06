@@ -1,7 +1,6 @@
 /**
- * Archivo del proyecto Sweet Love.
- * Propósito: contiene la lógica correspondiente al módulo indicado por su nombre.
- * Los comentarios y nombres de funciones mantienen la intención del código en español.
+ * carousel.js — carrusel de portada (librería Swiper).
+ * Rota las imágenes automáticamente cada 6 segundos, con flechas y puntos de navegación.
  */
 const coverSwiper = document.querySelector(".cover__swiper");
 

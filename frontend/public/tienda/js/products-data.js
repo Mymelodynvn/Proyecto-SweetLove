@@ -1,4 +1,9 @@
 /**
+ * products-data.js — catálogo de productos de la tienda.
+ * El catálogo real se pide a la API (/api/products). Si la API no responde, se usa
+ * un catálogo de respaldo local para que la tienda no quede vacía.
+ */
+/**
  * Catálogo de respaldo utilizado por el frontend cuando la API no está disponible.
  * El catálogo principal se carga desde MySQL mediante la ruta /api/products.
  */

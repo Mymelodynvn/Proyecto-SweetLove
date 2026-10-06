@@ -1,7 +1,6 @@
 /**
- * Archivo del proyecto Sweet Love.
- * Propósito: contiene la lógica correspondiente al módulo indicado por su nombre.
- * Los comentarios y nombres de funciones mantienen la intención del código en español.
+ * cart-drawer.js — carrito lateral (drawer) y botón flotante del carrito.
+ * Lista los productos, permite cambiar cantidades o quitarlos y muestra subtotal, IVA y total.
  */
 const CartDrawer = {
     template: `
@@ -73,6 +72,7 @@ const CartDrawer = {
             <span v-if="cart.count > 0" :key="cart.count" class="cart-button-trigger__badge cart-button-trigger__badge--pop">{{ cart.count }}</span>
         </div>`,
 
+    /** Estado: carrito compartido (cartStore) y estado de la interfaz (uiStore). */
     data() {
         return { cart: cartStore, ui: uiStore };
     },
@@ -80,15 +80,18 @@ const CartDrawer = {
     methods: {
         formatPrice,
 
+        /** Abre el panel lateral del carrito. */
         openDrawer() {
             uiStore.drawerOpen = true;
         },
 
+        /** Cierra el panel lateral del carrito. */
         closeDrawer() {
             uiStore.drawerOpen = false;
         }
     },
 
+    /** Al montar el componente, permite cerrar el carrito con la tecla Escape. */
     mounted() {
         document.addEventListener("keydown", (keyEvent) => {
             if (keyEvent.key === "Escape") {

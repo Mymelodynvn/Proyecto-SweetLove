@@ -1,7 +1,7 @@
 /**
- * Archivo del proyecto Sweet Love.
- * Propósito: contiene la lógica correspondiente al módulo indicado por su nombre.
- * Los comentarios y nombres de funciones mantienen la intención del código en español.
+ * main.js — arranque de la tienda.
+ * Monta cada componente Vue (encabezado, pie, carrito, buscador y login) en su
+ * contenedor HTML, solo si ese contenedor existe en la página actual.
  */
 const mountComponentApp = (selector, component) => {
     if (document.querySelector(selector)) {

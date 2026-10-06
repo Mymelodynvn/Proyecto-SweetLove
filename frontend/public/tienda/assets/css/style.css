@@ -146,6 +146,14 @@ header{
     color: var(--main_color-secundary-dark);
 }
 
+.menu-right .actions .user-greeting {
+    margin-right: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color_text-secundary);
+    white-space: nowrap;
+}
+
 @media (max-width: 900px){
     header{
         height: auto;
