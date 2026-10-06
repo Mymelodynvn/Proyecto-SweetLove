@@ -1,31 +1,16 @@
-/**
- * stores.js — estado global de la tienda (Vue.reactive).
- *  - cartStore: carrito de compras, guardado en localStorage.
- *  - catalogStore: catálogo de productos cargado desde la API.
- *  - uiStore: qué ventanas están abiertas (búsqueda, carrito, acceso).
- *  - addToCartMixin: método reutilizable para agregar productos con aviso visual.
- */
+// stores.js — estado global de la tienda: cartStore (carrito), catalogStore (catálogo), uiStore (ventanas abiertas) y addToCartMixin
 const CART_STORAGE_KEY = "sweetlove-cart";
 const TAX_RATE_PERCENT = 19;
 const ADDED_FEEDBACK_MS = 1600;
 
-/**
- * Devuelve la ruta de imagen lista para usar en la tienda.
- * Las rutas absolutas ("/uploads/...", "/tienda/...") y las URL completas se dejan igual;
- * las rutas relativas antiguas se completan con la carpeta "assets/".
- * @param {string} imagePath Ruta guardada en el carrito.
- * @returns {string} Ruta utilizable en un atributo src.
- */
+// Devuelve la ruta de imagen lista para usar en la tienda, recibe imagePath
 const normalizeImagePath = (imagePath) => {
     if (!imagePath) return "assets/recursos/logo.png";
     if (/^(\/|https?:|assets\/)/.test(imagePath)) return imagePath;
     return `assets/${imagePath}`;
 };
 
-/**
- * Lee el carrito guardado en localStorage (persiste entre visitas).
- * @returns {Array<object>} Productos del carrito, o lista vacía si no hay datos válidos.
- */
+// Lee el carrito guardado en localStorage (persiste entre visitas)
 const readStoredItems = () => {
     try {
         const storedItems = JSON.parse(localStorage.getItem(CART_STORAGE_KEY));
@@ -43,46 +28,39 @@ const readStoredItems = () => {
     }
 };
 
-/**
- * Da formato de pesos colombianos a un valor.
- * @param {number} value Monto numérico.
- * @returns {string} Texto como "$45.000".
- */
+// Da formato de pesos colombianos a un valor, recibe value
 const formatPrice = (value) => `$${value.toLocaleString("es-CO")}`;
 
-/** Carrito de compras. Se recalcula solo (count, total, subtotal, tax) y se guarda en localStorage. */
+// Carrito de compras
 const cartStore = Vue.reactive({
     items: readStoredItems(),
 
-    /** Cantidad de productos distintos en el carrito. */
+    // Cantidad de productos distintos en el carrito
     get count() {
         return this.items.length;
     },
 
-    /** Total a pagar (IVA incluido): suma de precio por cantidad de cada producto. */
+    // Total a pagar (IVA incluido): suma de precio por cantidad de cada producto
     get total() {
         return this.items.reduce((accumulatedTotal, cartItem) => accumulatedTotal + cartItem.price * cartItem.quantity, 0);
     },
 
-    /** Valor antes de IVA, deducido del total con la tasa TAX_RATE_PERCENT. */
+    // Valor antes de IVA, deducido del total con la tasa TAX_RATE_PERCENT
     get subtotal() {
         return Math.round(this.total / (1 + TAX_RATE_PERCENT / 100));
     },
 
-    /** Valor del IVA (total menos subtotal). */
+    // Valor del IVA (total menos subtotal)
     get tax() {
         return this.total - this.subtotal;
     },
 
-    /** Guarda el carrito en localStorage para conservarlo entre visitas. */
+    // Guarda el carrito en localStorage para conservarlo entre visitas
     persist() {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items));
     },
 
-    /**
-     * Agrega un producto al carrito; si ya está, suma una unidad.
-     * @param {{id:string, name:string, price:number, image:string}} product Producto a agregar.
-     */
+    // Agrega un producto al carrito; si ya está, suma una unidad, recibe product
     addItem(product) {
         const existingItem = this.items.find((cartItem) => cartItem.id === product.id);
 
@@ -101,11 +79,7 @@ const cartStore = Vue.reactive({
         this.persist();
     },
 
-    /**
-     * Suma o resta unidades de un producto; si queda en 0 o menos, lo quita.
-     * @param {string} productId Identificador del producto.
-     * @param {number} quantityChange Cambio de cantidad (+1 o -1).
-     */
+    // Suma o resta unidades de un producto; si queda en 0 o menos, lo quita, recibe productId, quantityChange
     changeQuantity(productId, quantityChange) {
         const targetItem = this.items.find((cartItem) => cartItem.id === productId);
 
@@ -122,24 +96,21 @@ const cartStore = Vue.reactive({
         this.persist();
     },
 
-    /**
-     * Quita un producto del carrito.
-     * @param {string} productId Identificador del producto.
-     */
+    // Quita un producto del carrito, recibe productId
     removeItem(productId) {
         this.items = this.items.filter((cartItem) => cartItem.id !== productId);
         this.persist();
     }
 });
 
-/** Catálogo de la tienda. Empieza con el catálogo de respaldo y se reemplaza al cargar la API. */
+// Catálogo de la tienda
 const catalogStore = Vue.reactive({
     // Se carga el catálogo desde la API conectada a MySQL.
     products: fallbackProductCatalog,
     loaded: false
 });
 
-/** Carga el catálogo real desde la API una sola vez; si falla, se conserva el de respaldo. */
+// Carga el catálogo real desde la API una sola vez; si falla, se conserva el de respaldo
 const loadCatalogFromApi = async () => {
     if (catalogStore.loaded) return;
 
@@ -154,7 +125,7 @@ const loadCatalogFromApi = async () => {
 // Carga el catálogo al iniciar el frontend.
 loadCatalogFromApi();
 
-/** Estado de la interfaz: qué ventanas (búsqueda, carrito, acceso) están abiertas. */
+// Estado de la interfaz: qué ventanas (búsqueda, carrito, acceso) están abiertas
 const uiStore = Vue.reactive({
     searchOpen: false,
     drawerOpen: false,
@@ -168,9 +139,9 @@ Vue.watchEffect(() => {
     document.body.classList.toggle("no-scroll", uiStore.searchOpen || uiStore.drawerOpen || uiStore.authOpen);
 });
 
-/** Mixin de Vue: agrega productos al carrito y muestra un check temporal en el botón. */
+// Mixin de Vue: agrega productos al carrito y muestra un check temporal en el botón
 const addToCartMixin = {
-    /** Estado local: ids de productos recién agregados (para el aviso visual). */
+    // Estado local: ids de productos recién agregados (para el aviso visual)
     data() {
         return { addedIds: [] };
     },
@@ -178,10 +149,7 @@ const addToCartMixin = {
     methods: {
         formatPrice,
 
-        /**
-         * Agrega el producto al carrito y marca el botón como "agregado" durante 1,6 segundos.
-         * @param {object} product Producto a agregar.
-         */
+        // Agrega el producto al carrito y marca el botón como "agregado" durante 1,6 segundos, recibe product
         addToCart(product) {
             cartStore.addItem(product);
 
@@ -196,11 +164,7 @@ const addToCartMixin = {
             }, ADDED_FEEDBACK_MS);
         },
 
-        /**
-         * Indica si el producto fue agregado hace poco (para mostrar el check).
-         * @param {string} productId Identificador del producto.
-         * @returns {boolean}
-         */
+        // Indica si el producto fue agregado hace poco (para mostrar el check), recibe productId
         isAdded(productId) {
             return this.addedIds.includes(productId);
         }

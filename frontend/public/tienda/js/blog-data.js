@@ -1,8 +1,4 @@
-/**
- * blog-data.js — contenido del blog.
- * Lista de artículos (id, título, categoría, resumen y párrafos). Es contenido estático:
- * el blog todavía no se administra desde la base de datos.
- */
+// blog-data.js — contenido del blog
 const blogPosts = [
     {
         id: "cupcake-tips",

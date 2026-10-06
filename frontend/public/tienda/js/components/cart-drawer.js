@@ -1,7 +1,4 @@
-/**
- * cart-drawer.js — carrito lateral (drawer) y botón flotante del carrito.
- * Lista los productos, permite cambiar cantidades o quitarlos y muestra subtotal, IVA y total.
- */
+// cart-drawer.js — carrito lateral (drawer) y botón flotante del carrito
 const CartDrawer = {
     template: `
         <div class="cart-drawer" :class="{ 'cart-drawer--open': ui.drawerOpen }" :aria-hidden="String(!ui.drawerOpen)">
@@ -72,7 +69,7 @@ const CartDrawer = {
             <span v-if="cart.count > 0" :key="cart.count" class="cart-button-trigger__badge cart-button-trigger__badge--pop">{{ cart.count }}</span>
         </div>`,
 
-    /** Estado: carrito compartido (cartStore) y estado de la interfaz (uiStore). */
+    // Estado: carrito compartido (cartStore) y estado de la interfaz (uiStore)
     data() {
         return { cart: cartStore, ui: uiStore };
     },
@@ -80,18 +77,18 @@ const CartDrawer = {
     methods: {
         formatPrice,
 
-        /** Abre el panel lateral del carrito. */
+        // Abre el panel lateral del carrito
         openDrawer() {
             uiStore.drawerOpen = true;
         },
 
-        /** Cierra el panel lateral del carrito. */
+        // Cierra el panel lateral del carrito
         closeDrawer() {
             uiStore.drawerOpen = false;
         }
     },
 
-    /** Al montar el componente, permite cerrar el carrito con la tecla Escape. */
+    // Al montar el componente, permite cerrar el carrito con la tecla Escape
     mounted() {
         document.addEventListener("keydown", (keyEvent) => {
             if (keyEvent.key === "Escape") {

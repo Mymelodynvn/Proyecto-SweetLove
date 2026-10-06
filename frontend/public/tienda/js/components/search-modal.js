@@ -1,7 +1,4 @@
-/**
- * search-modal.js — ventana de búsqueda de productos.
- * Filtra el catálogo por nombre mientras se escribe y muestra los productos más vendidos por defecto.
- */
+// search-modal.js — ventana de búsqueda de productos
 const SearchModal = {
     mixins: [addToCartMixin],
 
@@ -56,24 +53,24 @@ const SearchModal = {
             </div>
         </div>`,
 
-    /** Estado: catálogo, estado de la interfaz y texto de búsqueda. */
+    // Estado: catálogo, estado de la interfaz y texto de búsqueda
     data() {
         return { catalog: catalogStore, ui: uiStore, query: "" };
     },
 
     computed: {
-        /** Productos cuyo nombre contiene el texto buscado (sin distinguir mayúsculas). */
+        // Productos cuyo nombre contiene el texto buscado (sin distinguir mayúsculas)
         searchResults() {
             const normalizedQuery = this.query.toLowerCase();
             return this.catalog.products.filter((product) => product.name.toLowerCase().includes(normalizedQuery));
         },
 
-        /** Los 6 primeros productos del catálogo, mostrados como "Más vendidos". */
+        // Los 6 primeros productos del catálogo, mostrados como "Más vendidos"
         featuredProducts() {
             return this.catalog.products.slice(0, 6);
         },
 
-        /** Enlace a la sección de productos de la portada. */
+        // Enlace a la sección de productos de la portada
         productsLink() {
             const onHomePage = location.pathname.endsWith("index.html") || location.pathname.endsWith("/");
             return onHomePage ? "#products-section" : "index.html#products-section";
@@ -81,7 +78,7 @@ const SearchModal = {
     },
 
     watch: {
-        /** Cuando se abre la búsqueda, pone el cursor en el campo de texto. */
+        // Cuando se abre la búsqueda, pone el cursor en el campo de texto
         "ui.searchOpen"(openState) {
             if (openState) {
                 Vue.nextTick(() => this.$refs.searchInput.focus());
@@ -90,13 +87,13 @@ const SearchModal = {
     },
 
     methods: {
-        /** Cierra la ventana de búsqueda. */
+        // Cierra la ventana de búsqueda
         closeModal() {
             uiStore.searchOpen = false;
         }
     },
 
-    /** Al montar el componente, permite cerrar la búsqueda con la tecla Escape. */
+    // Al montar el componente, permite cerrar la búsqueda con la tecla Escape
     mounted() {
         document.addEventListener("keydown", (keyEvent) => {
             if (keyEvent.key === "Escape") {

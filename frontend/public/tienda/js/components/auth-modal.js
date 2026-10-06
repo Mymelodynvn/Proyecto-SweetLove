@@ -1,8 +1,4 @@
-/**
- * auth-modal.js — ventana de acceso (iniciar sesión y registrarse).
- * Se comunica con la API (/api/auth/login y /api/auth/register). La sesión real
- * queda en una cookie httpOnly del servidor.
- */
+// auth-modal.js — ventana de acceso (iniciar sesión y registrarse)
 const AuthModal = {
     template: `
         <div class="auth-modal" :class="{ 'auth-modal--open': ui.authOpen }" :aria-hidden="String(!ui.authOpen)">
@@ -87,7 +83,7 @@ const AuthModal = {
             </div>
         </div>`,
 
-    /** Estado: vista activa, visibilidad de contraseñas, mensajes y datos de los formularios. */
+    // Estado: vista activa, visibilidad de contraseñas, mensajes y datos de los formularios
     data() {
         return {
             ui: uiStore,
@@ -101,10 +97,7 @@ const AuthModal = {
     },
 
     methods: {
-        /**
-         * Envía el correo y la contraseña a la API y muestra el resultado.
-         * Si es correcto, deja el usuario en uiStore (el encabezado muestra su nombre) y cierra la ventana.
-         */
+        // Envía el correo y la contraseña a la API y muestra el resultado
         async submitLogin() {
             this.loginMessage = "";
             try {
@@ -123,10 +116,7 @@ const AuthModal = {
             }
         },
 
-        /**
-         * Envía los datos de registro a la API.
-         * Si se crea la cuenta, cambia a la vista de inicio de sesión con el correo ya escrito.
-         */
+        // Envía los datos de registro a la API
         async submitRegister() {
             this.registerMessage = "";
             try {
@@ -150,13 +140,13 @@ const AuthModal = {
             }
         },
 
-        /** Cierra la ventana de acceso. */
+        // Cierra la ventana de acceso
         closeAuth() {
             uiStore.authOpen = false;
         }
     },
 
-    /** Al montar el componente, permite cerrar la ventana con la tecla Escape. */
+    // Al montar el componente, permite cerrar la ventana con la tecla Escape
     mounted() {
         document.addEventListener("keydown", (keyEvent) => {
             if (keyEvent.key === "Escape") {

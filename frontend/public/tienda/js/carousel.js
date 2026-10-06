@@ -1,7 +1,4 @@
-/**
- * carousel.js — carrusel de portada (librería Swiper).
- * Rota las imágenes automáticamente cada 6 segundos, con flechas y puntos de navegación.
- */
+// carousel.js — carrusel de portada (librería Swiper)
 const coverSwiper = document.querySelector(".cover__swiper");
 
 if (coverSwiper) {

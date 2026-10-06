@@ -1,8 +1,4 @@
-/**
- * main.js — arranque de la tienda.
- * Monta cada componente Vue (encabezado, pie, carrito, buscador y login) en su
- * contenedor HTML, solo si ese contenedor existe en la página actual.
- */
+// main.js — arranque de la tienda
 const mountComponentApp = (selector, component) => {
     if (document.querySelector(selector)) {
         Vue.createApp(component).mount(selector);

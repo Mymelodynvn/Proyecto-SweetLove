@@ -1,12 +1,5 @@
-/**
- * products-data.js — catálogo de productos de la tienda.
- * El catálogo real se pide a la API (/api/products). Si la API no responde, se usa
- * un catálogo de respaldo local para que la tienda no quede vacía.
- */
-/**
- * Catálogo de respaldo utilizado por el frontend cuando la API no está disponible.
- * El catálogo principal se carga desde MySQL mediante la ruta /api/products.
- */
+// products-data.js — catálogo de productos de la tienda
+// Catálogo de respaldo utilizado por el frontend cuando la API no está disponible
 const fallbackProductCatalog = [
     {
         id: "cupcakes",
@@ -74,9 +67,7 @@ const fallbackProductCatalog = [
 ];
 
 
-/**
- * Solicita los productos reales al backend y conserva los datos de respaldo si la conexión falla.
- */
+// Solicita los productos reales al backend y conserva los datos de respaldo si la conexión falla
 const loadProductCatalog = async () => {
     try {
         const response = await fetch('/api/products');

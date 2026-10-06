@@ -1,7 +1,4 @@
-/**
- * site-footer.js — pie de página de la tienda.
- * Contiene datos de contacto, redes sociales y el aviso de derechos reservados.
- */
+// site-footer.js — pie de página de la tienda
 const SiteFooter = {
     template: `
         <footer class="footer">

@@ -1,7 +1,4 @@
-/**
- * site-header.js — encabezado de la tienda.
- * Muestra el menú principal, el logo y los botones de búsqueda y de inicio de sesión.
- */
+// site-header.js — encabezado de la tienda
 const SiteHeader = {
     template: `
         <header>
@@ -48,41 +45,41 @@ const SiteHeader = {
             <div class="header-wave-divider"></div>
         </header>`,
 
-    /** Estado: referencia al estado de la interfaz (incluye el usuario con sesión iniciada). */
+    // Estado: referencia al estado de la interfaz (incluye el usuario con sesión iniciada)
     data() {
         return { ui: uiStore };
     },
 
     computed: {
-        /** Indica si la página actual es la portada (para usar anclas internas en los enlaces). */
+        // Indica si la página actual es la portada (para usar anclas internas en los enlaces)
         onHomePage() {
             return location.pathname.endsWith("index.html") || location.pathname.endsWith("/");
         },
 
-        /** Enlace de "Inicio": ancla interna en la portada, o index.html desde otras páginas. */
+        // Enlace de "Inicio": ancla interna en la portada, o index.html desde otras páginas
         homeLink() {
             return this.onHomePage ? "#home-section" : "index.html";
         },
 
-        /** Enlace de "Productos": ancla de la sección de productos de la portada. */
+        // Enlace de "Productos": ancla de la sección de productos de la portada
         productsLink() {
             return this.onHomePage ? "#products-section" : "index.html#products-section";
         }
     },
 
     methods: {
-        /** Abre la ventana de búsqueda. */
+        // Abre la ventana de búsqueda
         openSearch() {
             uiStore.searchOpen = true;
         },
 
-        /** Abre la ventana de acceso en la vista de inicio de sesión. */
+        // Abre la ventana de acceso en la vista de inicio de sesión
         openLogin() {
             uiStore.authView = "login";
             uiStore.authOpen = true;
         },
 
-        /** Cierra la sesión en el servidor y quita el usuario de la interfaz. */
+        // Cierra la sesión en el servidor y quita el usuario de la interfaz
         async logout() {
             try {
                 await fetch("/api/auth/logout", { method: "POST" });
@@ -92,7 +89,7 @@ const SiteHeader = {
         }
     },
 
-    /** Al cargar la página, consulta al servidor si ya hay una sesión iniciada para mostrar el nombre. */
+    // Al cargar la página, consulta al servidor si ya hay una sesión iniciada para mostrar el nombre
     async mounted() {
         try {
             const response = await fetch("/api/auth/me");

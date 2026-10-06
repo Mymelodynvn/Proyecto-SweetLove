@@ -1,11 +1,5 @@
-/** checkout.js — envío del pedido a la API. */
-/**
- * Envía el carrito completo a la API para crear un solo pedido.
- *
- * El modelo de datos normalizado permite que un pedido tenga varias líneas
- * en la tabla itempedido. Por eso todos los productos del carrito se envían
- * en un único registro de pedido.
- */
+// checkout.js — envío del pedido a la API
+// Envía el carrito completo a la API para crear un solo pedido
 const createOrder = async (customer, paymentMethod = 'Pendiente') => {
     const items = cartStore.items.map((item) => ({
         productId: Number(item.id),
