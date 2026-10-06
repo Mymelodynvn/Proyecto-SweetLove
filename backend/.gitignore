@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.*
+!.env.example
+# Imágenes subidas por el administrador (se conserva solo la carpeta)
+uploads/products/*
+!uploads/products/.gitkeep
+*.log
