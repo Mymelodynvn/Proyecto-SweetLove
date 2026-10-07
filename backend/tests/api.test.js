@@ -98,3 +98,18 @@ describe('CORS y errores', () => {
     assert.equal((await response.json()).error, true)
   })
 })
+
+describe('límite de intentos de login', () => {
+  test('bloquea un correo tras 10 intentos fallidos sin afectar a otros correos', async () => {
+    // Sin contraseña el login responde 400 antes de tocar la base, y cuenta como intento fallido
+    for (let i = 0; i < 10; i++) {
+      const response = await call('/api/auth/login', { method: 'POST', body: { email: 'bloqueado@example.com' } })
+      assert.equal(response.status, 400)
+    }
+    const blocked = await call('/api/auth/login', { method: 'POST', body: { email: 'bloqueado@example.com' } })
+    assert.equal(blocked.status, 429)
+
+    const other = await call('/api/auth/login', { method: 'POST', body: { email: 'otro@example.com' } })
+    assert.equal(other.status, 400)
+  })
+})

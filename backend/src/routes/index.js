@@ -1,6 +1,6 @@
 // Mapa completo de la API (/api)
 import { Router } from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import { requireAdmin } from '../middleware/auth.js'
 import * as auth from '../controllers/authController.js'
 import * as products from '../controllers/productController.js'
@@ -8,13 +8,26 @@ import * as orders from '../controllers/orderController.js'
 import * as panel from '../controllers/panelController.js'
 import * as health from '../controllers/healthController.js'
 
-// Limita los intentos de login/registro por IP para frenar adivinación de contraseñas
-const authLimiter = rateLimit({
+const tooManyAttempts = { error: true, statusCode: 429, statusMessage: 'Demasiados intentos. Intenta de nuevo en unos minutos.' }
+
+// Limita los intentos fallidos de login por correo (no por IP: detrás del proxy de Render todos los usuarios comparten la misma IP)
+const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: 10,
+  skipSuccessfulRequests: true,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
-  message: { error: true, statusCode: 429, statusMessage: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+  keyGenerator: (req) => String(req.body?.email ?? '').trim().toLowerCase() || ipKeyGenerator(req.ip),
+  message: tooManyAttempts,
+})
+
+// Limita los registros por IP para frenar el spam de cuentas
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: tooManyAttempts,
 })
 
 const router = Router()
@@ -23,8 +36,8 @@ const router = Router()
 router.get('/health', health.check)
 router.get('/products', products.list)
 router.post('/orders', orders.create)
-router.post('/auth/login', authLimiter, auth.login)
-router.post('/auth/register', authLimiter, auth.register)
+router.post('/auth/login', loginLimiter, auth.login)
+router.post('/auth/register', registerLimiter, auth.register)
 router.post('/auth/logout', auth.logout)
 router.get('/auth/me', auth.me)
 
