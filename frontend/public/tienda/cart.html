@@ -1,138 +1,207 @@
 <!DOCTYPE html>
+<!-- Carrito de compras completo: productos, cantidades y finalizar pedido -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love | Carrito</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Lista de productos del carrito (js/cart-page.js) -->
         <section class="cart container" id="cart-page-app" v-cloak>
+            <!-- Contenido del carrito -->
             <div class="cart-inner">
+                <!-- Título -->
                 <h1 class="cart-title">Tu carrito</h1>
 
+                <!-- Cantidad de productos en el pedido -->
                 <p class="cart-subtitle">{{ countLabel }}</p>
 
+                <!-- Dos columnas: productos a la izquierda y resumen a la derecha -->
                 <div class="cart-layout">
+                    <!-- Columna de productos -->
                     <div class="cart-items">
+                        <!-- Mensaje cuando el carrito está vacío -->
                         <p v-if="cart.count === 0" class="cart-empty">Tu carrito está vacío. ¡Antójate de algo dulce en nuestra tienda!</p>
 
+                        <!-- Una fila por cada producto del carrito -->
                         <article v-for="cartItem in cart.items" :key="cartItem.id" class="cart-item">
+                            <!-- Imagen del producto -->
                             <img :src="cartItem.image" :alt="cartItem.name" class="cart-thumb">
 
+                            <!-- Nombre y precio unitario -->
                             <div class="cart-item-info">
+                                <!-- Nombre del producto -->
                                 <h2 class="prod-name">{{ cartItem.name }}</h2>
 
+                                <!-- Precio unitario -->
                                 <p class="prod-price">{{ formatPrice(cartItem.price) }}</p>
                             </div>
 
+                            <!-- Botones para quitar o agregar unidades -->
                             <div class="qty">
+                                <!-- Quitar una unidad -->
                                 <button class="qty-btn" @click="cart.changeQuantity(cartItem.id, -1)" aria-label="Quitar uno"><i class="fa-solid fa-minus"></i></button>
 
+                                <!-- Cantidad actual -->
                                 <span class="qty-value">{{ cartItem.quantity }}</span>
 
+                                <!-- Agregar una unidad -->
                                 <button class="qty-btn" @click="cart.changeQuantity(cartItem.id, 1)" aria-label="Agregar uno"><i class="fa-solid fa-plus"></i></button>
                             </div>
 
+                            <!-- Subtotal de la fila (precio por cantidad) -->
                             <p class="cart-item-subtotal">{{ formatPrice(cartItem.price * cartItem.quantity) }}</p>
 
+                            <!-- Eliminar el producto del carrito -->
                             <button class="cart-item-remove" @click="cart.removeItem(cartItem.id)" aria-label="Eliminar producto"><i class="fa-solid fa-trash-can"></i></button>
                         </article>
                     </div>
 
+                    <!-- Resumen: subtotal, IVA, total y botón para finalizar el pedido -->
                     <aside class="cart-summary">
+                        <!-- Título del resumen -->
                         <h2>Resumen del pedido</h2>
 
+                        <!-- Subtotal del pedido -->
                         <div class="summary-row">
+                            <!-- Texto: Subtotal -->
                             <span>Subtotal</span>
 
+                            <!-- Valor del subtotal -->
                             <span>{{ formatPrice(cart.subtotal) }}</span>
                         </div>
 
+                        <!-- IVA -->
                         <div class="summary-row">
+                            <!-- Texto: IVA -->
                             <span>IVA (19%)</span>
 
+                            <!-- Valor del IVA -->
                             <span>{{ formatPrice(cart.tax) }}</span>
                         </div>
 
+                        <!-- Envío -->
                         <div class="summary-row">
+                            <!-- Texto: Envío -->
                             <span>Envío</span>
 
+                            <!-- Aviso: el envío se calcula al pagar -->
                             <span>Se calcula al pagar</span>
                         </div>
 
+                        <!-- Total a pagar -->
                         <div class="summary-row summary-row--total">
+                            <!-- Texto: Total -->
                             <span>Total</span>
 
+                            <!-- Valor del total -->
                             <span class="total-value">{{ formatPrice(cart.total) }}</span>
                         </div>
 
+                        <!-- Nota sobre descuentos y envío -->
                         <p class="summary-note">Los códigos de descuento y costos de envío se añaden durante el pago.</p>
 
+                        <!-- Botón que inicia el pedido (lo maneja el script de abajo) -->
                         <a href="#" class="btn-checkout">Finalizar pedido</a>
 
+                        <!-- Enlace para seguir comprando -->
                         <a href="index.html#products-section" class="btn-continue">Seguir comprando</a>
                     </aside>
                 </div>
             </div>
         </section>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
+    <!-- Envía el pedido a la API -->
     <script src="js/checkout.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 
+    <!-- Lógica de la página del carrito -->
     <script src="js/cart-page.js"></script>
+<!-- Finalizar pedido: pide los datos con ventanas del navegador y llama a createOrder (js/checkout.js) -->
 <script>
+        // Al pulsar "Finalizar pedido": valida el carrito, pide los datos y crea el pedido
         document.querySelector('.btn-checkout')?.addEventListener('click', async (event) => {
             event.preventDefault();
+            // Si el carrito está vacío, avisa y no hace nada
             if (cartStore.items.length === 0) {
                 alert('Tu carrito está vacío.');
                 return;
             }
+            // Pide los datos del comprador con ventanas del navegador
             const name = prompt('Nombre:');
             const email = prompt('Correo electrónico:');
             if (!name || !email) return;
             const phone = prompt('Celular:') || '';
             const address = prompt('Dirección de entrega:') || '';
+            // Envía el pedido a la API; si sale bien avisa y recarga la página, si no muestra un error
             try {
                 await createOrder({ name, email, phone, address });
                 alert('¡Pedido registrado correctamente!');

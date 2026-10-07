@@ -1,122 +1,184 @@
 <!DOCTYPE html>
+<!-- Página del blog: lista de artículos con filtro por categoría -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love | Blog</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Blog: introducción, categorías, artículo destacado, lista y boletín -->
         <div class="container__blog">
+            <!-- Título y descripción del blog -->
             <div class="blog__intro">
+                <!-- Título de la página -->
                 <h1>Nuestro Blog</h1>
 
+                <!-- Descripción del blog -->
                 <p>Recetas, tips de repostería e historias dulces para inspirarte en cada celebración.</p>
             </div>
 
+            <!-- Categorías, artículo destacado y tarjetas (las dibuja js/blog.js con Vue) -->
             <div id="blog-app" v-cloak>
+                <!-- Botones de categorías -->
                 <div class="blog__categories">
+                    <!-- Un botón por categoría; la activa se resalta -->
                     <button v-for="category in categories" :key="category" type="button" class="blog__category" :class="{ 'blog__category--active': category === activeCategory }" @click="activeCategory = category">{{ category }}</button>
                 </div>
 
+                <!-- Artículo destacado (solo se ve con la categoría "Todos") -->
                 <article v-if="featuredPost && activeCategory === 'Todos'" class="blog__featured">
+                    <!-- Imagen y etiqueta del artículo destacado -->
                     <div class="blog__featured-media">
+                        <!-- Imagen del artículo destacado -->
                         <img :src="featuredPost.image" :alt="featuredPost.alt">
 
+                        <!-- Etiqueta "Destacado" -->
                         <span class="blog__chip">Destacado</span>
                     </div>
 
+                    <!-- Fecha, título, resumen y enlace del artículo destacado -->
                     <div class="blog__featured-content">
+                        <!-- Fecha y autor del artículo destacado -->
                         <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ featuredPost.date }} · Por {{ featuredPost.author }}</span>
 
+                        <!-- Título del artículo destacado -->
                         <h2>{{ featuredPost.title }}</h2>
 
+                        <!-- Resumen del artículo destacado -->
                         <p>{{ featuredPost.excerpt }}</p>
 
+                        <!-- Botón para leer el artículo completo -->
                         <a :href="postLink(featuredPost)" class="btn__text">Leer artículo</a>
                     </div>
                 </article>
 
+                <!-- Cuadrícula con el resto de los artículos -->
                 <div class="blog__grid">
+                    <!-- Una tarjeta por artículo (según la categoría elegida) -->
                     <article v-for="post in filteredPosts" :key="post.id" class="blog__card">
+                        <!-- Imagen y categoría del artículo -->
                         <div class="blog__card-media">
+                            <!-- Imagen del artículo -->
                             <img :src="post.image" :alt="post.alt">
 
+                            <!-- Categoría del artículo -->
                             <span class="blog__chip">{{ post.category }}</span>
                         </div>
 
+                        <!-- Fecha, título, resumen y enlace del artículo -->
                         <div class="blog__card-content">
+                            <!-- Fecha del artículo -->
                             <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ post.date }}</span>
 
+                            <!-- Título del artículo -->
                             <h3>{{ post.title }}</h3>
 
+                            <!-- Resumen del artículo -->
                             <p>{{ post.excerpt }}</p>
 
+                            <!-- Enlace "Leer más" -->
                             <a :href="postLink(post)" class="blog__read-more">Leer más<i class="fa-solid fa-arrow-right"></i></a>
                         </div>
                     </article>
                 </div>
             </div>
 
+            <!-- Boletín: formulario de ejemplo, todavía no envía datos -->
             <section class="blog__newsletter">
+                <!-- Texto de invitación a suscribirse -->
                 <div class="blog__newsletter-text">
+                    <!-- Título del boletín -->
                     <h2>Endulza tu correo</h2>
 
+                    <!-- Descripción del boletín -->
                     <p>Suscríbete y recibe recetas, promociones y novedades antes que nadie. Prometemos solo enviarte cosas dulces.</p>
                 </div>
 
+                <!-- Campo de correo y botón de suscripción -->
                 <form action="#" class="blog__newsletter-form">
+                    <!-- Campo: correo electrónico -->
                     <input type="email" placeholder="Tu correo electrónico" autocomplete="email" required>
 
+                    <!-- Botón para suscribirse -->
                     <button type="submit">Suscribirme</button>
                 </form>
             </section>
         </div>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 
+    <!-- Artículos del blog -->
     <script src="js/blog-data.js"></script>
 
+    <!-- Lógica de la lista del blog -->
     <script src="js/blog.js"></script>
 </body>
 

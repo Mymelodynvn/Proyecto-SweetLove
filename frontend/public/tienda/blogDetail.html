@@ -1,71 +1,111 @@
 <!DOCTYPE html>
+<!-- Detalle de un artículo del blog -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love | Blog</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Artículo elegido con ?post=id en la URL (lo dibuja js/blog-detail.js) -->
         <div id="blog-detail-app" v-cloak>
+            <!-- Se muestra cuando el artículo existe -->
             <div v-if="post" class="container__blog-detail">
+                <!-- Enlace para volver al blog -->
                 <a href="blog.html" class="blog-detail__back"><i class="fa-solid fa-arrow-left"></i>Volver al blog</a>
 
+                <!-- Artículo completo -->
                 <article class="blog-detail__article">
+                    <!-- Imagen y categoría del artículo -->
                     <div class="blog-detail__media">
+                        <!-- Imagen del artículo -->
                         <img :src="post.image" :alt="post.alt">
 
+                        <!-- Categoría del artículo -->
                         <span class="blog__chip">{{ post.category }}</span>
                     </div>
 
+                    <!-- Fecha, título y párrafos del artículo -->
                     <div class="blog-detail__content">
+                        <!-- Fecha y autor del artículo -->
                         <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ post.date }} · Por {{ post.author }}</span>
 
+                        <!-- Título del artículo -->
                         <h1>{{ post.title }}</h1>
 
+                        <!-- Un párrafo por cada texto del artículo -->
                         <p v-for="(paragraph, paragraphIndex) in post.content" :key="paragraphIndex">{{ paragraph }}</p>
                     </div>
                 </article>
 
+                <!-- Artículos relacionados -->
                 <section v-if="relatedPosts.length > 0" class="blog-detail__related">
+                    <!-- Título de la sección de artículos relacionados -->
                     <h2>También te puede endulzar</h2>
 
+                    <!-- Tarjetas de los artículos relacionados -->
                     <div class="blog__grid">
+                        <!-- Una tarjeta por artículo relacionado -->
                         <article v-for="relatedPost in relatedPosts" :key="relatedPost.id" class="blog__card">
+                            <!-- Imagen y categoría del artículo relacionado -->
                             <div class="blog__card-media">
+                                <!-- Imagen del artículo relacionado -->
                                 <img :src="relatedPost.image" :alt="relatedPost.alt">
 
+                                <!-- Categoría del artículo relacionado -->
                                 <span class="blog__chip">{{ relatedPost.category }}</span>
                             </div>
 
+                            <!-- Fecha, título, resumen y enlace del artículo relacionado -->
                             <div class="blog__card-content">
+                                <!-- Fecha del artículo relacionado -->
                                 <span class="blog__meta"><i class="fa-solid fa-calendar-days"></i>{{ relatedPost.date }}</span>
 
+                                <!-- Título del artículo relacionado -->
                                 <h3>{{ relatedPost.title }}</h3>
 
+                                <!-- Resumen del artículo relacionado -->
                                 <p>{{ relatedPost.excerpt }}</p>
 
+                                <!-- Enlace "Leer más" -->
                                 <a :href="postLink(relatedPost)" class="blog__read-more">Leer más<i class="fa-solid fa-arrow-right"></i></a>
                             </div>
                         </article>
@@ -73,36 +113,51 @@
                 </section>
             </div>
 
+            <!-- Mensaje cuando el artículo no existe -->
             <div v-else class="container__blog-detail blog-detail__empty">
+                <!-- Aviso de que el artículo no existe -->
                 <p class="blog-detail__missing">No encontramos este artículo. ¡Pero tenemos muchas historias dulces esperándote!</p>
 
+                <!-- Botón para ir al listado del blog -->
                 <a href="blog.html" class="btn__text">Ir al blog</a>
             </div>
         </div>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 
+    <!-- Artículos del blog -->
     <script src="js/blog-data.js"></script>
 
+    <!-- Lógica del detalle de un artículo -->
     <script src="js/blog-detail.js"></script>
 </body>
 

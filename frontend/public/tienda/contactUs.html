@@ -1,100 +1,148 @@
 <!DOCTYPE html>
+<!-- Página "Contáctanos": datos de contacto y formulario -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love | Contáctanos</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Contenedor de la página de contacto -->
         <div class="container__all-contact">
+            <!-- Tarjeta con los datos de contacto y el formulario -->
             <div class="contact__card">
+                <!-- Texto de bienvenida y datos de contacto -->
                 <div class="info__contact">
+                    <!-- Título de la página -->
                     <h1>Contáctanos</h1>
 
+                    <!-- Invitación a escribir -->
                     <p>¿Tienes un antojo o una idea dulce? ¡Hablemos!</p>
 
+                    <!-- Texto de apoyo: qué datos compartir -->
                     <p>Estamos aquí para escuchar, crear y endulzar tus momentos especiales. Comparte con nosotros fecha, diseño, sabores o detalles únicos, y juntos haremos realidad ese pedido personalizado que tienes en mente.</p>
 
+                    <!-- Lista de datos: correo, teléfono y ciudad -->
                     <ul class="contact__details">
+                        <!-- Correo electrónico -->
                         <li>
                             <i class="fa-solid fa-envelope"></i>
 
+                            <!-- Enlace para escribir un correo -->
                             <a href="mailto:Sweetlovemed@gmail.com">Sweetlovemed@gmail.com</a>
                         </li>
 
+                        <!-- Teléfono -->
                         <li>
                             <i class="fa-solid fa-phone"></i>
 
+                            <!-- Enlace para llamar por teléfono -->
                             <a href="tel:+573215771432">(+57) 321 577 1432</a>
                         </li>
 
+                        <!-- Ciudad -->
                         <li>
                             <i class="fa-solid fa-location-dot"></i>
 
+                            <!-- Ciudad -->
                             <span>Medellín, Colombia</span>
                         </li>
                     </ul>
                 </div>
 
+                <!-- Formulario de contacto: de ejemplo, todavía no envía el mensaje -->
                 <form action="#" class="contact__form">
+                    <!-- Título del formulario -->
                     <h2>Escríbenos</h2>
 
+                    <!-- Subtítulo del formulario -->
                     <p class="form__subtitle">Te responderemos lo antes posible</p>
 
+                    <!-- Campo: nombre -->
                     <input type="text" placeholder="Nombre" autocomplete="name" required>
 
+                    <!-- Campo: celular -->
                     <input type="tel" placeholder="Celular" autocomplete="tel" required>
 
+                    <!-- Campo: asunto -->
                     <input type="text" placeholder="Asunto" required>
 
+                    <!-- Campo: mensaje -->
                     <textarea placeholder="Cuéntanos tu idea dulce" rows="5" required></textarea>
 
+                    <!-- Botón para enviar -->
                     <button type="submit" class="btn__form"><i class="fa-solid fa-paper-plane"></i>Enviar</button>
                 </form>
             </div>
         </div>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 </body>
 

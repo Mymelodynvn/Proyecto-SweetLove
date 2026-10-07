@@ -1,86 +1,130 @@
 <!DOCTYPE html>
+<!-- Página "Sobre nosotros": quién es la fundadora y sus redes sociales -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love | Sobre Nosotros</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Tarjeta con la historia de la fundadora -->
         <div class="container__about-us">
+            <!-- Tarjeta: foto a la izquierda e información a la derecha -->
             <div class="about__card">
+                <!-- Columna de la foto -->
                 <div class="about__card-media">
+                    <!-- Foto de la fundadora -->
                     <img src="assets/images/maryuri1.png" alt="Maryuri de Mendoza">
                 </div>
 
+                <!-- Información de la fundadora -->
                 <div class="about__card-info">
+                    <!-- Cargo -->
                     <span class="about__card-role">CEO & Fundadora</span>
 
+                    <!-- Nombre -->
                     <h1>Maryuri de Mendoza</h1>
 
+                    <!-- Presentación -->
                     <p>Emprendedora venezolana radicada en Medellín, apasionada por la repostería artesanal y en formación constante para estar al día con las últimas tendencias.</p>
 
+                    <!-- Frase final de la presentación -->
                     <p>Su mayor placer: servir y crear momentos dulces y memorables para los demás.</p>
 
+                    <!-- Datos destacados -->
                     <ul class="about__card-highlights">
+                        <!-- Dato: repostería artesanal -->
                         <li><i class="fa-solid fa-cake-candles"></i>Repostería artesanal</li>
 
+                        <!-- Dato: años de experiencia -->
                         <li><i class="fa-solid fa-award"></i>+6 años de experiencia</li>
 
+                        <!-- Dato: ciudad -->
                         <li><i class="fa-solid fa-location-dot"></i>Medellín, Colombia</li>
                     </ul>
 
+                    <!-- Botón de contacto y redes sociales -->
                     <div class="about__card-actions">
+                        <!-- Botón que lleva a la página de contacto -->
                         <a href="contactUs.html" class="btn__text">Contáctanos</a>
 
+                        <!-- Enlace a Instagram -->
                         <a href="https://www.instagram.com/sweetlove" target="_blank" class="about__card-social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
 
+                        <!-- Enlace a Facebook -->
                         <a href="https://www.facebook.com/sweetlove" target="_blank" class="about__card-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 </body>
 

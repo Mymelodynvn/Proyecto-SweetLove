@@ -1,100 +1,154 @@
 <!DOCTYPE html>
+<!-- Portada de la tienda: carrusel de bienvenida y catálogo de productos -->
 <html lang="es">
 
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
 <head>
+    <!-- Codificación de caracteres -->
     <meta charset="UTF-8">
 
+    <!-- Ajusta la página al ancho del celular -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Título de la pestaña del navegador -->
     <title>Sweet Love</title>
 
+    <!-- Ícono de la pestaña -->
     <link rel="icon" href="assets/recursos/logo1.png">
 
+    <!-- Font Awesome: iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Swiper: estilos del carrusel -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
+    <!-- Estilos generales de la tienda -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
     <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
     <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
+<!-- Cuerpo de la página -->
 <body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
     <div id="site-header"></div>
 
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
     <div id="cart-app"></div>
 
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
     <div id="search-app"></div>
 
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
 
+    <!-- Contenido principal de la página -->
     <main>
+        <!-- Portada: carrusel de bienvenida y presentación de Sweet Love -->
         <div id="home-section" class="container__cover">
+            <!-- Contenedor de la portada -->
             <div class="cover">
+                <!-- Carrusel (Swiper) -->
                 <div class="cover__swiper swiper">
+                    <!-- Diapositivas del carrusel -->
                     <div class="swiper-wrapper">
+                        <!-- Diapositiva 1: bienvenida -->
                         <section class="cover__slide swiper-slide">
+                            <!-- Imagen de la diapositiva -->
                             <img src="assets/recursos/fondo.png" alt="Mesa de postres Sweet Love">
 
+                            <!-- Texto de la diapositiva: título, descripción y botón -->
                             <div class="cover__slide-text">
+                                <!-- Título de la diapositiva -->
                                 <h1>Celebra con sabor, comparte con amor</h1>
 
+                                <!-- Descripción de la diapositiva -->
                                 <p>Repostería artesanal hecha con ingredientes de calidad y mucho cariño. Tortas, cupcakes y postres pensados para endulzar cada uno de tus momentos.</p>
 
+                                <!-- Botón que lleva al catálogo -->
                                 <a href="#products-section" class="btn__text">Ver productos</a>
                             </div>
                         </section>
 
+                        <!-- Diapositiva 2: tortas personalizadas -->
                         <section class="cover__slide swiper-slide">
+                            <!-- Imagen de la diapositiva -->
                             <img src="assets/images/cake.jpeg" alt="Torta personalizada">
 
+                            <!-- Texto de la diapositiva: título, descripción y botón -->
                             <div class="cover__slide-text">
+                                <!-- Título de la diapositiva -->
                                 <h1>Tortas personalizadas para cada ocasión</h1>
 
+                                <!-- Descripción de la diapositiva -->
                                 <p>Diseños únicos adaptados a tus gustos y a tu estilo. Cuéntanos tu idea y la convertimos en un momento inolvidable.</p>
 
+                                <!-- Botón que lleva al catálogo -->
                                 <a href="#products-section" class="btn__text">Hacer mi pedido</a>
                             </div>
                         </section>
 
+                        <!-- Diapositiva 3: detalles dulces -->
                         <section class="cover__slide swiper-slide">
+                            <!-- Imagen de la diapositiva -->
                             <img src="assets/images/cupcakes.jpeg" alt="Cupcakes artesanales">
 
+                            <!-- Texto de la diapositiva: título, descripción y botón -->
                             <div class="cover__slide-text">
+                                <!-- Título de la diapositiva -->
                                 <h1>Detalles dulces que enamoran</h1>
 
+                                <!-- Descripción de la diapositiva -->
                                 <p>Cupcakes, fresas con chocolate y cajas sorpresa perfectas para regalar o para darte un gusto en cualquier día.</p>
 
+                                <!-- Botón que lleva al catálogo -->
                                 <a href="#products-section" class="btn__text">Ver productos</a>
                             </div>
                         </section>
                     </div>
 
+                    <!-- Flecha para ir a la diapositiva anterior -->
                     <button class="cover__arrow cover__arrow--prev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
 
+                    <!-- Flecha para ir a la diapositiva siguiente -->
                     <button class="cover__arrow cover__arrow--next" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
 
+                    <!-- Puntos de navegación del carrusel -->
                     <div class="cover__dots swiper-pagination"></div>
                 </div>
 
+                <!-- Presentación con imágenes de ejemplo -->
                 <section class="cover__intro">
+                    <!-- Título y texto de presentación -->
                     <div class="cover__intro-text">
+                        <!-- Título de la presentación -->
                         <h2>Hecho con amor, pensado para ti</h2>
 
+                        <!-- Texto de la presentación -->
                         <p>Sweet Love es tu espacio de repostería artesanal donde cada creación es única. Elaboramos tortas, cupcakes y postres con ingredientes de calidad, adaptados a tus gustos y estilo. Desde sabores selectos hasta diseños personalizados, hacemos realidad tus ideas más dulces para cada ocasión.</p>
                     </div>
 
+                    <!-- Tres imágenes pequeñas; cada una lleva al catálogo -->
                     <div class="mini__images-cover">
+                        <!-- Enlace al catálogo -->
                         <a href="#products-section">
+                            <!-- Foto: mini donas -->
                             <img src="assets/images/Mini donas pastel.jpeg" alt="Mini donas">
                         </a>
 
+                        <!-- Enlace al catálogo -->
                         <a href="#products-section">
+                            <!-- Foto: mini cake -->
                             <img src="assets/images/minicake.jpeg" alt="Mini cake">
                         </a>
 
+                        <!-- Enlace al catálogo -->
                         <a href="#products-section">
+                            <!-- Foto: cupcakes -->
                             <img src="assets/images/cupcakes.jpeg" alt="Cupcakes">
                         </a>
                     </div>
@@ -102,25 +156,38 @@
             </div>
         </div>
 
+        <!-- Catálogo: los productos vienen de la API (js/products-data.js) -->
         <div id="products-section" class="container__products container__card-primary">
+            <!-- Tarjeta del catálogo -->
             <div class="products card__primary">
+                <!-- Título del catálogo -->
                 <div class="text__produts text__card-primary">
+                    <!-- Título del catálogo -->
                     <h1>Crea tu pedido</h1>
 
+                    <!-- Descripción del catálogo -->
                     <p>Elige tus antojos favoritos y arma un pedido hecho a tu medida.</p>
                 </div>
 
+                <!-- Tarjetas de producto: las dibuja Vue desde el catálogo (js/products.js) -->
                 <div class="container__box-card-primary" id="products-app" v-cloak>
+                    <!-- Una tarjeta por cada producto del catálogo -->
                     <div v-for="product in catalog.products" :key="product.id" class="card__product box__card-primary">
+                        <!-- Imagen y precio del producto -->
                         <div class="card__product-media">
+                            <!-- Imagen del producto -->
                             <img :src="product.image" :alt="product.alt">
 
+                            <!-- Precio del producto -->
                             <span class="card__product-price">{{ formatPrice(product.price) }}</span>
                         </div>
 
+                        <!-- Nombre del producto y botón para agregarlo al carrito -->
                         <div class="card__product-info">
+                            <!-- Nombre del producto -->
                             <h2>{{ product.name }}</h2>
 
+                            <!-- Botón "Agregar al carrito" (cambia a "¡Añadido!" un momento) -->
                             <button type="button" class="btn__text-agg" :class="{ 'is-added': isAdded(product.id) }" @click="addToCart(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ isAdded(product.id) ? '¡Añadido!' : 'Agregar al carrito' }}</button>
                         </div>
                     </div>
@@ -128,32 +195,46 @@
             </div>
         </div>
 
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
         <div id="site-footer"></div>
     </main>
 
+    <!-- Swiper: librería del carrusel -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
+    <!-- Vue 3 (por CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 
+    <!-- Inicia el carrusel de la portada -->
     <script src="js/carousel.js"></script>
 
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
     <script src="js/products-data.js"></script>
 
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
+    <!-- Envía el pedido a la API -->
     <script src="js/checkout.js"></script>
 
+    <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
+    <!-- Componente del pie de página -->
     <script src="js/components/site-footer.js"></script>
 
+    <!-- Componente del carrito lateral -->
     <script src="js/components/cart-drawer.js"></script>
 
+    <!-- Componente de la ventana de búsqueda -->
     <script src="js/components/search-modal.js"></script>
 
+    <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
 
+    <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
 
+    <!-- Dibuja las tarjetas del catálogo -->
     <script src="js/products.js"></script>
 </body>
 
