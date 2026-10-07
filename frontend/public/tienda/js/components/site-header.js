@@ -1,47 +1,68 @@
 // site-header.js — encabezado de la tienda
 const SiteHeader = {
     template: `
+        <!-- Encabezado de la tienda -->
         <header>
+            <!-- Contenedor: menú izquierdo, logo y menú derecho -->
             <div class="container__header">
+                <!-- Menú de la izquierda -->
                 <nav class="menu-left">
+                    <!-- Lista de enlaces: Inicio, Productos y Sobre Nosotros -->
                     <ul>
+                        <!-- Enlace a Inicio -->
                         <li><a :href="homeLink">Inicio</a></li>
 
+                        <!-- Enlace a Productos -->
                         <li><a :href="productsLink">Productos</a></li>
 
+                        <!-- Enlace a Sobre Nosotros -->
                         <li><a href="aboutUs.html">Sobre Nosotros</a></li>
                     </ul>
                 </nav>
 
+                <!-- Logo: lleva a la portada -->
                 <div class="logo">
                     <a href="index.html"><img src="assets/recursos/logo1.png"></a>
                 </div>
 
+                <!-- Menú de la derecha -->
                 <div class="menu-right">
+                    <!-- Enlaces: Blog y Contáctanos -->
                     <nav>
+                        <!-- Lista de enlaces -->
                         <ul>
+                            <!-- Enlace al blog -->
                             <li><a href="blog.html">Blog</a></li>
 
+                            <!-- Enlace a contacto -->
                             <li><a href="contactUs.html">Contáctanos</a></li>
                         </ul>
                     </nav>
 
+                    <!-- Botones: búsqueda y perfil o sesión -->
                     <div class="actions">
+                        <!-- Botón de búsqueda -->
                         <a href="#" aria-label="Buscar" @click.prevent="openSearch"><i class="fa-solid fa-magnifying-glass"></i></a>
 
+                        <!-- Icono de perfil: abre el login (solo sin sesión) -->
                         <a v-if="!ui.user" href="#" aria-label="Perfil" @click.prevent="openLogin"><i class="fa-solid fa-circle-user"></i></a>
 
+                        <!-- Con sesión: saludo, acceso al panel (solo administrador) y cerrar sesión -->
                         <template v-else>
+                            <!-- Saludo con el nombre del usuario -->
                             <span class="user-greeting">Hola, {{ ui.user.nombre }}</span>
 
+                            <!-- Enlace al panel de administración (solo administrador) -->
                             <a v-if="ui.user.idRol === 1" href="/admin" class="user-panel-link" aria-label="Ir al panel de administración" title="Panel de administración"><i class="fa-solid fa-gauge"></i></a>
 
+                            <!-- Botón para cerrar sesión -->
                             <a href="#" aria-label="Cerrar sesión" title="Cerrar sesión" @click.prevent="logout"><i class="fa-solid fa-right-from-bracket"></i></a>
                         </template>
                     </div>
                 </div>
             </div>
 
+            <!-- Onda decorativa debajo del encabezado -->
             <div class="header-wave-divider"></div>
         </header>`,
 

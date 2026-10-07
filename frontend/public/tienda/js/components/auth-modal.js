@@ -1,84 +1,113 @@
 // auth-modal.js — ventana de acceso (iniciar sesión y registrarse)
 const AuthModal = {
     template: `
+        <!-- Ventana de login y registro: se abre y se cierra con ui.authOpen -->
         <div class="auth-modal" :class="{ 'auth-modal--open': ui.authOpen }" :aria-hidden="String(!ui.authOpen)">
+            <!-- Fondo oscuro: al pulsarlo se cierra la ventana -->
             <div class="auth-modal__overlay" @click="closeAuth"></div>
 
+            <!-- Panel de inicio de sesión -->
             <div v-if="ui.authView === 'login'" class="auth-modal__panel" role="dialog" aria-label="Iniciar sesión">
+                <!-- Botón para cerrar la ventana -->
                 <button class="auth-modal__close" @click="closeAuth" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
 
+                <!-- Logo -->
                 <img src="assets/recursos/logo1.png" alt="Sweet Love" class="auth-modal__logo">
 
+                <!-- Título -->
                 <h2>Iniciar Sesión</h2>
 
+                <!-- Subtítulo -->
                 <p class="form__subtitle">Nos alegra verte otra vez</p>
 
+                <!-- Formulario de login: envía el correo y la contraseña a la API -->
                 <form @submit.prevent="submitLogin">
+                    <!-- Campo: correo electrónico -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-envelope"></i>
 
                         <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="loginForm.email" required>
                     </div>
 
+                    <!-- Campo: contraseña, con botón para mostrarla u ocultarla -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-lock"></i>
 
                         <input :type="showLoginPassword ? 'text' : 'password'" placeholder="Contraseña" autocomplete="current-password" v-model="loginForm.password" required>
 
+                        <!-- Botón para mostrar u ocultar la contraseña -->
                         <button type="button" class="auth-modal__toggle-password" @click="showLoginPassword = !showLoginPassword" aria-label="Mostrar contraseña"><i :class="showLoginPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
                     </div>
 
+                    <!-- Enlace de contraseña olvidada (todavía sin función) -->
                     <a href="#" class="auth-modal__forgot" @click.prevent>¿Olvidaste tu contraseña?</a>
 
+                    <!-- Botón para ingresar -->
                     <button type="submit" class="btn__form auth-modal__submit">Ingresar</button>
                 </form>
 
+                <!-- Mensaje con el resultado del login -->
                 <p v-if="loginMessage" class="form__subtitle">{{ loginMessage }}</p>
 
+                <!-- Enlace para pasar al registro -->
                 <p class="form__switch">¿Aún no tienes una cuenta? <a href="#" @click.prevent="ui.authView = 'register'">Regístrate</a></p>
             </div>
 
+            <!-- Panel de registro -->
             <div v-else class="auth-modal__panel" role="dialog" aria-label="Registrarse">
+                <!-- Botón para cerrar la ventana -->
                 <button class="auth-modal__close" @click="closeAuth" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
 
+                <!-- Logo -->
                 <img src="assets/recursos/logo1.png" alt="Sweet Love" class="auth-modal__logo">
 
+                <!-- Título -->
                 <h2>Registrarse</h2>
 
+                <!-- Subtítulo -->
                 <p class="form__subtitle">Solo te tomará un minuto</p>
 
+                <!-- Formulario de registro: envía nombre, correo y contraseña a la API -->
                 <form @submit.prevent="submitRegister">
+                    <!-- Campo: nombre completo -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-user"></i>
 
                         <input type="text" placeholder="Nombre Completo" autocomplete="name" v-model.trim="registerForm.fullName" required>
                     </div>
 
+                    <!-- Campo: correo electrónico -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-envelope"></i>
 
                         <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="registerForm.email" required>
                     </div>
 
+                    <!-- Campo: nombre de usuario -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-circle-user"></i>
 
                         <input type="text" placeholder="Nombre de Usuario" autocomplete="username" v-model.trim="registerForm.username" required>
                     </div>
 
+                    <!-- Campo: contraseña, con botón para mostrarla u ocultarla -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-lock"></i>
 
                         <input :type="showRegisterPassword ? 'text' : 'password'" placeholder="Contraseña" autocomplete="new-password" v-model="registerForm.password" required>
 
+                        <!-- Botón para mostrar u ocultar la contraseña -->
                         <button type="button" class="auth-modal__toggle-password" @click="showRegisterPassword = !showRegisterPassword" aria-label="Mostrar contraseña"><i :class="showRegisterPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
                     </div>
 
+                    <!-- Botón para registrarse -->
                     <button type="submit" class="btn__form auth-modal__submit">Registrarme</button>
                 </form>
 
+                <!-- Mensaje con el resultado del registro -->
                 <p v-if="registerMessage" class="form__subtitle">{{ registerMessage }}</p>
 
+                <!-- Enlace para volver al login -->
                 <p class="form__switch">¿Ya tienes una cuenta? <a href="#" @click.prevent="ui.authView = 'login'">Inicia sesión</a></p>
             </div>
         </div>`,
