@@ -1,5 +1,7 @@
+/* Tipografía: fuente Montserrat de Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
+/* Estilos base: reinicio de márgenes, fondo y tipo de letra */
 *{
     margin: 0;
     padding: 0;
@@ -14,9 +16,11 @@ body {
 html {
     scroll-behavior: smooth;
 }
+/* Oculta el contenido de Vue hasta que termine de cargar */
 [v-cloak] {
     display: none;
 }
+/* Variables de color y animación usadas en toda la tienda */
 :root{
     --color_text-primary: #FFFDEC;
     --color_text-secundary: #6C8D6F;
@@ -41,6 +45,7 @@ html {
     --transition_ios: cubic-bezier(0.32, 0.72, 0.35, 1);
 }
 
+/* Encabezado: logo y menú de navegación */
 header{
     width: 100%;
     height: 120px;
@@ -154,6 +159,7 @@ header{
     white-space: nowrap;
 }
 
+/* Encabezado en pantallas pequeñas */
 @media (max-width: 900px){
     header{
         height: auto;
@@ -193,6 +199,7 @@ header{
     }
 }
 
+/* Portada: carrusel de bienvenida (Swiper) y presentación */
 .container__cover{
     padding-top: 30px;
     background: var(--main_color-primary);
@@ -246,6 +253,7 @@ header{
     color: var(--color_text-primary);
     opacity: 0.92;
 }
+/* Botón de texto principal (por ejemplo "Ver productos") */
 .btn__text{
     display: inline-block;
     margin-top: 30px;
@@ -268,6 +276,7 @@ header{
     transform: scale(0.96);
 }
 
+/* Flechas y puntos del carrusel */
 .cover__arrow{
     position: absolute;
     top: 50%;
@@ -344,6 +353,7 @@ header{
     color: var(--color_text-secundary);
     opacity: 0.85;
 }
+/* Imágenes pequeñas de la presentación */
 .mini__images-cover{
     flex: 1;
     display: flex;
@@ -368,6 +378,7 @@ header{
     box-shadow: var(--box_shadow-primary);
 }
 
+/* Portada en tablet y celular */
 @media (max-width: 900px){
     .cover__slide{
         height: 480px;
@@ -433,6 +444,7 @@ header{
     }
 }
 
+/* Formularios compartidos (login y contacto): subtítulo, botón y enlaces */
 .form__subtitle{
     margin-top: 8px;
     text-align: center;
@@ -476,6 +488,7 @@ header{
     text-decoration: underline;
 }
 
+/* Catálogo de productos: contenedor y tarjetas */
 .container__card-primary{
     padding-top: 50px;
     padding-bottom: 60px;
@@ -580,6 +593,7 @@ header{
     gap: 16px;
     padding: 16px 18px 20px 18px;
 }
+/* Botón "Agregar al carrito" */
 .btn__text-agg{
     display: flex;
     align-items: center;
@@ -611,6 +625,7 @@ header{
     background: var(--main_color-secundary-dark);
 }
 
+/* Catálogo en pantallas medianas y pequeñas */
 @media (max-width: 1400px) {
     .container__box-card-primary{
         grid-template-columns: repeat(3, 1fr);
@@ -629,6 +644,7 @@ header{
     }
 }
 
+/* Página "Sobre nosotros": tarjeta de la fundadora */
 .container__about-us{
     width: 100%;
     max-width: 1100px;
@@ -755,6 +771,7 @@ header{
     }
 }
 
+/* Página "Contáctanos": datos y formulario */
 .container__all-contact{
     width: 100%;
     max-width: 1200px;
@@ -899,6 +916,7 @@ header{
     }
 }
 
+/* Blog: introducción, categorías, artículo destacado, tarjetas y boletín */
 .container__blog{
     width: 100%;
     max-width: 1400px;
@@ -1180,6 +1198,7 @@ header{
     }
 }
 
+/* Detalle de un artículo del blog */
 .container__blog-detail{
     width: 100%;
     max-width: 1000px;
@@ -1268,6 +1287,7 @@ header{
     }
 }
 
+/* Pie de página */
 .footer {
     background: var(--color_text-tertiary);
     position: relative;
@@ -1379,6 +1399,7 @@ header{
     }
 }
 
+/* Página del carrito: lista de productos y resumen del pedido */
 .cart.container{
     max-width: 1500px;
     width: 100%;
@@ -1565,6 +1586,7 @@ header{
     opacity: 0.7;
 }
 
+/* Botón "Finalizar pedido" */
 .btn-checkout{
     display: block;
     width: 100%;
@@ -1612,6 +1634,7 @@ header{
     transform: scale(0.97);
 }
 
+/* Carrito en pantallas pequeñas */
 @media (max-width: 1100px){
     .cart-layout{
         grid-template-columns: 1fr;
@@ -1665,6 +1688,7 @@ header{
     }
 }
 
+/* Ajustes por ancho de pantalla (sin reglas por ahora) */
 @media screen and (min-width: 992px) {
     
 }

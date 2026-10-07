@@ -1,3 +1,4 @@
+/* Carrito lateral: botón flotante, panel, productos y resumen */
 .cart-button-trigger {
     display: flex;
     justify-content: center;
@@ -24,6 +25,7 @@
 .cart-button-trigger:active {
     transform: scale(0.92);
 }
+/* Animación de la insignia con la cantidad de productos */
 @keyframes badge-pop {
     0% { transform: scale(1); }
     50% { transform: scale(1.35); }
@@ -233,10 +235,12 @@
 .cart-drawer__summary .btn-continue{
     margin-top: 10px;
 }
+/* Bloquea el scroll de la página cuando hay una ventana abierta */
 .no-scroll{
     overflow: hidden;
 }
 
+/* Carrito lateral en celular */
 @media (max-width: 600px){
     .cart-drawer__panel{
         top: 10px;

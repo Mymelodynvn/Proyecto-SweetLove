@@ -1,3 +1,4 @@
+/* Ventana de búsqueda de productos */
 .search-modal{
     position: fixed;
     inset: 0;
@@ -190,6 +191,7 @@
     opacity: 0.7;
 }
 
+/* Ventana de búsqueda en celular */
 @media (max-width: 600px){
     .search-modal__panel{
         top: 16px;
