@@ -65,8 +65,24 @@ Se ejecutan dentro de la carpeta indicada.
 | `DATABASE_SSL` | `true` si la base es de un proveedor en la nube que exige conexión cifrada (TiDB Cloud, Aiven…); `false` con XAMPP |
 | `PORT` | Puerto de la API (por defecto 4000) |
 | `CORS_ORIGIN` | Orígenes extra permitidos, separados por coma. Vacío si el frontend usa el proxy (lo normal) |
+| `MP_ACCESS_TOKEN` | Access Token de Mercado Pago (de prueba o de producción). **Secreto**, solo en el backend |
+| `MP_WEBHOOK_SECRET` | Clave secreta de los webhooks de Mercado Pago (opcional; valida que los avisos sean de ellos) |
+| `MP_CURRENCY_ID` | Moneda de la cuenta de Mercado Pago (`COP` para Colombia) |
+| `FRONTEND_URL` | URL pública de la tienda, adonde vuelve el cliente después de pagar |
+| `BACKEND_PUBLIC_URL` | URL pública del backend, adonde Mercado Pago envía los avisos de pago (vacía en local) |
 
 **Frontend** (`frontend/.env`): `API_URL`, la dirección del backend. Se lee al **construir**; si la cambias, vuelve a construir.
+
+## Pagos con Mercado Pago (Checkout Pro)
+
+1. En el carrito, "Finalizar pedido" abre `tienda/checkout.html`: un formulario con los datos de entrega (se valida campo por campo y se rellena solo si hay sesión) y el resumen del pedido. Al pagar, se crea el pedido en la base (estado `Pendiente`, pago `Pendiente`) y el backend pide a Mercado Pago un enlace de pago.
+2. El cliente paga en la página de Mercado Pago y vuelve a `tienda/pagoResultado.html`.
+3. Mercado Pago avisa al backend en `POST /api/payments/webhook`; el backend consulta el pago y actualiza `pago.estadoPago` (`Aprobado`, `Rechazado`, `Reembolsado` o `Pendiente`).
+
+Para probar con dinero ficticio: usa las **credenciales de prueba** de tu aplicación en [Mercado Pago Developers](https://www.mercadopago.com.co/developers), una **cuenta de prueba de tipo Comprador** para pagar y las tarjetas de la sección *Tarjetas de prueba* (con el nombre `APRO` el pago se aprueba).
+Los avisos (webhook) solo llegan si el backend tiene URL pública: configúrala en *Webhooks* de la aplicación como `https://TU-BACKEND/api/payments/webhook` (evento *Pagos*) y define `BACKEND_PUBLIC_URL`.
+Para pagar hay que entrar a Mercado Pago con la cuenta **compradora de prueba** (mejor en una ventana privada): con una cuenta real, Mercado Pago responde "Una de las partes con la que intentas hacer el pago es de prueba".
+Un pedido cuyo pago no se aprueba conserva el stock descontado hasta que alguien lo cancele en el panel.
 
 ## Seguridad
 
@@ -96,4 +112,3 @@ Dos servicios Node más una base MySQL:
 - Blog, equipo, perfil y ajustes del panel se guardan en el navegador (`localStorage`); aún no tienen tablas.
 - La tienda es HTML/JS con Vue por CDN; el panel es Nuxt. Unificarlas en una sola tecnología sería un trabajo aparte.
 - La recuperación de contraseña y la verificación OTP son solo pantallas.
-- El checkout de la tienda pide los datos con ventanas emergentes del navegador.
