@@ -117,6 +117,12 @@ const loadCatalogFromApi = async () => {
     try {
         const products = await loadProductCatalog();
         catalogStore.products = products;
+
+        // Con el catálogo real, quita del carrito los productos que no existen en la tienda (por ejemplo, los de respaldo guardados antes)
+        if (catalogLoadedFromApi) {
+            cartStore.items = cartStore.items.filter((item) => products.some((product) => product.id === item.id));
+            cartStore.persist();
+        }
     } finally {
         catalogStore.loaded = true;
     }

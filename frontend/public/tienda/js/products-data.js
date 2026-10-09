@@ -67,12 +67,16 @@ const fallbackProductCatalog = [
 ];
 
 
+// Indica si el catálogo se cargó desde la API (true) o es el de respaldo (false)
+let catalogLoadedFromApi = false;
+
 // Solicita los productos reales al backend y conserva los datos de respaldo si la conexión falla
 const loadProductCatalog = async () => {
     try {
         const response = await fetch('/api/products');
         if (!response.ok) throw new Error('No fue posible obtener los productos.');
         const products = await response.json();
+        catalogLoadedFromApi = true;
         return products.map((product) => ({
             id: String(product.id),
             name: product.name,
