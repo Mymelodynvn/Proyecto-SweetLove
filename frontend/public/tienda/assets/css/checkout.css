@@ -1,0 +1,175 @@
+/* Página de finalizar pedido: formulario, mensajes y resumen (usa los colores y variables de style.css) */
+
+/* Tarjeta del formulario de datos de entrega */
+.checkout__form{
+    padding: 36px 34px;
+    background: var(--main_color-tertiary);
+    border-radius: var(--radius_card);
+    box-shadow: var(--box_shadow-soft);
+}
+.checkout__form h2{
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color_text-secundary);
+    margin-bottom: 6px;
+}
+
+/* Texto de ayuda bajo el título */
+.checkout__hint{
+    font-size: 15px;
+    color: var(--color_text-secundary);
+    opacity: 0.75;
+}
+
+/* Cuadrícula de campos: dos columnas */
+.checkout__grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 18px;
+    margin-top: 18px;
+}
+
+/* Un campo: etiqueta, entrada y mensaje de error */
+.checkout__field{
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+}
+.checkout__field--wide{
+    grid-column: 1 / -1;
+}
+.checkout__field label{
+    margin-bottom: 7px;
+    padding-left: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color_text-secundary);
+}
+.checkout__field input{
+    width: 100%;
+    padding: 15px 22px;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius_pill);
+    background: var(--main_color-primary);
+    font-size: 17px;
+    color: var(--color_text-secundary);
+    outline: none;
+    transition: border-color 300ms, box-shadow 300ms;
+}
+.checkout__field input::placeholder{
+    color: rgba(108, 141, 111, 0.5);
+}
+.checkout__field input:focus{
+    border-color: var(--main_color-secundary);
+    box-shadow: 0 0 0 4px rgba(108, 141, 111, 0.15);
+}
+
+/* Campo con error: borde y mensaje en rojo suave */
+.checkout__field--error input{
+    border-color: #c0504d;
+    box-shadow: 0 0 0 4px rgba(192, 80, 77, 0.12);
+}
+.checkout__error{
+    margin: 6px 0 0 8px;
+    font-size: 14px;
+    color: #b03f3c;
+}
+
+/* Error que devuelve el servidor */
+.checkout__alert{
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: rgba(192, 80, 77, 0.12);
+    font-size: 15px;
+    color: #9c3532;
+}
+
+/* Botón de pagar: es un button, así que se le quita el borde y se muestra desactivado mientras envía */
+button.btn-checkout{
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+button.btn-checkout:disabled{
+    opacity: 0.65;
+    cursor: wait;
+    box-shadow: none;
+}
+
+/* Aviso de seguridad bajo el botón */
+.checkout__note{
+    margin-top: 14px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--color_text-secundary);
+    opacity: 0.8;
+}
+
+/* Mensajes de carrito vacío o de pedido sin enlace de pago */
+.checkout__state{
+    max-width: 520px;
+    margin: 50px auto 0;
+    padding: 44px 30px;
+    text-align: center;
+    background: var(--main_color-tertiary);
+    border-radius: var(--radius_card);
+    box-shadow: var(--box_shadow-soft);
+}
+.checkout__state i{
+    font-size: 52px;
+    margin-bottom: 14px;
+    color: var(--main_color-secundary);
+}
+.checkout__state p{
+    margin-bottom: 24px;
+    line-height: 1.5;
+    color: var(--color_text-secundary);
+}
+
+/* Lista de productos dentro del resumen */
+.checkout__items{
+    margin: 8px 0 6px;
+    padding: 0;
+    list-style: none;
+}
+.checkout__item{
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(108, 141, 111, 0.15);
+    color: var(--color_text-secundary);
+}
+.checkout__item img{
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+.checkout__item-name{
+    font-size: 15px;
+    font-weight: 600;
+}
+.checkout__item-name small{
+    font-weight: 500;
+    opacity: 0.7;
+}
+.checkout__item-price{
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Celular: una sola columna y menos relleno */
+@media (max-width: 900px){
+    .checkout__form{
+        padding: 26px 20px;
+    }
+    .checkout__grid{
+        grid-template-columns: 1fr;
+    }
+    .checkout__field--wide{
+        grid-column: auto;
+    }
+}

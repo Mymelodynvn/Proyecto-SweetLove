@@ -79,8 +79,8 @@ const CartDrawer = {
                         <span class="total-value">{{ formatPrice(cart.total) }}</span>
                     </div>
 
-                    <!-- Botón para finalizar el pedido -->
-                    <a href="#" class="btn-checkout">Finalizar pedido</a>
+                    <!-- Botón que lleva a la página de finalizar pedido -->
+                    <a href="checkout.html" class="btn-checkout">Finalizar pedido</a>
 
                     <!-- Enlace al carrito completo -->
                     <a href="cart.html" class="btn-continue">Ver carrito completo</a>

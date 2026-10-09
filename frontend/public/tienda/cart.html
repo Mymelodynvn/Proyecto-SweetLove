@@ -140,8 +140,8 @@
                         <!-- Nota sobre descuentos y envío -->
                         <p class="summary-note">Los códigos de descuento y costos de envío se añaden durante el pago.</p>
 
-                        <!-- Botón que inicia el pedido (lo maneja el script de abajo) -->
-                        <a href="#" class="btn-checkout">Finalizar pedido</a>
+                        <!-- Botón que lleva a la página de finalizar pedido -->
+                        <a href="checkout.html" class="btn-checkout">Finalizar pedido</a>
 
                         <!-- Enlace para seguir comprando -->
                         <a href="index.html#products-section" class="btn-continue">Seguir comprando</a>
@@ -162,10 +162,7 @@
 
     <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
     <script src="js/stores.js"></script>
-    <!-- Envía el pedido a la API -->
-    <script src="js/checkout.js"></script>
-
-    <!-- Componente del encabezado -->
+        <!-- Componente del encabezado -->
     <script src="js/components/site-header.js"></script>
 
     <!-- Componente del pie de página -->
@@ -185,33 +182,6 @@
 
     <!-- Lógica de la página del carrito -->
     <script src="js/cart-page.js"></script>
-<!-- Finalizar pedido: pide los datos con ventanas del navegador y llama a createOrder (js/checkout.js) -->
-<script>
-        // Al pulsar "Finalizar pedido": valida el carrito, pide los datos y crea el pedido
-        document.querySelector('.btn-checkout')?.addEventListener('click', async (event) => {
-            event.preventDefault();
-            // Si el carrito está vacío, avisa y no hace nada
-            if (cartStore.items.length === 0) {
-                alert('Tu carrito está vacío.');
-                return;
-            }
-            // Pide los datos del comprador con ventanas del navegador
-            const name = prompt('Nombre:');
-            const email = prompt('Correo electrónico:');
-            if (!name || !email) return;
-            const phone = prompt('Celular:') || '';
-            const address = prompt('Dirección de entrega:') || '';
-            // Envía el pedido a la API; si sale bien avisa y recarga la página, si no muestra un error
-            try {
-                await createOrder({ name, email, phone, address });
-                alert('¡Pedido registrado correctamente!');
-                window.location.reload();
-            } catch (error) {
-                console.error(error);
-                alert('No fue posible registrar el pedido. Verifica la conexión con la base de datos.');
-            }
-        });
-    </script>
 </body>
 
 </html>

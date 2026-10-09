@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!-- Finalizar pedido: formulario con los datos de entrega, resumen del pedido y pago con Mercado Pago -->
+<html lang="es">
+
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
+<head>
+    <!-- Codificación de caracteres -->
+    <meta charset="UTF-8">
+
+    <!-- Ajusta la página al ancho del celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título de la pestaña del navegador -->
+    <title>Sweet Love | Finalizar pedido</title>
+
+    <!-- Ícono de la pestaña -->
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <!-- Font Awesome: iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Estilos generales de la tienda -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
+    <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <!-- Estilos del formulario de finalizar pedido -->
+    <link rel="stylesheet" href="assets/css/checkout.css">
+</head>
+
+<!-- Cuerpo de la página -->
+<body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
+    <div id="site-header"></div>
+
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
+    <div id="cart-app"></div>
+
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
+    <div id="search-app"></div>
+
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
+    <div id="auth-app"></div>
+
+    <!-- Contenido principal de la página -->
+    <main>
+        <!-- Página de finalizar pedido (la dibuja js/checkout-page.js con Vue) -->
+        <section class="cart container" id="checkout-app" v-cloak>
+            <!-- Contenido de la página -->
+            <div class="cart-inner">
+                <!-- Título -->
+                <h1 class="cart-title">Finalizar pedido</h1>
+
+                <!-- Subtítulo -->
+                <p class="cart-subtitle">Completa tus datos y paga de forma segura con Mercado Pago</p>
+
+                <!-- Carrito vacío: no hay nada que pagar -->
+                <div v-if="cart.count === 0 && !placed" class="checkout__state">
+                    <!-- Icono del mensaje -->
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                    <!-- Mensaje -->
+                    <p>Tu carrito está vacío. ¡Antójate de algo dulce en nuestra tienda!</p>
+
+                    <!-- Botón para volver al catálogo -->
+                    <a href="index.html#products-section" class="btn__text">Ver productos</a>
+                </div>
+
+                <!-- Pedido registrado pero sin enlace de pago (Mercado Pago no respondió) -->
+                <div v-else-if="placed" class="checkout__state">
+                    <!-- Icono del mensaje -->
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    <!-- Mensaje con el número del pedido -->
+                    <p>Tu pedido #{{ placed.idPedido }} quedó registrado, pero no pudimos iniciar el pago con Mercado Pago. Escríbenos y te ayudamos a completarlo.</p>
+
+                    <!-- Botón para ir a contacto -->
+                    <a href="contactUs.html" class="btn__text">Contáctanos</a>
+                </div>
+
+                <!-- Dos columnas: formulario a la izquierda y resumen a la derecha -->
+                <div v-else class="cart-layout">
+                    <!-- Formulario de datos de entrega: se valida campo por campo antes de enviarse -->
+                    <form class="checkout__form" @submit.prevent="submit" novalidate>
+                        <!-- Título del formulario -->
+                        <h2>Datos de entrega</h2>
+
+                        <!-- Si hay sesión iniciada, los datos se rellenan solos -->
+                        <p v-if="ui.user" class="checkout__hint">Usamos los datos de tu cuenta; puedes cambiarlos.</p>
+
+                        <!-- Campos en dos columnas (una en celular) -->
+                        <div class="checkout__grid">
+                            <!-- Campo: nombre -->
+                            <div class="checkout__field" :class="{ 'checkout__field--error': errors.name }">
+                                <!-- Etiqueta -->
+                                <label for="checkout-name">Nombre</label>
+
+                                <!-- Entrada de texto -->
+                                <input id="checkout-name" type="text" v-model.trim="form.name" autocomplete="given-name" placeholder="Ej. Ana" @blur="validateField('name')">
+
+                                <!-- Mensaje de error del campo -->
+                                <p v-if="errors.name" class="checkout__error">{{ errors.name }}</p>
+                            </div>
+
+                            <!-- Campo: apellido -->
+                            <div class="checkout__field" :class="{ 'checkout__field--error': errors.lastName }">
+                                <!-- Etiqueta -->
+                                <label for="checkout-lastname">Apellido</label>
+
+                                <!-- Entrada de texto -->
+                                <input id="checkout-lastname" type="text" v-model.trim="form.lastName" autocomplete="family-name" placeholder="Ej. Pérez" @blur="validateField('lastName')">
+
+                                <!-- Mensaje de error del campo -->
+                                <p v-if="errors.lastName" class="checkout__error">{{ errors.lastName }}</p>
+                            </div>
+
+                            <!-- Campo: correo electrónico -->
+                            <div class="checkout__field" :class="{ 'checkout__field--error': errors.email }">
+                                <!-- Etiqueta -->
+                                <label for="checkout-email">Correo electrónico</label>
+
+                                <!-- Entrada de correo -->
+                                <input id="checkout-email" type="email" v-model.trim="form.email" autocomplete="email" placeholder="tucorreo@ejemplo.com" @blur="validateField('email')">
+
+                                <!-- Mensaje de error del campo -->
+                                <p v-if="errors.email" class="checkout__error">{{ errors.email }}</p>
+                            </div>
+
+                            <!-- Campo: celular -->
+                            <div class="checkout__field" :class="{ 'checkout__field--error': errors.phone }">
+                                <!-- Etiqueta -->
+                                <label for="checkout-phone">Celular</label>
+
+                                <!-- Entrada de teléfono -->
+                                <input id="checkout-phone" type="tel" inputmode="tel" v-model.trim="form.phone" autocomplete="tel" placeholder="300 123 4567" @blur="validateField('phone')">
+
+                                <!-- Mensaje de error del campo -->
+                                <p v-if="errors.phone" class="checkout__error">{{ errors.phone }}</p>
+                            </div>
+
+                            <!-- Campo: dirección de entrega (ocupa las dos columnas) -->
+                            <div class="checkout__field checkout__field--wide" :class="{ 'checkout__field--error': errors.address }">
+                                <!-- Etiqueta -->
+                                <label for="checkout-address">Dirección de entrega y ciudad</label>
+
+                                <!-- Entrada de texto -->
+                                <input id="checkout-address" type="text" v-model.trim="form.address" autocomplete="street-address" placeholder="Calle 10 # 20-30, Medellín" @blur="validateField('address')">
+
+                                <!-- Mensaje de error del campo -->
+                                <p v-if="errors.address" class="checkout__error">{{ errors.address }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Error que devuelve el servidor (por ejemplo, producto sin stock) -->
+                        <p v-if="serverError" class="checkout__alert" role="alert">{{ serverError }}</p>
+
+                        <!-- Botón para pagar: se desactiva mientras se envía el pedido -->
+                        <button type="submit" class="btn-checkout" :disabled="sending">{{ sending ? 'Procesando…' : 'Pagar con Mercado Pago' }}</button>
+
+                        <!-- Aviso de seguridad -->
+                        <p class="checkout__note"><i class="fa-solid fa-lock"></i> Te llevaremos a Mercado Pago para completar el pago. Tus datos de tarjeta no pasan por esta tienda.</p>
+                    </form>
+
+                    <!-- Resumen del pedido -->
+                    <aside class="cart-summary">
+                        <!-- Título del resumen -->
+                        <h2>Tu pedido</h2>
+
+                        <!-- Lista de productos -->
+                        <ul class="checkout__items">
+                            <!-- Un producto del carrito -->
+                            <li v-for="item in cart.items" :key="item.id" class="checkout__item">
+                                <!-- Imagen del producto -->
+                                <img :src="item.image" :alt="item.name">
+
+                                <!-- Nombre y cantidad -->
+                                <span class="checkout__item-name">{{ item.name }} <small>x{{ item.quantity }}</small></span>
+
+                                <!-- Subtotal del producto -->
+                                <span class="checkout__item-price">{{ formatPrice(item.price * item.quantity) }}</span>
+                            </li>
+                        </ul>
+
+                        <!-- Subtotal del pedido -->
+                        <div class="summary-row">
+                            <!-- Texto: Subtotal -->
+                            <span>Subtotal</span>
+
+                            <!-- Valor del subtotal -->
+                            <span>{{ formatPrice(cart.subtotal) }}</span>
+                        </div>
+
+                        <!-- IVA -->
+                        <div class="summary-row">
+                            <!-- Texto: IVA -->
+                            <span>IVA (19%)</span>
+
+                            <!-- Valor del IVA -->
+                            <span>{{ formatPrice(cart.tax) }}</span>
+                        </div>
+
+                        <!-- Total a pagar -->
+                        <div class="summary-row summary-row--total">
+                            <!-- Texto: Total -->
+                            <span>Total</span>
+
+                            <!-- Valor del total -->
+                            <span class="total-value">{{ formatPrice(cart.total) }}</span>
+                        </div>
+
+                        <!-- Enlace para volver al carrito -->
+                        <a href="cart.html" class="btn-continue">Volver al carrito</a>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
+        <div id="site-footer"></div>
+    </main>
+
+    <!-- Vue 3 (por CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
+    <script src="js/products-data.js"></script>
+
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
+    <script src="js/stores.js"></script>
+
+    <!-- Envía el pedido a la API -->
+    <script src="js/checkout.js"></script>
+
+    <!-- Componente del encabezado -->
+    <script src="js/components/site-header.js"></script>
+
+    <!-- Componente del pie de página -->
+    <script src="js/components/site-footer.js"></script>
+
+    <!-- Componente del carrito lateral -->
+    <script src="js/components/cart-drawer.js"></script>
+
+    <!-- Componente de la ventana de búsqueda -->
+    <script src="js/components/search-modal.js"></script>
+
+    <!-- Componente de la ventana de login y registro -->
+    <script src="js/components/auth-modal.js"></script>
+
+    <!-- Monta los componentes en la página -->
+    <script src="js/main.js"></script>
+
+    <!-- Lógica de la página: validación del formulario y envío del pedido -->
+    <script src="js/checkout-page.js"></script>
+</body>
+
+</html>
