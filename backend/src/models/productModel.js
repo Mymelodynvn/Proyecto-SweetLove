@@ -60,7 +60,7 @@ export const remove = async (id) => {
 // Lee un producto y lo bloquea (FOR UPDATE) para que dos pedidos no descuenten el mismo stock, recibe connection, id
 export const lockForSale = async (connection, id) => {
   const [rows] = await connection.query(
-    'SELECT idProducto, precio, cantidad, estado FROM producto WHERE idProducto = ? FOR UPDATE',
+    'SELECT idProducto, nombre, precio, cantidad, estado FROM producto WHERE idProducto = ? FOR UPDATE',
     [id],
   )
   return rows[0]

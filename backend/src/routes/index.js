@@ -7,6 +7,7 @@ import * as products from '../controllers/productController.js'
 import * as orders from '../controllers/orderController.js'
 import * as panel from '../controllers/panelController.js'
 import * as health from '../controllers/healthController.js'
+import * as payments from '../controllers/paymentController.js'
 
 const tooManyAttempts = { error: true, statusCode: 429, statusMessage: 'Demasiados intentos. Intenta de nuevo en unos minutos.' }
 
@@ -36,6 +37,7 @@ const router = Router()
 router.get('/health', health.check)
 router.get('/products', products.list)
 router.post('/orders', orders.create)
+router.post('/payments/webhook', payments.webhook)
 router.post('/auth/login', loginLimiter, auth.login)
 router.post('/auth/register', registerLimiter, auth.register)
 router.post('/auth/logout', auth.logout)

@@ -65,3 +65,9 @@ export const insertShipment = async (connection, idPago) => {
     [idPago],
   )
 }
+
+// Cambia el estado del pago de un pedido (Aprobado, Rechazado, Pendiente...), recibe idPedido, status
+export const updatePaymentStatus = async (idPedido, status) => {
+  const [result] = await getPool().execute('UPDATE pago SET estadoPago = ? WHERE idPedido = ?', [status, idPedido])
+  return result.affectedRows
+}

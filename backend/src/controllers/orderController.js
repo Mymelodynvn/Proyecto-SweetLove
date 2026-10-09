@@ -3,6 +3,7 @@ import { HttpError } from '../utils/httpError.js'
 import { cleanText, parseEmail, parsePositiveInt } from '../utils/validate.js'
 import * as orderModel from '../models/orderModel.js'
 import * as orderService from '../services/orderService.js'
+import * as mercadoPago from '../services/mercadoPagoService.js'
 
 // Estados que un pedido puede tener
 const ORDER_STATUSES = ['Pendiente', 'En preparación', 'Enviado', 'Completado', 'Cancelado']
@@ -59,7 +60,7 @@ const parseItems = (body) => {
   return []
 }
 
-// POST /api/orders — registra un pedido desde la tienda (público), recibe req, res
+// POST /api/orders — registra un pedido desde la tienda (público); con Mercado Pago responde también el enlace de pago, recibe req, res
 export const create = async (req, res) => {
   const body = req.body ?? {}
   const name = cleanText(body.name)
@@ -68,7 +69,9 @@ export const create = async (req, res) => {
   const items = parseItems(body)
   if (!items.length) throw new HttpError(400, 'El pedido debe contener al menos un producto.')
 
-  const result = await orderService.createOrder({
+  const paymentMethod = cleanText(body.paymentMethod) || 'Pendiente'
+
+  const { lines, ...order } = await orderService.createOrder({
     customer: {
       name,
       lastName: cleanText(body.lastName),
@@ -77,8 +80,22 @@ export const create = async (req, res) => {
       address: cleanText(body.address),
     },
     items,
-    paymentMethod: cleanText(body.paymentMethod) || 'Pendiente',
+    paymentMethod,
   })
 
-  res.status(201).json(result)
+  // Con otro medio de pago el pedido queda registrado y se responde sin enlace de pago
+  if (paymentMethod !== mercadoPago.MERCADO_PAGO) return void res.status(201).json(order)
+
+  // Con Mercado Pago se crea el enlace de pago; si falla, el pedido igual queda registrado como Pendiente
+  try {
+    const { initPoint } = await mercadoPago.createPreference({ orderId: order.idPedido, items: lines })
+    res.status(201).json({ ...order, initPoint })
+  } catch (error) {
+    console.error('[pedido] no se pudo crear el pago en Mercado Pago:', error.message)
+    res.status(201).json({
+      ...order,
+      initPoint: null,
+      paymentError: 'No se pudo iniciar el pago con Mercado Pago. Tu pedido quedó registrado.',
+    })
+  }
 }

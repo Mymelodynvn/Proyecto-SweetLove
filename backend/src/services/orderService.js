@@ -54,7 +54,7 @@ const validateItems = async (connection, items) => {
     if (Number(product.cantidad) < quantity) throw new HttpError(409, `No hay suficiente stock para el producto ${productId}.`)
 
     const unitPrice = Number(product.precio)
-    validated.push({ productId, quantity, unitPrice, subtotal: unitPrice * quantity })
+    validated.push({ productId, title: product.nombre, quantity, unitPrice, subtotal: unitPrice * quantity })
   }
 
   return validated
@@ -82,7 +82,7 @@ export const createOrder = async ({ customer, items, paymentMethod }) => {
     await orderModel.insertShipment(connection, paymentId)
 
     await connection.commit()
-    return { ok: true, idPedido: orderId, total, cantidadProductos: lines.length }
+    return { ok: true, idPedido: orderId, total, cantidadProductos: lines.length, lines }
   } catch (error) {
     await connection.rollback()
     throw error

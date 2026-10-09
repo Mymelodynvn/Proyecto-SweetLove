@@ -34,4 +34,14 @@ export const config = Object.freeze({
     // true para bases en la nube (TiDB Cloud, Aiven, PlanetScale...) que exigen conexión cifrada.
     ssl: process.env.DATABASE_SSL === 'true',
   },
+  // Mercado Pago (Checkout Pro): el Access Token es secreto y solo vive en el backend
+  mercadoPago: {
+    accessToken: process.env.MP_ACCESS_TOKEN || '',
+    webhookSecret: process.env.MP_WEBHOOK_SECRET || '',
+    currencyId: process.env.MP_CURRENCY_ID || 'COP',
+    // Adonde vuelve el cliente después de pagar (la tienda)
+    frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, ''),
+    // Adonde Mercado Pago envía los avisos de pago; vacío en local (debe ser una URL pública)
+    backendPublicUrl: (process.env.BACKEND_PUBLIC_URL || '').replace(/\/+$/, ''),
+  },
 })
