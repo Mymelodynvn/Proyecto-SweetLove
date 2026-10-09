@@ -1696,3 +1696,28 @@ header{
 @media screen and (max-width: 991px) {
     
 }
+
+/* Página de resultado del pago: mensaje centrado con icono y botón */
+.pago{
+    max-width: 560px;
+    margin: 80px auto;
+    padding: 48px 32px;
+    text-align: center;
+    background: var(--main_color-tertiary);
+    border-radius: var(--radius_card);
+    box-shadow: var(--box_shadow-soft);
+}
+.pago i{
+    font-size: 64px;
+    color: var(--main_color-secundary);
+    margin-bottom: 16px;
+}
+.pago h1{
+    color: var(--color_text-secundary);
+    margin-bottom: 12px;
+}
+.pago p{
+    color: var(--color_text-secundary);
+    margin-bottom: 28px;
+    line-height: 1.5;
+}

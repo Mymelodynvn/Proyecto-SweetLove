@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!-- Resultado del pago: mensaje al que vuelve el cliente desde Mercado Pago -->
+<html lang="es">
+
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
+<head>
+    <!-- Codificación de caracteres -->
+    <meta charset="UTF-8">
+
+    <!-- Ajusta la página al ancho del celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título de la pestaña del navegador -->
+    <title>Sweet Love | Resultado del pago</title>
+
+    <!-- Ícono de la pestaña -->
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <!-- Font Awesome: iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Estilos generales de la tienda -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
+    <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+
+<!-- Cuerpo de la página -->
+<body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
+    <div id="site-header"></div>
+
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
+    <div id="cart-app"></div>
+
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
+    <div id="search-app"></div>
+
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
+    <div id="auth-app"></div>
+
+    <!-- Contenido principal de la página -->
+    <main>
+        <!-- Mensaje del resultado del pago (lo dibuja js/pago-resultado.js con Vue) -->
+        <div id="pago-app" v-cloak>
+            <!-- Tarjeta centrada con icono, título, texto y botón -->
+            <div class="pago">
+                <!-- Icono según el resultado: pago recibido, fallido o en proceso -->
+                <i :class="detalle.icono"></i>
+
+                <!-- Título del resultado -->
+                <h1>{{ detalle.titulo }}</h1>
+
+                <!-- Explicación del resultado -->
+                <p>{{ detalle.mensaje }}</p>
+
+                <!-- Botón para volver al catálogo -->
+                <a href="index.html#products-section" class="btn__text">Volver a la tienda</a>
+            </div>
+        </div>
+
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
+        <div id="site-footer"></div>
+    </main>
+
+    <!-- Vue 3 (por CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
+    <script src="js/products-data.js"></script>
+
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
+    <script src="js/stores.js"></script>
+
+    <!-- Componente del encabezado -->
+    <script src="js/components/site-header.js"></script>
+
+    <!-- Componente del pie de página -->
+    <script src="js/components/site-footer.js"></script>
+
+    <!-- Componente del carrito lateral -->
+    <script src="js/components/cart-drawer.js"></script>
+
+    <!-- Componente de la ventana de búsqueda -->
+    <script src="js/components/search-modal.js"></script>
+
+    <!-- Componente de la ventana de login y registro -->
+    <script src="js/components/auth-modal.js"></script>
+
+    <!-- Monta los componentes en la página -->
+    <script src="js/main.js"></script>
+
+    <!-- Muestra el mensaje según el resultado del pago -->
+    <script src="js/pago-resultado.js"></script>
+</body>
+
+</html>
