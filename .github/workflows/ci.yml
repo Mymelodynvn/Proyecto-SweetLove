@@ -1,6 +1,6 @@
 name: CI
 
-# Se ejecuta en cada push y pull request: prueba el backend y comprueba que el frontend compila.
+# Se ejecuta en cada push y pull request: prueba el backend (con y sin base de datos) y comprueba que el frontend compila.
 on:
   push:
   pull_request:
@@ -8,6 +8,41 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  # Pruebas de integración con una base MySQL real (cuentas, pedidos, stock y pagos simulados)
+  integracion:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_SSL: "false"
+      TEST_DATABASE_NAME: sweetlove_test
     defaults:
       run:
         working-directory: backend
