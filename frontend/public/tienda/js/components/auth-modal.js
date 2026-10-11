@@ -1,4 +1,30 @@
-// auth-modal.js — ventana de acceso (iniciar sesión y registrarse)
+// auth-modal.js — ventana de acceso (iniciar sesión, registrarse y recuperar la contraseña)
+
+// Reglas de contraseña que se muestran en los formularios (el servidor las vuelve a comprobar)
+const PASSWORD_RULES_TEXT = "Mínimo 8 caracteres, con al menos una letra y un número.";
+
+// Devuelve el problema de una contraseña (texto) o una cadena vacía si cumple las reglas básicas, recibe password
+const passwordProblemClient = (password) => {
+    if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres.";
+    if (new TextEncoder().encode(password).length > 72) return "La contraseña es demasiado larga (máximo 72 caracteres).";
+    if (!/\p{L}/u.test(password) || !/\d/.test(password)) return "La contraseña debe tener al menos una letra y un número.";
+    return "";
+};
+
+// Envía un JSON por POST a la API y devuelve { ok, status, data } sin lanzar errores de red, recibe path, body
+const postJson = async (path, body = {}) => {
+    try {
+        const response = await fetch(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        return { ok: response.ok, status: response.status, data: await response.json().catch(() => ({})) };
+    } catch (error) {
+        return { ok: false, status: 0, data: { statusMessage: "No pudimos conectar con el servidor. Intenta de nuevo." } };
+    }
+};
+
 const AuthModal = {
     template: `
         <!-- Ventana de login y registro: se abre y se cierra con ui.authOpen -->
@@ -39,8 +65,8 @@ const AuthModal = {
                         <button type="button" class="auth-modal__toggle-password" @click="showLoginPassword = !showLoginPassword" aria-label="Mostrar contraseña"><i :class="showLoginPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
                     </div>
 
-                    <!-- Enlace de contraseña olvidada (todavía sin función) -->
-                    <a href="#" class="auth-modal__forgot" @click.prevent>¿Olvidaste tu contraseña?</a>
+                    <!-- Enlace que abre la recuperación de contraseña -->
+                    <a href="#" class="auth-modal__forgot" @click.prevent="openForgot">¿Olvidaste tu contraseña?</a>
 
                     <!-- Botón para ingresar -->
                     <button type="submit" class="btn__form auth-modal__submit">Ingresar</button>
@@ -49,12 +75,15 @@ const AuthModal = {
                 <!-- Mensaje con el resultado del login -->
                 <p v-if="loginMessage" class="form__subtitle">{{ loginMessage }}</p>
 
+                <!-- Enlace para pedir otra vez el correo de verificación (solo si la cuenta está sin verificar) -->
+                <p v-if="needsVerification" class="form__switch"><a href="#" @click.prevent="resendVerification">Reenviar correo de verificación</a></p>
+
                 <!-- Enlace para pasar al registro -->
                 <p class="form__switch">¿Aún no tienes una cuenta? <a href="#" @click.prevent="ui.authView = 'register'">Regístrate</a></p>
             </div>
 
             <!-- Panel de registro -->
-            <div v-else class="auth-modal__panel" role="dialog" aria-label="Registrarse">
+            <div v-else-if="ui.authView === 'register'" class="auth-modal__panel" role="dialog" aria-label="Registrarse">
                 <!-- Botón para cerrar la ventana -->
                 <button class="auth-modal__close" @click="closeAuth" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
 
@@ -83,13 +112,6 @@ const AuthModal = {
                         <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="registerForm.email" required>
                     </div>
 
-                    <!-- Campo: nombre de usuario -->
-                    <div class="auth-modal__field">
-                        <i class="fa-solid fa-circle-user"></i>
-
-                        <input type="text" placeholder="Nombre de Usuario" autocomplete="username" v-model.trim="registerForm.username" required>
-                    </div>
-
                     <!-- Campo: contraseña, con botón para mostrarla u ocultarla -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-lock"></i>
@@ -100,8 +122,11 @@ const AuthModal = {
                         <button type="button" class="auth-modal__toggle-password" @click="showRegisterPassword = !showRegisterPassword" aria-label="Mostrar contraseña"><i :class="showRegisterPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
                     </div>
 
+                    <!-- Reglas de la contraseña -->
+                    <p class="auth-modal__hint">{{ passwordRules }}</p>
+
                     <!-- Botón para registrarse -->
-                    <button type="submit" class="btn__form auth-modal__submit">Registrarme</button>
+                    <button type="submit" class="btn__form auth-modal__submit" :disabled="busy">Registrarme</button>
                 </form>
 
                 <!-- Mensaje con el resultado del registro -->
@@ -109,6 +134,40 @@ const AuthModal = {
 
                 <!-- Enlace para volver al login -->
                 <p class="form__switch">¿Ya tienes una cuenta? <a href="#" @click.prevent="ui.authView = 'login'">Inicia sesión</a></p>
+            </div>
+
+            <!-- Panel para recuperar la contraseña -->
+            <div v-else class="auth-modal__panel" role="dialog" aria-label="Recuperar contraseña">
+                <!-- Botón para cerrar la ventana -->
+                <button class="auth-modal__close" @click="closeAuth" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+
+                <!-- Logo -->
+                <img src="assets/recursos/logo1.png" alt="Sweet Love" class="auth-modal__logo">
+
+                <!-- Título -->
+                <h2>Recuperar contraseña</h2>
+
+                <!-- Subtítulo -->
+                <p class="form__subtitle">Te enviaremos un enlace para elegir una nueva</p>
+
+                <!-- Formulario de recuperación: envía el correo a la API -->
+                <form @submit.prevent="submitForgot">
+                    <!-- Campo: correo electrónico -->
+                    <div class="auth-modal__field">
+                        <i class="fa-solid fa-envelope"></i>
+
+                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="forgotForm.email" required>
+                    </div>
+
+                    <!-- Botón para enviar el enlace -->
+                    <button type="submit" class="btn__form auth-modal__submit" :disabled="busy">Enviar enlace</button>
+                </form>
+
+                <!-- Mensaje con el resultado del envío -->
+                <p v-if="forgotMessage" class="form__subtitle">{{ forgotMessage }}</p>
+
+                <!-- Enlace para volver al login -->
+                <p class="form__switch">¿Ya la recordaste? <a href="#" @click.prevent="ui.authView = 'login'">Inicia sesión</a></p>
             </div>
         </div>`,
 
@@ -120,8 +179,13 @@ const AuthModal = {
             showRegisterPassword: false,
             loginMessage: "",
             registerMessage: "",
+            forgotMessage: "",
+            needsVerification: false,
+            busy: false,
+            passwordRules: PASSWORD_RULES_TEXT,
             loginForm: { email: "", password: "" },
-            registerForm: { fullName: "", email: "", username: "", password: "" }
+            registerForm: { fullName: "", email: "", password: "" },
+            forgotForm: { email: "" }
         };
     },
 
@@ -129,44 +193,63 @@ const AuthModal = {
         // Envía el correo y la contraseña a la API y muestra el resultado
         async submitLogin() {
             this.loginMessage = "";
-            try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(this.loginForm)
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data?.statusMessage || "No fue posible iniciar sesión.");
-                uiStore.user = data.user; // la sesión real es la cookie del servidor; esto solo actualiza la pantalla
-                this.loginMessage = `Bienvenida, ${data.user.nombre}.`;
-                setTimeout(() => this.closeAuth(), 700);
-            } catch (error) {
-                this.loginMessage = error.message || "No fue posible iniciar sesión.";
+            this.needsVerification = false;
+            const { ok, data } = await postJson("/api/auth/login", this.loginForm);
+            if (!ok) {
+                // Con el código EMAIL_NOT_VERIFIED se ofrece reenviar el correo de verificación
+                this.needsVerification = data?.code === "EMAIL_NOT_VERIFIED";
+                this.loginMessage = data?.statusMessage || "No fue posible iniciar sesión.";
+                return;
             }
+            uiStore.user = data.user; // la sesión real es la cookie del servidor; esto solo actualiza la pantalla
+            this.loginMessage = `Bienvenida, ${data.user.nombre}.`;
+            setTimeout(() => this.closeAuth(), 700);
         },
 
-        // Envía los datos de registro a la API
+        // Valida la contraseña y envía los datos de registro a la API; al terminar vuelve al login con el aviso
         async submitRegister() {
             this.registerMessage = "";
-            try {
-                const response = await fetch("/api/auth/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        fullName: this.registerForm.fullName,
-                        email: this.registerForm.email,
-                        password: this.registerForm.password
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data?.statusMessage || "No fue posible crear la cuenta.");
-                this.registerMessage = data.message;
-                this.ui.authView = "login";
-                this.loginForm.email = this.registerForm.email;
-                this.loginForm.password = "";
-            } catch (error) {
-                this.registerMessage = error.message || "No fue posible crear la cuenta.";
+            const problem = passwordProblemClient(this.registerForm.password);
+            if (problem) {
+                this.registerMessage = problem;
+                return;
             }
+
+            this.busy = true;
+            const { ok, data } = await postJson("/api/auth/register", { ...this.registerForm });
+            this.busy = false;
+            if (!ok) {
+                this.registerMessage = data?.statusMessage || "No fue posible crear la cuenta.";
+                return;
+            }
+
+            this.ui.authView = "login";
+            this.loginForm.email = this.registerForm.email;
+            this.loginForm.password = "";
+            this.loginMessage = data.message;
+            this.needsVerification = Boolean(data.needsVerification);
+        },
+
+        // Abre la vista de recuperación con el correo ya escrito en el login
+        openForgot() {
+            this.forgotForm.email = this.loginForm.email;
+            this.forgotMessage = "";
+            this.ui.authView = "forgot";
+        },
+
+        // Pide a la API el enlace para restablecer la contraseña y muestra su respuesta
+        async submitForgot() {
+            this.forgotMessage = "";
+            this.busy = true;
+            const { ok, data } = await postJson("/api/auth/forgot-password", this.forgotForm);
+            this.busy = false;
+            this.forgotMessage = ok ? data.message : data?.statusMessage || "No pudimos enviar el enlace. Intenta de nuevo.";
+        },
+
+        // Pide otra vez el correo de verificación para el correo escrito en el login
+        async resendVerification() {
+            const { ok, data } = await postJson("/api/auth/resend-verification", { email: this.loginForm.email });
+            this.loginMessage = ok ? data.message : data?.statusMessage || "No pudimos enviar el correo. Intenta de nuevo.";
         },
 
         // Cierra la ventana de acceso

@@ -138,7 +138,9 @@ const uiStore = Vue.reactive({
     authOpen: false,
     authView: "login",
     // Usuario con sesión iniciada ({ nombre, idRol... }) o null. Lo llena el login y /api/auth/me.
-    user: null
+    user: null,
+    // true cuando ya se preguntó al servidor si hay sesión (evita mostrar "inicia sesión" mientras carga)
+    userLoaded: false
 });
 
 Vue.watchEffect(() => {

@@ -2,15 +2,16 @@
 
 // Reglas de cada campo: devuelven el mensaje de error, o una cadena vacía si el valor es válido
 const CHECKOUT_RULES = {
-    name: (value) => (value.length >= 2 ? "" : "Escribe tu nombre."),
-    lastName: (value) => (value.length >= 2 ? "" : "Escribe tu apellido."),
+    name: (value) => (value.length >= 2 && value.length <= 50 ? "" : "Escribe tu nombre (entre 2 y 50 letras)."),
+    lastName: (value) => (value.length >= 2 && value.length <= 50 ? "" : "Escribe tu apellido (entre 2 y 50 letras)."),
     email: (value) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? "" : "Escribe un correo válido, por ejemplo tucorreo@ejemplo.com."),
     phone: (value) => {
         // Se cuentan solo los dígitos: se aceptan espacios, guiones, paréntesis y el signo +
         const digits = value.replace(/\D/g, "");
-        return digits.length >= 7 && digits.length <= 15 ? "" : "Escribe un celular válido (entre 7 y 15 números).";
+        const validChars = /^\+?[\d\s().-]+$/.test(value) && value.length <= 20;
+        return validChars && digits.length >= 7 && digits.length <= 15 ? "" : "Escribe un celular válido (entre 7 y 15 números).";
     },
-    address: (value) => (value.length >= 6 ? "" : "Escribe la dirección de entrega con la ciudad.")
+    address: (value) => (value.length >= 6 && value.length <= 150 ? "" : "Escribe la dirección de entrega con la ciudad (entre 6 y 150 caracteres).")
 };
 
 if (document.querySelector("#checkout-app")) {

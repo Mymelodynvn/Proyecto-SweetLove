@@ -157,3 +157,18 @@
         padding: 34px 24px 36px 24px;
     }
 }
+
+/* Reglas de la contraseña bajo el campo del registro */
+.auth-modal__hint{
+    margin: 4px 0 10px;
+    font-size: 13px;
+    text-align: center;
+    color: var(--color_text-secundary);
+    opacity: 0.8;
+}
+
+/* Botón de enviar desactivado mientras se espera la respuesta */
+.auth-modal__submit:disabled{
+    opacity: 0.65;
+    cursor: wait;
+}

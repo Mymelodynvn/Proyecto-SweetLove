@@ -49,8 +49,8 @@ const SiteHeader = {
 
                         <!-- Con sesión: saludo, acceso al panel (solo administrador) y cerrar sesión -->
                         <template v-else>
-                            <!-- Saludo con el nombre del usuario -->
-                            <span class="user-greeting">Hola, {{ ui.user.nombre }}</span>
+                            <!-- Saludo con el nombre del usuario: lleva a Mi cuenta -->
+                            <a href="cuenta.html" class="user-greeting" title="Mi cuenta">Hola, {{ ui.user.nombre }}</a>
 
                             <!-- Enlace al panel de administración (solo administrador) -->
                             <a v-if="ui.user.idRol === 1" href="/admin" class="user-panel-link" aria-label="Ir al panel de administración" title="Panel de administración"><i class="fa-solid fa-gauge"></i></a>
@@ -117,6 +117,8 @@ const SiteHeader = {
             if (response.ok) uiStore.user = (await response.json()).user;
         } catch (error) {
             uiStore.user = null;
+        } finally {
+            uiStore.userLoaded = true;
         }
     }
 };
