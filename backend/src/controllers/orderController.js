@@ -1,6 +1,6 @@
 // Controlador de pedidos: listado y cambio de estado para el panel, y creación desde la tienda
 import { HttpError } from '../utils/httpError.js'
-import { cleanText, parseEmail, parsePositiveInt } from '../utils/validate.js'
+import { parseAddress, parseEmail, parseName, parsePhone, parsePositiveInt } from '../utils/validate.js'
 import * as orderModel from '../models/orderModel.js'
 import * as orderService from '../services/orderService.js'
 import * as mercadoPago from '../services/mercadoPagoService.js'
@@ -48,7 +48,14 @@ export const updateStatus = async (req, res) => {
   const status = req.body?.status
 
   if (!ORDER_STATUSES.includes(status)) throw new HttpError(400, 'Estado de pedido inválido.')
-  if (!(await orderModel.updateStatus(id, status))) throw new HttpError(404, 'El pedido no existe.')
+
+  const current = await orderModel.findStatus(id)
+  if (!current) throw new HttpError(404, 'El pedido no existe.')
+  if (current === 'Cancelado' && status !== 'Cancelado') throw new HttpError(409, 'Un pedido cancelado no se puede reactivar.')
+
+  // Cancelar devuelve los productos al inventario; los demás estados solo cambian el pedido
+  if (status === 'Cancelado') await orderModel.cancelAndRestock(id, 'Cancelado')
+  else await orderModel.updateStatus(id, status)
 
   res.json({ ok: true })
 }
@@ -63,22 +70,20 @@ const parseItems = (body) => {
 // POST /api/orders — registra un pedido desde la tienda (público); con Mercado Pago responde también el enlace de pago, recibe req, res
 export const create = async (req, res) => {
   const body = req.body ?? {}
-  const name = cleanText(body.name)
-  if (!name) throw new HttpError(400, 'Nombre y correo son obligatorios.')
+  // Todos los datos se validan aquí: el formulario del navegador se puede saltar
+  const name = parseName(body.name, 'El nombre')
+  const lastName = parseName(body.lastName, 'El apellido', 50, false)
+  const email = parseEmail(body.email)
+  const phone = parsePhone(body.phone)
+  const address = parseAddress(body.address)
 
   const items = parseItems(body)
   if (!items.length) throw new HttpError(400, 'El pedido debe contener al menos un producto.')
 
-  const paymentMethod = cleanText(body.paymentMethod) || 'Pendiente'
+  const paymentMethod = String(body.paymentMethod ?? '').trim() || 'Pendiente'
 
   const { lines, ...order } = await orderService.createOrder({
-    customer: {
-      name,
-      lastName: cleanText(body.lastName),
-      email: parseEmail(body.email),
-      phone: cleanText(body.phone),
-      address: cleanText(body.address),
-    },
+    customer: { name, lastName, email, phone, address },
     items,
     paymentMethod,
   })

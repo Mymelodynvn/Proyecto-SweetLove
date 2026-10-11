@@ -7,20 +7,17 @@ import * as userModel from '../models/userModel.js'
 import * as productModel from '../models/productModel.js'
 import * as orderModel from '../models/orderModel.js'
 
-// Busca al cliente por correo y lo crea si no existe; si existe actualiza sus datos de entrega, recibe connection, customer
+// Busca al cliente por correo; si no existe crea una cuenta de invitado, y si existe solo completa los datos que tenga vacíos, recibe connection, customer
 const findOrCreateCustomer = async (connection, customer) => {
   const existing = await userModel.findByEmail(customer.email, connection)
 
   if (existing) {
-    await userModel.updateContact(
-      existing.idUser,
-      { nombre: customer.name, apellido: customer.lastName, celular: customer.phone, direccion: customer.address },
-      connection,
-    )
+    // Nunca se sobrescriben los datos de una cuenta: la entrega usa los datos del propio pedido
+    await userModel.fillMissingContact(existing.idUser, { celular: customer.phone, direccion: customer.address }, connection)
     return existing.idUser
   }
 
-  // Contraseña aleatoria que nadie conoce: la cuenta no permite iniciar sesión.
+  // Cuenta de invitado: contraseña aleatoria que nadie conoce; el dueño del correo puede activarla después con un enlace
   const unusableHash = await bcrypt.hash(randomBytes(32).toString('hex'), 10)
   return userModel.create(
     {
@@ -31,6 +28,8 @@ const findOrCreateCustomer = async (connection, customer) => {
       direccion: customer.address,
       contrasenaHash: unusableHash,
       rol: 'Cliente',
+      emailVerificado: false,
+      esInvitado: true,
     },
     connection,
   )
@@ -71,7 +70,12 @@ export const createOrder = async ({ customer, items, paymentMethod }) => {
     const lines = await validateItems(connection, items)
     const total = lines.reduce((sum, line) => sum + line.subtotal, 0)
 
-    const orderId = await orderModel.insertOrder(connection, total, userId)
+    const shipping = {
+      name: `${customer.name} ${customer.lastName}`.trim(),
+      phone: customer.phone,
+      address: customer.address,
+    }
+    const orderId = await orderModel.insertOrder(connection, total, userId, shipping)
 
     for (const line of lines) {
       await orderModel.insertItem(connection, orderId, line)
