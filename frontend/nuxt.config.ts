@@ -14,6 +14,15 @@ export default defineNuxtConfig({
 
   // Conexión con el backend (proyecto /backend, Express)
   routeRules: {
+    // Cabeceras de seguridad en todas las páginas (sin CSP: la tienda usa scripts de CDN y scripts en línea)
+    '/**': {
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+      },
+    },
     // La portada del sitio es la tienda; el panel de administración vive en /admin.
     '/': { redirect: '/tienda/index.html' },
     '/api/**': { proxy: `${process.env.API_URL || 'http://localhost:4000'}/api/**` },
