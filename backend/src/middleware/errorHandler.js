@@ -15,10 +15,12 @@ export const notFoundHandler = (req, _res, next) => {
 export const errorHandler = (error, _req, res, _next) => {
   let statusCode = 500
   let message = 'Error interno del servidor.'
+  let code
 
   if (error instanceof HttpError) {
     statusCode = error.statusCode
     message = error.message
+    code = error.code
   } else if (error.type === 'entity.parse.failed') {
     statusCode = 400
     message = 'El cuerpo de la petición no es un JSON válido.'
@@ -35,5 +37,5 @@ export const errorHandler = (error, _req, res, _next) => {
     console.error('[error]', error)
   }
 
-  res.status(statusCode).json({ error: true, statusCode, statusMessage: message, message })
+  res.status(statusCode).json({ error: true, statusCode, statusMessage: message, message, ...(code ? { code } : {}) })
 }
