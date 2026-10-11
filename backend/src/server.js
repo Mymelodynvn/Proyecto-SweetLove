@@ -20,7 +20,7 @@ const expireStaleOrders = async () => {
 
 // Avisa en el registro de lo que falta configurar para que todo funcione
 const warnAboutConfiguration = () => {
-  if (!mailer.isEnabled()) console.warn('[config] RESEND_API_KEY vacía: no se envían correos (sin recuperar contraseña ni verificar correo).')
+  if (!mailer.isEnabled()) console.warn('[config] SMTP_USER y SMTP_PASSWORD vacíos: no se envían correos (sin recuperar contraseña ni verificar correo).')
   if (!mercadoPago.isConfigured()) console.warn('[config] MP_ACCESS_TOKEN vacío: los pagos con Mercado Pago no funcionan.')
   if (config.isProduction && !config.mercadoPago.webhookSecret) {
     console.warn('[config] MP_WEBHOOK_SECRET vacía: los avisos de Mercado Pago se rechazan (el pago se confirma al volver a la tienda).')

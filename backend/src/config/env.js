@@ -40,8 +40,16 @@ export const config = Object.freeze({
   orderTtlMinutes: Number(process.env.ORDER_TTL_MINUTES || 30),
   // Correo: con RESEND_API_KEY se envía por Resend; con MAIL_TRANSPORT=memory (pruebas) se guarda en memoria
   mail: {
+    // SMTP: por defecto Gmail con una contraseña de aplicación (los espacios que muestra Google se ignoran)
+    smtp: {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT || 465),
+      user: (process.env.SMTP_USER || '').trim(),
+      password: (process.env.SMTP_PASSWORD || '').replace(/\s+/g, ''),
+    },
     resendApiKey: process.env.RESEND_API_KEY || '',
-    from: process.env.MAIL_FROM || 'Sweet Love <onboarding@resend.dev>',
+    // Gmail solo deja enviar con el correo de la cuenta autenticada
+    from: process.env.MAIL_FROM || (process.env.SMTP_USER ? `Sweet Love <${process.env.SMTP_USER.trim()}>` : 'Sweet Love <onboarding@resend.dev>'),
     transport: process.env.MAIL_TRANSPORT || '',
   },
   // Mercado Pago (Checkout Pro): el Access Token es secreto y solo vive en el backend
