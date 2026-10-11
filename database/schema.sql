@@ -15,6 +15,7 @@ SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS token_cuenta;
 DROP TABLE IF EXISTS envio;
 DROP TABLE IF EXISTS pago;
 DROP TABLE IF EXISTS itempedido;
@@ -40,6 +41,8 @@ CREATE TABLE usuario (
   direccion VARCHAR(150) DEFAULT NULL,
   contrasena VARCHAR(255) NOT NULL,
   idRol INT DEFAULT NULL,
+  emailVerificado TINYINT(1) NOT NULL DEFAULT 1,
+  esInvitado TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (idUser),
   UNIQUE KEY uk_usuario_email (email),
   KEY idx_usuario_rol (idRol),
@@ -80,6 +83,10 @@ CREATE TABLE pedido (
   fecha DATE NOT NULL,
   estadoPedido VARCHAR(100) NOT NULL DEFAULT 'Pendiente',
   idUser INT NOT NULL,
+  creadoEn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  nombreEnvio VARCHAR(100) DEFAULT NULL,
+  celularEnvio VARCHAR(20) DEFAULT NULL,
+  direccionEnvio VARCHAR(150) DEFAULT NULL,
   PRIMARY KEY (idPedido),
   KEY idx_pedido_usuario (idUser),
   CONSTRAINT pedido_ibfk_1 FOREIGN KEY (idUser) REFERENCES usuario (idUser)
@@ -132,6 +139,22 @@ CREATE TABLE envio (
     ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT envio_ibfk_2 FOREIGN KEY (idEstado) REFERENCES estadoenvio (idEstado)
     ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tokens de un solo uso para verificar el correo y restablecer la contraseña (se guarda solo el hash)
+CREATE TABLE token_cuenta (
+  idToken INT NOT NULL AUTO_INCREMENT,
+  idUser INT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  tokenHash CHAR(64) NOT NULL,
+  expiraEn DATETIME NOT NULL,
+  usadoEn DATETIME DEFAULT NULL,
+  creadoEn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (idToken),
+  UNIQUE KEY uk_token_hash (tokenHash),
+  KEY idx_token_usuario (idUser),
+  CONSTRAINT token_cuenta_ibfk_1 FOREIGN KEY (idUser) REFERENCES usuario (idUser)
+    ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
