@@ -173,3 +173,25 @@ button.btn-checkout:disabled{
         grid-column: auto;
     }
 }
+
+/* Formulario estrecho y centrado (Mi cuenta y nueva contraseña) */
+.checkout__form--narrow{
+    max-width: 520px;
+    margin: 40px auto 0;
+}
+
+/* Aviso de éxito dentro de un formulario */
+.checkout__success{
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: rgba(108, 141, 111, 0.16);
+    font-size: 15px;
+    color: var(--main_color-secundary-dark);
+}
+
+/* Enlaces dentro de los avisos bajo el botón (por ejemplo, Cerrar sesión) */
+.checkout__note a{
+    color: inherit;
+    text-decoration: underline;
+}

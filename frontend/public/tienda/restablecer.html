@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!-- Nueva contraseña: la persona llega desde el enlace del correo y elige su contraseña -->
+<html lang="es">
+
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
+<head>
+    <!-- Codificación de caracteres -->
+    <meta charset="UTF-8">
+
+    <!-- Ajusta la página al ancho del celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título de la pestaña del navegador -->
+    <title>Sweet Love | Nueva contraseña</title>
+
+    <!-- Ícono de la pestaña -->
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <!-- Font Awesome: iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Estilos generales de la tienda -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
+    <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <!-- Estilos de formularios y mensajes (los mismos de finalizar pedido) -->
+    <link rel="stylesheet" href="assets/css/checkout.css">
+</head>
+
+<!-- Cuerpo de la página -->
+<body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
+    <div id="site-header"></div>
+
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
+    <div id="cart-app"></div>
+
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
+    <div id="search-app"></div>
+
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
+    <div id="auth-app"></div>
+
+    <!-- Contenido principal de la página -->
+    <main>
+        <!-- Contenedor de la página de nueva contraseña -->
+        <section class="cart container">
+            <!-- Espaciado de la página -->
+            <div class="cart-inner">
+                <!-- Pantalla que dibuja js/restablecer.js con Vue -->
+                <div id="restablecer-app" v-cloak>
+                    <!-- Aviso cuando la dirección no trae el enlace (token) -->
+                    <div v-if="!token" class="checkout__state">
+                        <!-- Icono de error -->
+                        <i class="fa-solid fa-circle-xmark"></i>
+
+                        <!-- Explicación -->
+                        <p>Este enlace no es válido. Pide uno nuevo desde "¿Olvidaste tu contraseña?" al iniciar sesión.</p>
+
+                        <!-- Botón para volver a la tienda -->
+                        <a href="index.html" class="btn__text">Volver a la tienda</a>
+                    </div>
+
+                    <!-- Mensaje cuando la contraseña ya se cambió -->
+                    <div v-else-if="done" class="checkout__state">
+                        <!-- Icono de éxito -->
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        <!-- Mensaje del servidor -->
+                        <p>{{ doneMessage }}</p>
+
+                        <!-- Botón que abre la ventana de inicio de sesión -->
+                        <a href="#" class="btn__text" @click.prevent="openLogin">Iniciar sesión</a>
+                    </div>
+
+                    <!-- Formulario para elegir la contraseña nueva -->
+                    <form v-else class="checkout__form checkout__form--narrow" @submit.prevent="submit" novalidate>
+                        <!-- Título del formulario -->
+                        <h2>Elige tu nueva contraseña</h2>
+
+                        <!-- Reglas de la contraseña -->
+                        <p class="checkout__hint">{{ rules }}</p>
+
+                        <!-- Campo: contraseña nueva -->
+                        <div class="checkout__field checkout__field--wide">
+                            <!-- Etiqueta del campo -->
+                            <label for="reset-password">Nueva contraseña</label>
+
+                            <!-- Entrada de la contraseña nueva -->
+                            <input id="reset-password" type="password" autocomplete="new-password" v-model="password" required>
+                        </div>
+
+                        <!-- Campo: repetir la contraseña -->
+                        <div class="checkout__field checkout__field--wide">
+                            <!-- Etiqueta del campo -->
+                            <label for="reset-confirm">Repite la contraseña</label>
+
+                            <!-- Entrada para repetir la contraseña -->
+                            <input id="reset-confirm" type="password" autocomplete="new-password" v-model="confirm" required>
+                        </div>
+
+                        <!-- Error de validación o del servidor -->
+                        <p v-if="error" class="checkout__alert">{{ error }}</p>
+
+                        <!-- Botón para guardar la contraseña -->
+                        <button type="submit" class="btn-checkout" :disabled="sending">{{ sending ? "Guardando..." : "Guardar contraseña" }}</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
+        <div id="site-footer"></div>
+    </main>
+
+    <!-- Vue 3 (por CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
+    <script src="js/products-data.js"></script>
+
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
+    <script src="js/stores.js"></script>
+
+    <!-- Componente del encabezado -->
+    <script src="js/components/site-header.js"></script>
+
+    <!-- Componente del pie de página -->
+    <script src="js/components/site-footer.js"></script>
+
+    <!-- Componente del carrito lateral -->
+    <script src="js/components/cart-drawer.js"></script>
+
+    <!-- Componente de la ventana de búsqueda -->
+    <script src="js/components/search-modal.js"></script>
+
+    <!-- Componente de la ventana de login y registro (incluye las reglas de contraseña compartidas) -->
+    <script src="js/components/auth-modal.js"></script>
+
+    <!-- Monta los componentes en la página -->
+    <script src="js/main.js"></script>
+
+    <!-- Lógica de la página de nueva contraseña -->
+    <script src="js/restablecer.js"></script>
+</body>
+
+</html>

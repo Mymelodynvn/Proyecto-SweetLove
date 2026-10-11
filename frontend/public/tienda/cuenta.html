@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!-- Mi cuenta: datos de la cuenta y cambio de contraseña -->
+<html lang="es">
+
+<!-- Cabecera: codificación, título, ícono y hojas de estilo -->
+<head>
+    <!-- Codificación de caracteres -->
+    <meta charset="UTF-8">
+
+    <!-- Ajusta la página al ancho del celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título de la pestaña del navegador -->
+    <title>Sweet Love | Mi cuenta</title>
+
+    <!-- Ícono de la pestaña -->
+    <link rel="icon" href="assets/recursos/logo1.png">
+
+    <!-- Font Awesome: iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Estilos generales de la tienda -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Estilos del carrito lateral -->
+    <link rel="stylesheet" href="assets/css/cart.css">
+    <!-- Estilos de la ventana de búsqueda -->
+    <link rel="stylesheet" href="assets/css/search.css">
+    <!-- Estilos de la ventana de login y registro -->
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <!-- Estilos de formularios y mensajes (los mismos de finalizar pedido) -->
+    <link rel="stylesheet" href="assets/css/checkout.css">
+</head>
+
+<!-- Cuerpo de la página -->
+<body>
+    <!-- Encabezado: menú, logo, búsqueda y perfil (lo dibuja site-header.js) -->
+    <div id="site-header"></div>
+
+    <!-- Carrito lateral y botón flotante (los dibuja cart-drawer.js) -->
+    <div id="cart-app"></div>
+
+    <!-- Ventana de búsqueda (la dibuja search-modal.js) -->
+    <div id="search-app"></div>
+
+    <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
+    <div id="auth-app"></div>
+
+    <!-- Contenido principal de la página -->
+    <main>
+        <!-- Contenedor de la página Mi cuenta -->
+        <section class="cart container">
+            <!-- Espaciado de la página -->
+            <div class="cart-inner">
+                <!-- Pantalla que dibuja js/cuenta.js con Vue -->
+                <div id="cuenta-app" v-cloak>
+                    <!-- Aviso cuando no hay sesión iniciada -->
+                    <div v-if="ui.userLoaded && !ui.user" class="checkout__state">
+                        <!-- Icono de candado -->
+                        <i class="fa-solid fa-lock"></i>
+
+                        <!-- Explicación -->
+                        <p>Inicia sesión para ver tu cuenta y cambiar tu contraseña.</p>
+
+                        <!-- Botón que abre la ventana de inicio de sesión -->
+                        <a href="#" class="btn__text" @click.prevent="openLogin">Iniciar sesión</a>
+                    </div>
+
+                    <!-- Contenido de la cuenta (solo con sesión iniciada) -->
+                    <div v-else-if="ui.user">
+                        <!-- Título de la página -->
+                        <h1 class="cart-title">Mi cuenta</h1>
+
+                        <!-- Nombre y correo de la cuenta -->
+                        <p class="cart-subtitle">{{ ui.user.nombre }} {{ ui.user.apellido }} · {{ ui.user.email }}</p>
+
+                        <!-- Formulario para cambiar la contraseña -->
+                        <form class="checkout__form checkout__form--narrow" @submit.prevent="submit" novalidate>
+                            <!-- Título del formulario -->
+                            <h2>Cambiar contraseña</h2>
+
+                            <!-- Reglas de la contraseña -->
+                            <p class="checkout__hint">{{ rules }}</p>
+
+                            <!-- Campo: contraseña actual -->
+                            <div class="checkout__field checkout__field--wide">
+                                <!-- Etiqueta del campo -->
+                                <label for="cuenta-actual">Contraseña actual</label>
+
+                                <!-- Entrada de la contraseña actual -->
+                                <input id="cuenta-actual" type="password" autocomplete="current-password" v-model="current" required>
+                            </div>
+
+                            <!-- Campo: contraseña nueva -->
+                            <div class="checkout__field checkout__field--wide">
+                                <!-- Etiqueta del campo -->
+                                <label for="cuenta-nueva">Contraseña nueva</label>
+
+                                <!-- Entrada de la contraseña nueva -->
+                                <input id="cuenta-nueva" type="password" autocomplete="new-password" v-model="password" required>
+                            </div>
+
+                            <!-- Campo: repetir la contraseña nueva -->
+                            <div class="checkout__field checkout__field--wide">
+                                <!-- Etiqueta del campo -->
+                                <label for="cuenta-repetir">Repite la contraseña nueva</label>
+
+                                <!-- Entrada para repetir la contraseña nueva -->
+                                <input id="cuenta-repetir" type="password" autocomplete="new-password" v-model="confirm" required>
+                            </div>
+
+                            <!-- Error de validación o del servidor -->
+                            <p v-if="error" class="checkout__alert">{{ error }}</p>
+
+                            <!-- Aviso de que la contraseña se cambió -->
+                            <p v-if="success" class="checkout__success">{{ success }}</p>
+
+                            <!-- Botón para guardar la contraseña nueva -->
+                            <button type="submit" class="btn-checkout" :disabled="sending">{{ sending ? "Guardando..." : "Cambiar contraseña" }}</button>
+                        </form>
+
+                        <!-- Botón para cerrar la sesión -->
+                        <p class="checkout__note"><a href="#" @click.prevent="logout">Cerrar sesión</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pie de página (lo dibuja js/components/site-footer.js) -->
+        <div id="site-footer"></div>
+    </main>
+
+    <!-- Vue 3 (por CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Catálogo de productos (desde la API, con datos de respaldo) -->
+    <script src="js/products-data.js"></script>
+
+    <!-- Estado compartido: carrito, catálogo y ventanas abiertas -->
+    <script src="js/stores.js"></script>
+
+    <!-- Componente del encabezado -->
+    <script src="js/components/site-header.js"></script>
+
+    <!-- Componente del pie de página -->
+    <script src="js/components/site-footer.js"></script>
+
+    <!-- Componente del carrito lateral -->
+    <script src="js/components/cart-drawer.js"></script>
+
+    <!-- Componente de la ventana de búsqueda -->
+    <script src="js/components/search-modal.js"></script>
+
+    <!-- Componente de la ventana de login y registro (incluye las reglas de contraseña compartidas) -->
+    <script src="js/components/auth-modal.js"></script>
+
+    <!-- Monta los componentes en la página -->
+    <script src="js/main.js"></script>
+
+    <!-- Lógica de la página Mi cuenta -->
+    <script src="js/cuenta.js"></script>
+</body>
+
+</html>
