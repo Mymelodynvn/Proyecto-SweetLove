@@ -4,7 +4,9 @@
   "private": true,
   "description": "API REST de Sweet Love (Express + MySQL) con arquitectura MVC.",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
@@ -21,6 +23,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.1.0",
+    "helmet": "^8.3.0",
     "mysql2": "^3.15.3"
   }
 }

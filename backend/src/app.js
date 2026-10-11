@@ -1,6 +1,7 @@
 // Construye la aplicación Express (sin abrir el puerto), de modo que las pruebas puedan arrancarla en un puerto temporal
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import cookieSession from 'cookie-session'
 import { config } from './config/env.js'
 import routes from './routes/index.js'
@@ -14,6 +15,9 @@ export const createApp = () => {
   // Render y otros hosts ponen un proxy delante: necesario para cookies `secure`.
   app.set('trust proxy', 1)
   app.disable('x-powered-by')
+
+  // Cabeceras de seguridad (nosniff, HSTS, no mostrar en marcos...); las imágenes de /uploads se pueden pedir desde la tienda
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 
   // CORS: solo los orígenes de CORS_ORIGIN. Sin ellos, solo mismo origen (el frontend usa proxy).
   app.use(cors({ origin: config.corsOrigins, credentials: true }))
