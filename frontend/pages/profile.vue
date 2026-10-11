@@ -194,5 +194,8 @@ const recentActivity = computed(() => dashboardData.value.recentOrders.slice(0, 
         </template>
       </CardContent>
     </Card>
+
+    <!-- Seguridad: cambio de contraseña de la cuenta -->
+    <ChangePasswordCard />
   </div>
 </template>

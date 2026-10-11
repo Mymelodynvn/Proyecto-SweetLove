@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~
 useHead({ title: 'Pagos | Sweet Love Admin' })
 const { data, pending } = await useFetch<Array<{ id:number; provider:string; amount:number; status:string; orderId:number }>>('/api/payments', { default: () => [] })
 // Clases de color de la etiqueta según el estado del pago, recibe status
-const statusClass = (status: string) => status === 'Aprobado' ? 'bg-primary/15 text-primary border-transparent' : status === 'Pendiente' ? 'bg-chart-5/40 text-foreground border-transparent' : 'bg-destructive/10 text-destructive border-transparent'
+const statusClass = (status: string) => status === 'Aprobado' ? 'bg-primary/15 text-primary border-transparent' : status === 'Pendiente' || status === 'En proceso' ? 'bg-chart-5/40 text-foreground border-transparent' : 'bg-destructive/10 text-destructive border-transparent'
 </script>
 <template>
   <div class="flex flex-col gap-6"><div><h1 class="font-heading text-2xl font-bold">Pagos</h1><p class="text-muted-foreground">Consulta los pagos registrados y su pedido asociado.</p></div>
