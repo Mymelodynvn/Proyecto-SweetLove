@@ -1,0 +1,431 @@
+// Pruebas de integración con una base MySQL real: cuentas, contraseñas, pedidos, stock y pagos (Mercado Pago simulado)
+// Solo corren si se define TEST_DATABASE_NAME (el nombre debe terminar en _test, p. ej. sweetlove_test); la base se recrea al empezar
+import { after, before, describe, test } from 'node:test'
+import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
+import { createHmac } from 'node:crypto'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+
+const TEST_DB = process.env.TEST_DATABASE_NAME
+const enabled = Boolean(TEST_DB)
+if (enabled && !/_test$/.test(TEST_DB)) throw new Error('TEST_DATABASE_NAME debe terminar en _test para no tocar una base real.')
+
+// Las variables se fijan antes de cargar el código para que la configuración las lea
+if (enabled) {
+  process.env.DATABASE_NAME = TEST_DB
+  process.env.MAIL_TRANSPORT = 'memory'
+  process.env.MP_ACCESS_TOKEN = 'APP_USR-token-de-prueba'
+  process.env.MP_WEBHOOK_SECRET = 'secreto-de-prueba'
+  process.env.MP_CURRENCY_ID = 'COP'
+  process.env.FRONTEND_URL = 'https://tienda.example.com'
+  process.env.BACKEND_PUBLIC_URL = ''
+  process.env.ORDER_TTL_MINUTES = '30'
+}
+
+const realFetch = globalThis.fetch
+let api
+let getPool
+let outbox
+let paymentService
+let server
+let baseUrl
+let adminCookie
+let counter = 0
+
+// Datos de Mercado Pago simulados: pagos por pedido y la última preferencia creada
+const mp = { payments: new Map(), lastPreference: null, failSearch: false }
+
+// Simula la API de Mercado Pago; cualquier otra dirección usa la red real, recibe url, options
+const fakeFetch = async (url, options) => {
+  const target = String(url)
+  if (!target.startsWith('https://api.mercadopago.com')) return realFetch(url, options)
+
+  // Arma una respuesta simulada con estado y cuerpo, recibe status, data
+  const reply = (status, data) => ({ ok: status >= 200 && status < 300, status, json: async () => data })
+  if (target.includes('/checkout/preferences')) {
+    mp.lastPreference = JSON.parse(options.body)
+    return reply(201, { id: 'pref-test', init_point: 'https://www.mercadopago.com.co/checkout/v1/redirect?pref_id=pref-test' })
+  }
+  if (target.includes('/v1/payments/search')) {
+    if (mp.failSearch) return reply(500, { message: 'error simulado' })
+    const orderId = new URL(target).searchParams.get('external_reference')
+    return reply(200, { results: mp.payments.get(orderId) ?? [] })
+  }
+  const paymentId = target.split('/v1/payments/')[1]
+  for (const list of mp.payments.values()) {
+    const found = list.find((payment) => String(payment.id) === paymentId)
+    if (found) return reply(200, found)
+  }
+  return reply(404, { message: 'Payment not found' })
+}
+
+// Envía una petición JSON a la API de prueba y devuelve estado, cuerpo y cookies, recibe path, options
+const call = async (path, { method = 'GET', body, cookie, headers = {} } = {}) => {
+  const response = await realFetch(baseUrl + path, {
+    method,
+    headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}), ...headers },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  const data = await response.json().catch(() => ({}))
+  const cookies = (response.headers.getSetCookie?.() ?? []).map((line) => line.split(';')[0]).join('; ')
+  return { status: response.status, data, cookie: cookies, headers: response.headers }
+}
+
+// Inicia sesión y devuelve la cookie, recibe email, password
+const login = async (email, password) => {
+  const result = await call('/api/auth/login', { method: 'POST', body: { email, password } })
+  assert.equal(result.status, 200, `login de ${email}: ${JSON.stringify(result.data)}`)
+  return result.cookie
+}
+
+// Genera un correo único para cada prueba
+const uniqueEmail = (prefix = 'cliente') => `${prefix}${Date.now()}${++counter}@example.com`
+
+// Registra una cuenta, verifica el correo con el enlace recibido y devuelve sus datos, recibe password
+const createVerifiedUser = async (password = 'ClaveSegura1') => {
+  const email = uniqueEmail()
+  const registered = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password } })
+  assert.equal(registered.status, 201)
+  await call('/api/auth/verify-email', { method: 'POST', body: { token: tokenFromLastMail(email) } })
+  return { email, password }
+}
+
+// Saca el token del último correo enviado a una dirección, recibe email
+const tokenFromLastMail = (email) => {
+  const mail = [...outbox].reverse().find((item) => item.to === email)
+  assert.ok(mail, `no hay correo para ${email}`)
+  return new URL(mail.text.match(/https?:\/\/\S+/)[0]).searchParams.get('token')
+}
+
+// Crea un producto como administrador y devuelve su identificador, recibe stock, price
+const createProduct = async (stock, price = 10000) => {
+  const created = await call('/api/products', {
+    method: 'POST',
+    cookie: adminCookie,
+    body: { name: `Producto ${++counter}`, description: 'prueba', price, stock, active: true },
+  })
+  assert.equal(created.status, 201, JSON.stringify(created.data))
+  return created.data.producto.id
+}
+
+// Devuelve el stock actual de un producto, recibe productId
+const stockOf = async (productId) => {
+  const [rows] = await getPool().query('SELECT cantidad FROM producto WHERE idProducto = ?', [productId])
+  return Number(rows[0].cantidad)
+}
+
+// Datos de entrega válidos para un pedido, recibe email
+const orderBody = (email, productId, quantity = 1, extra = {}) => ({
+  name: 'Ana',
+  lastName: 'Prueba',
+  email,
+  phone: '3001112233',
+  address: 'Calle 10 # 20-30, Medellín',
+  items: [{ productId, quantity }],
+  ...extra,
+})
+
+// Lee el pago y el pedido de un número de pedido, recibe orderId
+const orderState = async (orderId) => {
+  const [rows] = await getPool().query(
+    'SELECT p.estadoPedido, pa.estadoPago, pa.monto FROM pedido p LEFT JOIN pago pa ON pa.idPedido = p.idPedido WHERE p.idPedido = ?',
+    [orderId],
+  )
+  return rows[0]
+}
+
+// Firma un aviso como lo haría Mercado Pago, recibe dataId, requestId, ts
+const sign = (dataId, requestId = 'req-1', ts = '1700000000') =>
+  `ts=${ts},v1=${createHmac('sha256', 'secreto-de-prueba').update(`id:${dataId};request-id:${requestId};ts:${ts};`).digest('hex')}`
+
+// Crea un pedido con Mercado Pago y devuelve su número, recibe productId, quantity
+const createMercadoPagoOrder = async (productId, quantity = 1) => {
+  const result = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, quantity, { paymentMethod: 'Mercado Pago' }) })
+  assert.equal(result.status, 201, JSON.stringify(result.data))
+  return result.data
+}
+
+describe('integración con base de datos', { skip: !enabled && 'define TEST_DATABASE_NAME=sweetlove_test para correrlas' }, () => {
+  before(async () => {
+    // Recrea la base de pruebas con el esquema y los datos de demostración
+    const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+    execFileSync(process.execPath, ['scripts/db.js', 'init', '--force'], { cwd: root, env: process.env, stdio: 'pipe' })
+
+    globalThis.fetch = fakeFetch
+    ;({ getPool } = await import('../src/config/database.js'))
+    ;({ outbox } = await import('../src/services/mailer.js'))
+    paymentService = await import('../src/services/paymentService.js')
+    const { createApp } = await import('../src/app.js')
+    server = createApp().listen(0)
+    await new Promise((resolve) => server.once('listening', resolve))
+    baseUrl = `http://127.0.0.1:${server.address().port}`
+    adminCookie = await login('carlos@gmail.com', 'SweetLove#2026')
+  })
+
+  after(async () => {
+    globalThis.fetch = realFetch
+    server?.close()
+    await getPool?.().end()
+  })
+
+  describe('cuentas y contraseñas', () => {
+    test('login: credenciales válidas entran y las incorrectas dan 401', async () => {
+      const wrong = await call('/api/auth/login', { method: 'POST', body: { email: 'carlos@gmail.com', password: 'otra-clave-1' } })
+      assert.equal(wrong.status, 401)
+      assert.ok(adminCookie.includes('sweetlove-session'))
+    })
+
+    test('registro: pide verificar el correo antes de iniciar sesión', async () => {
+      const email = uniqueEmail()
+      const registered = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password: 'ClaveSegura1' } })
+      assert.equal(registered.status, 201)
+      assert.equal(registered.data.needsVerification, true)
+
+      const early = await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1' } })
+      assert.equal(early.status, 403)
+      assert.equal(early.data.code, 'EMAIL_NOT_VERIFIED')
+
+      const token = tokenFromLastMail(email)
+      assert.equal((await call('/api/auth/verify-email', { method: 'POST', body: { token } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1' } })).status, 200)
+      // El enlace es de un solo uso
+      assert.equal((await call('/api/auth/verify-email', { method: 'POST', body: { token } })).status, 400)
+    })
+
+    test('registro: rechaza contraseñas débiles, comunes o demasiado largas', async () => {
+      for (const password of ['12345678', 'Password1', 'abcdefgh', 'soloLetrasAqui', `${'x'.repeat(80)}1`]) {
+        const result = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email: uniqueEmail(), password } })
+        assert.equal(result.status, 400, password.slice(0, 12))
+        assert.equal(result.data.code, 'WEAK_PASSWORD')
+      }
+    })
+
+    test('recuperar contraseña: respuesta igual exista o no la cuenta, enlace de un solo uso y reglas de contraseña', async () => {
+      const user = await createVerifiedUser()
+      const before = outbox.length
+
+      const unknown = await call('/api/auth/forgot-password', { method: 'POST', body: { email: uniqueEmail('nadie') } })
+      const known = await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
+      assert.equal(unknown.status, 200)
+      assert.equal(known.status, 200)
+      assert.deepEqual(unknown.data, known.data)
+      assert.equal(outbox.length, before + 1, 'solo la cuenta real recibe correo')
+
+      const token = tokenFromLastMail(user.email)
+      // Una contraseña débil no gasta el enlace
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: '12345678' } })).status, 400)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2' } })).status, 200)
+
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: user.password } })).status, 401)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'OtraClave3' } })).status, 400)
+    })
+
+    test('cambiar contraseña: pide la actual y aplica las reglas', async () => {
+      const user = await createVerifiedUser()
+      const cookie = await login(user.email, user.password)
+
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2' } })).status, 401)
+      const wrong = await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2' } })
+      assert.equal(wrong.status, 400)
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: user.password } })).status, 400)
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: '12345678' } })).status, 400)
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: 'NuevaClave2' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2' } })).status, 200)
+    })
+
+    test('invitado: la compra no sobrescribe cuentas y el dueño del correo puede activar la suya', async () => {
+      // Cuenta existente con datos propios: la compra no los cambia, pero el pedido guarda su propia entrega
+      const user = await createVerifiedUser()
+      await getPool().execute("UPDATE usuario SET celular = '3000000000', direccion = 'Mi casa 123' WHERE email = ?", [user.email])
+      const productId = await createProduct(5)
+      const order = await call('/api/orders', { method: 'POST', body: orderBody(user.email, productId, 1, { name: 'Otra', address: 'Entrega en otro lugar 45' }) })
+      assert.equal(order.status, 201)
+      const [[account]] = await getPool().query('SELECT nombre, celular, direccion FROM usuario WHERE email = ?', [user.email])
+      assert.equal(account.nombre, 'Ana')
+      assert.equal(account.celular, '3000000000')
+      assert.equal(account.direccion, 'Mi casa 123')
+      const [[shipping]] = await getPool().query('SELECT nombreEnvio, direccionEnvio FROM pedido WHERE idPedido = ?', [order.data.idPedido])
+      assert.equal(shipping.direccionEnvio, 'Entrega en otro lugar 45')
+
+      // Compra como invitado: se crea una cuenta que no permite entrar
+      const guest = uniqueEmail('invitado')
+      assert.equal((await call('/api/orders', { method: 'POST', body: orderBody(guest, productId) })).status, 201)
+      const [[guestRow]] = await getPool().query('SELECT esInvitado, emailVerificado FROM usuario WHERE email = ?', [guest])
+      assert.equal(Number(guestRow.esInvitado), 1)
+      assert.equal(Number(guestRow.emailVerificado), 0)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1' } })).status, 401)
+
+      // Registrarse con ese correo envía un enlace para activarla; la clave escrita en el formulario no se usa
+      const claim = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email: guest, password: 'ClaveSegura1' } })
+      assert.equal(claim.status, 201)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1' } })).status, 401)
+      const token = tokenFromLastMail(guest)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'MiClaveNueva9' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'MiClaveNueva9' } })).status, 200)
+      const [[claimed]] = await getPool().query('SELECT esInvitado FROM usuario WHERE email = ?', [guest])
+      assert.equal(Number(claimed.esInvitado), 0)
+    })
+  })
+
+  describe('pedidos y stock', () => {
+    test('el backend valida celular, dirección, nombre y productos', async () => {
+      const productId = await createProduct(5)
+      const base = orderBody(uniqueEmail(), productId)
+      for (const [label, change] of [
+        ['celular con letras', { phone: 'abc1234567' }],
+        ['celular corto', { phone: '123' }],
+        ['sin dirección', { address: '' }],
+        ['dirección corta', { address: 'Cll 1' }],
+        ['nombre de una letra', { name: 'A' }],
+        ['correo inválido', { email: 'no-es-correo' }],
+        ['cantidad cero', { items: [{ productId, quantity: 0 }] }],
+      ]) {
+        const result = await call('/api/orders', { method: 'POST', body: { ...base, ...change } })
+        assert.equal(result.status, 400, label)
+      }
+      assert.equal(await stockOf(productId), 5, 'ningún pedido inválido descuenta stock')
+    })
+
+    test('cinco compras simultáneas de la última unidad: solo una se concreta', async () => {
+      const productId = await createProduct(1)
+      const results = await Promise.all(
+        Array.from({ length: 5 }, () => call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId) })),
+      )
+      assert.equal(results.filter((result) => result.status === 201).length, 1)
+      assert.equal(results.filter((result) => result.status === 409).length, 4)
+      assert.equal(await stockOf(productId), 0)
+    })
+
+    test('cancelar un pedido devuelve el stock una sola vez y no se puede reactivar', async () => {
+      const productId = await createProduct(5)
+      const order = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, 2) })
+      assert.equal(await stockOf(productId), 3)
+
+      // Cancela el pedido como administrador
+      const cancel = () => call(`/api/orders/${order.data.idPedido}`, { method: 'PATCH', cookie: adminCookie, body: { status: 'Cancelado' } })
+      assert.equal((await cancel()).status, 200)
+      assert.equal(await stockOf(productId), 5)
+      assert.equal((await cancel()).status, 200)
+      assert.equal(await stockOf(productId), 5, 'una segunda cancelación no devuelve stock otra vez')
+
+      const reactivate = await call(`/api/orders/${order.data.idPedido}`, { method: 'PATCH', cookie: adminCookie, body: { status: 'Pendiente' } })
+      assert.equal(reactivate.status, 409)
+    })
+  })
+
+  describe('pagos con Mercado Pago (simulado)', () => {
+    test('el enlace de pago vence con el plazo del pedido', async () => {
+      const productId = await createProduct(3, 20000)
+      const order = await createMercadoPagoOrder(productId, 2)
+      assert.ok(order.initPoint.includes('mercadopago.com.co'))
+      assert.equal(mp.lastPreference.expires, true)
+      const minutes = (new Date(mp.lastPreference.expiration_date_to) - new Date(mp.lastPreference.expiration_date_from)) / 60000
+      assert.equal(Math.round(minutes), 30)
+      assert.equal(mp.lastPreference.items[0].unit_price, 20000)
+    })
+
+    test('aviso firmado con pago aprobado y monto correcto: el pago queda Aprobado', async () => {
+      const order = await createMercadoPagoOrder(await createProduct(3, 15000))
+      mp.payments.set(String(order.idPedido), [{ id: 9001, status: 'approved', transaction_amount: 15000, currency_id: 'COP', external_reference: String(order.idPedido) }])
+
+      const notice = await call('/api/payments/webhook?type=payment&data.id=9001', { method: 'POST', headers: { 'x-signature': sign('9001'), 'x-request-id': 'req-1' }, body: {} })
+      assert.equal(notice.status, 200)
+      assert.equal((await orderState(order.idPedido)).estadoPago, 'Aprobado')
+    })
+
+    test('aviso sin firma o con firma falsa se rechaza', async () => {
+      const none = await call('/api/payments/webhook?type=payment&data.id=9002', { method: 'POST', body: {} })
+      const fake = await call('/api/payments/webhook?type=payment&data.id=9002', { method: 'POST', headers: { 'x-signature': 'ts=1,v1=falsa', 'x-request-id': 'req-1' }, body: {} })
+      assert.equal(none.status, 401)
+      assert.equal(fake.status, 401)
+    })
+
+    test('un pago aprobado con otro monto no se acepta', async () => {
+      const order = await createMercadoPagoOrder(await createProduct(3, 15000))
+      mp.payments.set(String(order.idPedido), [{ id: 9003, status: 'approved', transaction_amount: 1, currency_id: 'COP', external_reference: String(order.idPedido) }])
+
+      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido } })
+      assert.equal(confirm.status, 200)
+      assert.equal((await orderState(order.idPedido)).estadoPago, 'Pendiente')
+    })
+
+    test('confirmar al volver de Mercado Pago actualiza el pago sin esperar el aviso', async () => {
+      const order = await createMercadoPagoOrder(await createProduct(3, 15000))
+      mp.payments.set(String(order.idPedido), [{ id: 9004, status: 'approved', transaction_amount: 15000, currency_id: 'COP', external_reference: String(order.idPedido) }])
+
+      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido } })
+      assert.equal(confirm.data.status, 'Aprobado')
+      assert.equal((await orderState(order.idPedido)).estadoPago, 'Aprobado')
+    })
+
+    test('pedidos vencidos: se cancelan y devuelven el stock, salvo los pagados o en proceso', async () => {
+      const productId = await createProduct(10, 5000)
+      const unpaid = await createMercadoPagoOrder(productId, 2)
+      const paid = await createMercadoPagoOrder(productId, 1)
+      const processing = await createMercadoPagoOrder(productId, 1)
+      const fresh = await createMercadoPagoOrder(productId, 1)
+      assert.equal(await stockOf(productId), 5)
+
+      mp.payments.set(String(paid.idPedido), [{ id: 9005, status: 'approved', transaction_amount: 5000, currency_id: 'COP' }])
+      mp.payments.set(String(processing.idPedido), [{ id: 9006, status: 'in_process', transaction_amount: 5000, currency_id: 'COP' }])
+      // Los tres primeros ya pasaron el plazo; el último es reciente
+      await getPool().execute('UPDATE pedido SET creadoEn = DATE_SUB(NOW(), INTERVAL 2 HOUR) WHERE idPedido IN (?, ?, ?)', [unpaid.idPedido, paid.idPedido, processing.idPedido])
+
+      await paymentService.expireStaleOrders()
+
+      assert.deepEqual(await orderState(unpaid.idPedido), { estadoPedido: 'Cancelado', estadoPago: 'Expirado', monto: 10000 })
+      assert.equal((await orderState(paid.idPedido)).estadoPago, 'Aprobado')
+      assert.equal((await orderState(paid.idPedido)).estadoPedido, 'Pendiente')
+      assert.equal((await orderState(processing.idPedido)).estadoPago, 'En proceso')
+      assert.equal((await orderState(processing.idPedido)).estadoPedido, 'Pendiente')
+      assert.equal((await orderState(fresh.idPedido)).estadoPedido, 'Pendiente')
+      assert.equal(await stockOf(productId), 7, 'solo se devolvieron las 2 unidades del pedido vencido')
+    })
+
+    test('si Mercado Pago no responde, un pedido vencido no se cancela (podría estar pagado)', async () => {
+      const productId = await createProduct(5)
+      const order = await createMercadoPagoOrder(productId)
+      await getPool().execute('UPDATE pedido SET creadoEn = DATE_SUB(NOW(), INTERVAL 2 HOUR) WHERE idPedido = ?', [order.idPedido])
+
+      mp.failSearch = true
+      try {
+        await paymentService.expireStaleOrders()
+      } finally {
+        mp.failSearch = false
+      }
+      assert.equal((await orderState(order.idPedido)).estadoPedido, 'Pendiente')
+      assert.equal(await stockOf(productId), 4)
+    })
+  })
+
+  describe('seguridad', () => {
+    test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
+      const productId = await createProduct(2)
+      const response = await realFetch(`${baseUrl}/api/orders`, {
+        method: 'POST',
+        headers: { 'content-type': 'text/plain' },
+        body: JSON.stringify(orderBody(uniqueEmail(), productId)),
+      })
+      assert.equal(response.status, 400)
+      assert.equal(await stockOf(productId), 2)
+    })
+
+    test('CORS cerrado y cabeceras de seguridad presentes', async () => {
+      const preflight = await realFetch(`${baseUrl}/api/orders`, { method: 'OPTIONS', headers: { origin: 'https://sitio-malo.example', 'access-control-request-method': 'POST' } })
+      assert.equal(preflight.headers.get('access-control-allow-origin'), null)
+
+      const response = await call('/api/auth/me')
+      assert.equal(response.headers.get('x-content-type-options'), 'nosniff')
+      assert.equal(response.headers.get('x-powered-by'), null)
+    })
+
+    test('un cliente no puede usar las rutas de administrador', async () => {
+      const user = await createVerifiedUser()
+      const cookie = await login(user.email, user.password)
+      assert.equal((await call('/api/orders', { cookie })).status, 403)
+      assert.equal((await call('/api/products', { method: 'POST', cookie, body: { name: 'X', price: 1, stock: 1 } })).status, 403)
+    })
+  })
+})

@@ -49,8 +49,9 @@ describe('estado del pago', () => {
     assert.equal(mercadoPago.mapPaymentStatus('rejected'), 'Rechazado')
     assert.equal(mercadoPago.mapPaymentStatus('cancelled'), 'Rechazado')
     assert.equal(mercadoPago.mapPaymentStatus('refunded'), 'Reembolsado')
-    assert.equal(mercadoPago.mapPaymentStatus('in_process'), 'Pendiente')
-    assert.equal(mercadoPago.mapPaymentStatus('pending'), 'Pendiente')
+    assert.equal(mercadoPago.mapPaymentStatus('in_process'), 'En proceso')
+    assert.equal(mercadoPago.mapPaymentStatus('pending'), 'En proceso')
+    assert.equal(mercadoPago.mapPaymentStatus('algo_desconocido'), 'Pendiente')
   })
 })
 
