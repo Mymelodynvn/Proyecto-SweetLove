@@ -27,10 +27,11 @@ rol 1 ───< usuario 1 ───< pedido 1 ───< itempedido >─── 
 | `itempedido` | Una línea por producto del pedido, con el precio unitario del momento de la compra |
 | `pago` | Pago de un pedido: medio, monto, `estadoPago` |
 | `estadoenvio` / `envio` | Estados de envío (Pendiente, En camino, Entregado) y el envío asociado a un pago |
+| `token_cuenta` | Enlaces de un solo uso (verificar correo, restablecer contraseña); guarda solo el hash |
 | `schema_migrations` | Control de migraciones aplicadas (la crea el ejecutor) |
 
 Un pedido puede tener varios productos. Los modelos antiguos con `pedido.idItem` o `itempedido.idUser` ya no existen
-(ver `migrations/001_pedidos_normalizados.sql`).
+(ver `migrations/001_pedidos_normalizados.sql`). La migración `003` agrega a `usuario` los campos `emailVerificado` y `esInvitado`, y a `pedido` la hora de creación y los datos de entrega propios del pedido.
 
 ## Comandos (dentro de la carpeta `backend/`)
 
@@ -51,13 +52,14 @@ Si ya tienes una base en uso (por ejemplo la de XAMPP), **no ejecutes `db:init`*
 |---|---|
 | Ya usa el modelo normalizado (`pedido.idUser`) pero guarda contraseñas `1234` | `npm run db:baseline -- 001` y luego `npm run db:migrate` (aplica `002`, que las convierte a hash; la clave nueva es `SweetLove#2026`) |
 | Todavía usa el modelo antiguo (`pedido.idItem`) | `npm run db:migrate` (aplica `001` y `002`). Haz un respaldo antes |
-| Ya está totalmente al día | `npm run db:baseline -- 002` para que quede registrada |
+| Ya tiene las contraseñas con hash | `npm run db:baseline -- 002` y luego `npm run db:migrate` (aplica `003`) |
+| Ya está totalmente al día | `npm run db:baseline -- 003` para que quede registrada |
 
 Comprueba el resultado con `npm run db:status`.
 
 ## Cómo agregar un cambio de esquema
 
-1. Crea `migrations/003_descripcion.sql` con el `ALTER`/`CREATE` necesario.
+1. Crea `migrations/004_descripcion.sql` con el `ALTER`/`CREATE` necesario.
 2. Aplica el mismo cambio en `schema.sql`, para que las bases nuevas nazcan igual.
 3. En cada base existente: `npm run db:migrate`.
 

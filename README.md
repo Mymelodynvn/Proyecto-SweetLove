@@ -64,6 +64,8 @@ Se ejecutan dentro de la carpeta indicada.
 | `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` | Conexión a MySQL |
 | `DATABASE_SSL` | `true` si la base es de un proveedor en la nube que exige conexión cifrada (TiDB Cloud, Aiven…); `false` con XAMPP |
 | `PORT` | Puerto de la API (por defecto 4000) |
+| `RESEND_API_KEY`, `MAIL_FROM` | Envío de correos (verificar cuenta y recuperar contraseña) con [Resend](https://resend.com). Sin la clave no se envían correos |
+| `ORDER_TTL_MINUTES` | Minutos que un pedido con Mercado Pago espera su pago antes de cancelarse y devolver el stock (30 por defecto) |
 | `CORS_ORIGIN` | Orígenes extra permitidos, separados por coma. Vacío si el frontend usa el proxy (lo normal) |
 | `MP_ACCESS_TOKEN` | Access Token de Mercado Pago (de prueba o de producción). **Secreto**, solo en el backend |
 | `MP_WEBHOOK_SECRET` | Clave secreta de los webhooks de Mercado Pago (opcional; valida que los avisos sean de ellos) |
@@ -88,7 +90,10 @@ Un pedido cuyo pago no se aprueba conserva el stock descontado hasta que alguien
 
 - Contraseñas con **bcrypt**; sesión en cookie **firmada y httpOnly** (8 h), con atributo `secure` en producción.
 - Todas las rutas del panel exigen rol Administrador en el backend; el rol se consulta a la base en cada petición.
-- Límite de intentos de login y registro (20 por 15 minutos por IP).
+- **Contraseñas:** 8–72 caracteres, con letra y número, sin claves obvias; el servidor las valida siempre. Recuperación por correo con enlaces de un solo uso (1 h), verificación de correo, y cambio de contraseña pidiendo la actual.
+- Límites de intentos: login (10 fallos por correo cada 15 min), correos de recuperación (6 por hora) y registros por IP.
+- Cabeceras de seguridad (`helmet` en la API; `nosniff`, `X-Frame-Options`, `Referrer-Policy` en el frontend). Protección CSRF: la cookie es `SameSite=Lax` y la API solo lee JSON (un formulario de otro sitio no puede enviar nada válido); está cubierto por pruebas.
+- **Compras como invitado:** crean una cuenta sin contraseña que no deja iniciar sesión; no se sobrescriben datos de cuentas existentes (la entrega se guarda en el pedido). El dueño del correo puede activar esa cuenta al registrarse (le llega un enlace).
 - El checkout calcula los precios en el servidor, dentro de una transacción con bloqueo de stock.
 
 ## Publicar (por ejemplo en Render)
@@ -111,4 +116,5 @@ Dos servicios Node más una base MySQL:
 
 - Blog, equipo, perfil y ajustes del panel se guardan en el navegador (`localStorage`); aún no tienen tablas.
 - La tienda es HTML/JS con Vue por CDN; el panel es Nuxt. Unificarlas en una sola tecnología sería un trabajo aparte.
-- La recuperación de contraseña y la verificación OTP son solo pantallas.
+- La verificación OTP (`/auth/otp-verification`) del panel es solo una pantalla.
+- Para recuperar contraseñas y verificar correos hace falta configurar `RESEND_API_KEY`.
