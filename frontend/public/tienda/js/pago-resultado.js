@@ -19,6 +19,9 @@ const PAGO_MENSAJES = {
     }
 };
 
+// Resultado que corresponde a cada estado de pago que devuelve el backend
+const ESTADO_A_RESULTADO = { Aprobado: "exito", Rechazado: "fallo", Expirado: "fallo", Cancelado: "fallo", "En proceso": "pendiente" };
+
 if (document.querySelector("#pago-app")) {
     Vue.createApp({
         // Estado: el resultado que viene en la dirección de la página
@@ -31,6 +34,15 @@ if (document.querySelector("#pago-app")) {
             detalle() {
                 return PAGO_MENSAJES[this.resultado] || PAGO_MENSAJES.pendiente;
             }
+        },
+
+        // Al cargar, pide al backend el estado real del pedido (Mercado Pago lo envía en external_reference) y lo muestra
+        async mounted() {
+            const orderId = Number(new URLSearchParams(location.search).get("external_reference"));
+            if (!Number.isInteger(orderId) || orderId < 1) return;
+
+            const { ok, data } = await postJson("/api/payments/confirm", { orderId });
+            if (ok && ESTADO_A_RESULTADO[data.status]) this.resultado = ESTADO_A_RESULTADO[data.status];
         }
     }).mount("#pago-app");
 }
