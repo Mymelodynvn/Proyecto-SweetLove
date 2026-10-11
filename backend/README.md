@@ -90,9 +90,15 @@ Los errores llevan `code: WEAK_PASSWORD`. Los códigos de la respuesta de error 
 
 ### Correo
 
-Con `RESEND_API_KEY` se envían los correos de verificación y de recuperación por [Resend](https://resend.com) (por HTTPS, funciona
-en Render). **Sin esa clave no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
-Con un remitente de prueba (`onboarding@resend.dev`) Resend solo entrega a la cuenta dueña de la clave; para otros destinatarios hay que verificar un dominio.
+Los correos de verificación y de recuperación salen por **Gmail (SMTP)**. Pasos:
+
+1. En tu cuenta de Google activa la **verificación en dos pasos** (Seguridad).
+2. Crea una **contraseña de aplicación** en <https://myaccount.google.com/apppasswords> (16 letras; los espacios no importan).
+3. En `backend/.env`: `SMTP_USER=tucorreo@gmail.com` y `SMTP_PASSWORD=la contraseña de aplicación`. El remitente es esa misma cuenta (Gmail no deja usar otro).
+
+**Sin esas variables no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
+Si Gmail rechaza el inicio de sesión (`535 Username and Password not accepted`), la contraseña de aplicación es incorrecta o está revocada: genera otra.
+Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render suelen bloquear los puertos SMTP; allí conviene `RESEND_API_KEY` (envío por HTTPS, requiere un dominio verificado para escribir a terceros).
 
 ### Solo administrador
 

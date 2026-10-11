@@ -64,7 +64,7 @@ Se ejecutan dentro de la carpeta indicada.
 | `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` | Conexión a MySQL |
 | `DATABASE_SSL` | `true` si la base es de un proveedor en la nube que exige conexión cifrada (TiDB Cloud, Aiven…); `false` con XAMPP |
 | `PORT` | Puerto de la API (por defecto 4000) |
-| `RESEND_API_KEY`, `MAIL_FROM` | Envío de correos (verificar cuenta y recuperar contraseña) con [Resend](https://resend.com). Sin la clave no se envían correos |
+| `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | Envío de correos (verificar cuenta y recuperar contraseña) con Gmail: tu correo y una **contraseña de aplicación** de Google. Sin ellos no se envían correos |
 | `ORDER_TTL_MINUTES` | Minutos que un pedido con Mercado Pago espera su pago antes de cancelarse y devolver el stock (30 por defecto) |
 | `CORS_ORIGIN` | Orígenes extra permitidos, separados por coma. Vacío si el frontend usa el proxy (lo normal) |
 | `MP_ACCESS_TOKEN` | Access Token de Mercado Pago (de prueba o de producción). **Secreto**, solo en el backend |
@@ -117,4 +117,4 @@ Dos servicios Node más una base MySQL:
 - Blog, equipo, perfil y ajustes del panel se guardan en el navegador (`localStorage`); aún no tienen tablas.
 - La tienda es HTML/JS con Vue por CDN; el panel es Nuxt. Unificarlas en una sola tecnología sería un trabajo aparte.
 - La verificación OTP (`/auth/otp-verification`) del panel es solo una pantalla.
-- Para recuperar contraseñas y verificar correos hace falta configurar `RESEND_API_KEY`.
+- Para recuperar contraseñas y verificar correos hace falta configurar `SMTP_USER` y `SMTP_PASSWORD` (Gmail).
