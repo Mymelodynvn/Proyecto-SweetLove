@@ -1,9 +1,10 @@
-// Controlador de pagos: recibe los avisos (webhook) de Mercado Pago
+// Controlador de pagos: avisos (webhook) de Mercado Pago y confirmación del pago al volver a la tienda
 import { HttpError } from '../utils/httpError.js'
-import * as orderModel from '../models/orderModel.js'
+import { parsePositiveInt } from '../utils/validate.js'
 import * as mercadoPago from '../services/mercadoPagoService.js'
+import * as paymentService from '../services/paymentService.js'
 
-// POST /api/payments/webhook — aviso de Mercado Pago: consulta el pago y actualiza su estado en la tabla pago, recibe req, res
+// POST /api/payments/webhook — aviso de Mercado Pago: consulta el pago y actualiza el estado del pedido, recibe req, res
 export const webhook = async (req, res) => {
   const type = req.query.type ?? req.query.topic ?? req.body?.type ?? req.body?.topic
   const dataId = String(req.query['data.id'] ?? req.query.id ?? req.body?.data?.id ?? '')
@@ -29,9 +30,14 @@ export const webhook = async (req, res) => {
   }
 
   const orderId = Number(payment.external_reference)
-  if (Number.isInteger(orderId) && orderId > 0) {
-    await orderModel.updatePaymentStatus(orderId, mercadoPago.mapPaymentStatus(payment.status))
-  }
+  if (Number.isInteger(orderId) && orderId > 0) await paymentService.syncOrderPayment(orderId)
 
   res.json({ ok: true })
+}
+
+// POST /api/payments/confirm — la tienda pide confirmar el pago de un pedido al volver de Mercado Pago, recibe req, res
+export const confirm = async (req, res) => {
+  const orderId = parsePositiveInt(req.body?.orderId, 'El pedido')
+  const { status } = await paymentService.syncOrderPayment(orderId)
+  res.json({ ok: true, status })
 }

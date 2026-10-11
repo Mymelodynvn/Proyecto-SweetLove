@@ -1,7 +1,7 @@
 // Mapa completo de la API (/api)
 import { Router } from 'express'
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
-import { requireAdmin } from '../middleware/auth.js'
+import { requireAdmin, requireUser } from '../middleware/auth.js'
 import * as auth from '../controllers/authController.js'
 import * as products from '../controllers/productController.js'
 import * as orders from '../controllers/orderController.js'
@@ -31,6 +31,45 @@ const registerLimiter = rateLimit({
   message: tooManyAttempts,
 })
 
+// Limita los correos de recuperación y verificación por correo y por hora (evita enviar correos sin fin)
+const mailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 6,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (req) => `mail:${String(req.body?.email ?? '').trim().toLowerCase() || ipKeyGenerator(req.ip)}`,
+  message: tooManyAttempts,
+})
+
+// Limita los intentos de usar enlaces (tokens) por IP
+const tokenLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: tooManyAttempts,
+})
+
+// Limita los intentos fallidos de cambiar la contraseña por cuenta
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (req) => `cambio:${req.session?.idUser ?? ipKeyGenerator(req.ip)}`,
+  message: tooManyAttempts,
+})
+
+// Limita las confirmaciones de pago por IP
+const confirmLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: tooManyAttempts,
+})
+
 const router = Router()
 
 // --- Públicas (tienda) ---
@@ -38,10 +77,16 @@ router.get('/health', health.check)
 router.get('/products', products.list)
 router.post('/orders', orders.create)
 router.post('/payments/webhook', payments.webhook)
+router.post('/payments/confirm', confirmLimiter, payments.confirm)
 router.post('/auth/login', loginLimiter, auth.login)
 router.post('/auth/register', registerLimiter, auth.register)
 router.post('/auth/logout', auth.logout)
 router.get('/auth/me', auth.me)
+router.post('/auth/forgot-password', mailLimiter, auth.forgotPassword)
+router.post('/auth/reset-password', tokenLimiter, auth.resetPassword)
+router.post('/auth/verify-email', tokenLimiter, auth.verifyEmail)
+router.post('/auth/resend-verification', mailLimiter, auth.resendVerification)
+router.post('/auth/change-password', requireUser, changePasswordLimiter, auth.changePassword)
 
 // --- Solo administrador (panel) ---
 router.post('/products', requireAdmin, products.create)

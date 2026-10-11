@@ -37,13 +37,14 @@ const request = async (path, options = {}) => {
 
 // Direcciones a las que vuelve el cliente según el resultado del pago, sin parámetros extra
 const backUrls = () => {
-  const base = `${config.mercadoPago.frontendUrl}/tienda/pagoResultado.html`
+  const base = `${config.frontendUrl}/tienda/pagoResultado.html`
   return { success: `${base}?resultado=exito`, failure: `${base}?resultado=fallo`, pending: `${base}?resultado=pendiente` }
 }
 
 // Crea el enlace de pago (preferencia) de un pedido y devuelve su dirección, recibe orderId, items
 export const createPreference = async ({ orderId, items }) => {
-  const { currencyId, frontendUrl, backendPublicUrl } = config.mercadoPago
+  const { currencyId, backendPublicUrl } = config.mercadoPago
+  const { frontendUrl, orderTtlMinutes } = config
 
   const body = {
     items: items.map((item) => ({
@@ -57,6 +58,10 @@ export const createPreference = async ({ orderId, items }) => {
     external_reference: String(orderId),
     back_urls: backUrls(),
     statement_descriptor: 'SWEET LOVE',
+    // El enlace vence a los minutos del pedido: así no se puede pagar un pedido que ya se canceló
+    expires: true,
+    expiration_date_from: new Date().toISOString(),
+    expiration_date_to: new Date(Date.now() + orderTtlMinutes * 60 * 1000).toISOString(),
   }
   // Mercado Pago solo acepta la vuelta automática si la tienda está en HTTPS
   if (frontendUrl.startsWith('https://')) body.auto_return = 'approved'
@@ -78,10 +83,17 @@ export const getPayment = async (paymentId) => {
   return request(`/v1/payments/${paymentId}`)
 }
 
-// Comprueba la firma (x-signature) de un aviso con la clave secreta; sin clave configurada no se exige, recibe signature, requestId, dataId
+// Busca los pagos de un pedido por su referencia externa, del más reciente al más antiguo, recibe orderId
+export const findPaymentsByReference = async (orderId) => {
+  const query = new URLSearchParams({ external_reference: String(orderId), sort: 'date_created', criteria: 'desc' })
+  const data = await request(`/v1/payments/search?${query}`)
+  return Array.isArray(data.results) ? data.results : []
+}
+
+// Comprueba la firma (x-signature) de un aviso con la clave secreta; en producción sin clave se rechaza todo, recibe signature, requestId, dataId
 export const verifyWebhookSignature = ({ signature, requestId, dataId }) => {
   const secret = config.mercadoPago.webhookSecret
-  if (!secret) return true
+  if (!secret) return !config.isProduction
   if (!signature) return false
 
   const parts = Object.fromEntries(signature.split(',').map((piece) => piece.trim().split('=')))
@@ -104,5 +116,7 @@ export const mapPaymentStatus = (status) => {
   if (status === 'approved') return 'Aprobado'
   if (status === 'rejected' || status === 'cancelled') return 'Rechazado'
   if (status === 'refunded' || status === 'charged_back') return 'Reembolsado'
+  // Pago iniciado pero todavía sin resultado (por ejemplo, transferencia bancaria en revisión)
+  if (status === 'pending' || status === 'in_process' || status === 'authorized' || status === 'in_mediation') return 'En proceso'
   return 'Pendiente'
 }
