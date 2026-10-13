@@ -30,3 +30,28 @@ export const saveProductImage = async (dataUrl, productId) => {
   await writeFile(join(directory, fileName), buffer)
   return `/uploads/products/${fileName}`
 }
+
+// Largo máximo de la ruta o URL de la imagen (columna producto.imagen)
+const MAX_IMAGE_REFERENCE_LENGTH = 255
+
+// Valida la imagen de un producto: vacía, archivo en Data URL (se guarda aparte), ruta propia ("/...") o URL http(s); devuelve el texto limpio o null, recibe value
+export const parseImageReference = (value) => {
+  if (value == null || value === '') return null
+  if (typeof value !== 'string') throw new HttpError(400, 'La imagen no es válida.')
+
+  const text = value.trim()
+  if (!text) return null
+  if (isImageDataUrl(text)) return text
+
+  if (text.length > MAX_IMAGE_REFERENCE_LENGTH) {
+    throw new HttpError(400, `La dirección de la imagen admite máximo ${MAX_IMAGE_REFERENCE_LENGTH} caracteres.`)
+  }
+  // Ruta de un archivo del propio sitio (por ejemplo /uploads/products/... o /tienda/assets/...); sin "//" ni ".."
+  const isOwnPath = text.startsWith('/') && !text.startsWith('//') && !text.includes('..') && !/\s/.test(text)
+  // URL externa con http o https y sin espacios
+  const isWebUrl = /^https?:\/\/[^\s/$.?#][^\s]*$/i.test(text)
+  if (!isOwnPath && !isWebUrl) {
+    throw new HttpError(400, 'La imagen debe ser un archivo subido o una URL que empiece con http:// o https://.')
+  }
+  return text
+}

@@ -400,6 +400,30 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('imagen de los productos', () => {
+    test('un producto acepta una URL como imagen al crearse y al editarse, y rechaza valores peligrosos', async () => {
+      const url = 'https://sitio.example.com/fotos/oso.jpg'
+      const created = await call('/api/products', { method: 'POST', cookie: adminCookie, body: { name: 'Con URL', price: 1000, stock: 1, image: url } })
+      assert.equal(created.status, 201)
+      assert.equal(created.data.producto.image, url)
+
+      const id = created.data.producto.id
+      const other = 'https://otro.example.com/foto.png'
+      const updated = await call(`/api/products/${id}`, { method: 'PUT', cookie: adminCookie, body: { name: 'Con URL', price: 1000, stock: 1, image: other } })
+      assert.equal(updated.status, 200)
+      const list = await call('/api/products')
+      assert.equal(list.data.find((product) => product.id === id).image, other)
+
+      // Un valor peligroso se rechaza y, al crear, no deja un producto a medias
+      const [[{ total: before }]] = await getPool().query('SELECT COUNT(*) AS total FROM producto')
+      const bad = await call('/api/products', { method: 'POST', cookie: adminCookie, body: { name: 'Mala', price: 1000, stock: 1, image: 'javascript:alert(1)' } })
+      assert.equal(bad.status, 400)
+      const [[{ total: after }]] = await getPool().query('SELECT COUNT(*) AS total FROM producto')
+      assert.equal(Number(after), Number(before))
+      assert.equal((await call(`/api/products/${id}`, { method: 'PUT', cookie: adminCookie, body: { name: 'Con URL', price: 1000, stock: 1, image: 'javascript:alert(1)' } })).status, 400)
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)

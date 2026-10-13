@@ -1,14 +1,14 @@
 // Controlador de productos: catálogo público y administración (crear, editar, eliminar)
 import { HttpError } from '../utils/httpError.js'
 import { cleanText, parseNonNegativeInt, parsePositiveInt } from '../utils/validate.js'
-import { isImageDataUrl, saveProductImage } from '../utils/product-image.js'
+import { isImageDataUrl, parseImageReference, saveProductImage } from '../utils/product-image.js'
 import * as productModel from '../models/productModel.js'
 
 // Imágenes de la tienda para los productos de ejemplo cuando la base aún no tiene imagen propia
 const FALLBACK_IMAGE_BY_ID = {
   1: '/tienda/assets/images/trufas.jpeg',
   2: '/tienda/assets/images/combox3.jpeg',
-  3: '/tienda/assets/images/maryuri.jpeg',
+  3: '/tienda/assets/images/combox6.jpeg',
   4: '/tienda/assets/images/fresas.jpeg',
 }
 // Largos máximos de las columnas `producto.nombre` y `producto.descripcion` (ver database/schema.sql)
@@ -56,11 +56,12 @@ export const list = async (_req, res) => {
 // POST /api/products — crea un producto (solo administrador), recibe req, res
 export const create = async (req, res) => {
   const data = parseProductBody(req.body)
+  // La imagen se valida antes de crear el producto, para no dejar uno a medias si es inválida
+  const image = parseImageReference(req.body.image)
   const id = await productModel.create(data)
 
-  if (isImageDataUrl(req.body.image)) {
-    await productModel.setImage(id, await saveProductImage(req.body.image, id))
-  }
+  // Archivo subido: se guarda como archivo; URL o ruta: se guarda tal cual
+  if (image) await productModel.setImage(id, isImageDataUrl(image) ? await saveProductImage(image, id) : image)
 
   res.status(201).json({ producto: await productModel.findById(id) })
 }
@@ -70,7 +71,7 @@ export const update = async (req, res) => {
   const id = parsePositiveInt(req.params.id, 'El identificador de producto')
   const data = parseProductBody(req.body)
 
-  let image = req.body.image ?? null
+  let image = parseImageReference(req.body.image)
   if (isImageDataUrl(image)) image = await saveProductImage(image, id)
 
   const affected = await productModel.update(id, { ...data, image })

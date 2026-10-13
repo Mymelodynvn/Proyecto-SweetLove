@@ -104,7 +104,7 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 
 | Ruta | Descripción |
 |---|---|
-| `POST /products` | Crea producto. Body `{ name, description?, price, stock, active?, supplierId?, image? }`. `image` puede ser una Data URL (PNG/JPG/WEBP, máx. 3 MB) |
+| `POST /products` | Crea producto. Body `{ name, description?, price, stock, active?, supplierId?, image? }`. `image` puede ser una Data URL (PNG/JPG/WEBP, máx. 3 MB; se guarda como archivo), una ruta propia (`/tienda/assets/...`) o una **URL** `http(s)://…` de hasta 255 caracteres; cualquier otro valor se rechaza con 400 |
 | `PUT /products/:id` | Actualiza producto (mismo body) |
 | `DELETE /products/:id` | Elimina; `409` si tiene pedidos |
 | `GET /orders` | Pedidos con sus productos resumidos |
