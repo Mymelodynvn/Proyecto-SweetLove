@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="assets/css/search.css">
     <!-- Estilos de la ventana de login y registro -->
     <link rel="stylesheet" href="assets/css/auth.css">
+    <!-- Estilos de la ventana de detalle de producto -->
+    <link rel="stylesheet" href="assets/css/product.css">
 </head>
 
 <!-- Cuerpo de la página -->
@@ -45,6 +47,9 @@
 
     <!-- Ventana de login y registro (la dibuja auth-modal.js) -->
     <div id="auth-app"></div>
+
+    <!-- Ventana de detalle de un producto (la dibuja product-modal.js) -->
+    <div id="product-app"></div>
 
     <!-- Contenido principal de la página -->
     <main>
@@ -171,8 +176,8 @@
 
                 <!-- Tarjetas de producto: las dibuja Vue desde el catálogo (js/products.js) -->
                 <div class="container__box-card-primary" id="products-app" v-cloak>
-                    <!-- Una tarjeta por cada producto del catálogo -->
-                    <div v-for="product in catalog.products" :key="product.id" class="card__product box__card-primary">
+                    <!-- Una tarjeta por cada producto del catálogo: al pulsarla se abre su detalle -->
+                    <div v-for="product in catalog.products" :key="product.id" class="card__product box__card-primary" tabindex="0" role="button" :aria-label="'Ver detalle de ' + product.name" @click="openProduct(product)" @keydown.enter="openProduct(product)">
                         <!-- Imagen y precio del producto -->
                         <div class="card__product-media">
                             <!-- Imagen del producto -->
@@ -188,7 +193,7 @@
                             <h2>{{ product.name }}</h2>
 
                             <!-- Botón "Agregar al carrito" (cambia a "¡Añadido!" un momento) -->
-                            <button type="button" class="btn__text-agg" :class="{ 'is-added': isAdded(product.id) }" @click="addToCart(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ isAdded(product.id) ? '¡Añadido!' : 'Agregar al carrito' }}</button>
+                            <button type="button" class="btn__text-agg" :class="{ 'is-added': isAdded(product.id) }" @click.stop="addToCart(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ isAdded(product.id) ? '¡Añadido!' : 'Agregar al carrito' }}</button>
                         </div>
                     </div>
                 </div>
@@ -227,6 +232,9 @@
 
     <!-- Componente de la ventana de login y registro -->
     <script src="js/components/auth-modal.js"></script>
+
+    <!-- Componente de la ventana de detalle de un producto -->
+    <script src="js/components/product-modal.js"></script>
 
     <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
