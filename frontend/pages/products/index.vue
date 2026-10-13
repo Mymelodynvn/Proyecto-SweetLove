@@ -87,6 +87,31 @@ const EMPTY_FORM = (): ProductFormData => ({
 
 const imageFileInput = ref<HTMLInputElement | null>(null)
 const imageError = ref('')
+// Texto de la URL de imagen que escribe la persona y si la vista previa no pudo cargarla
+const imageUrl = ref('')
+const previewFailed = ref(false)
+
+// Indica si un texto es una URL web de imagen válida (http o https, sin espacios, hasta 255 caracteres), recibe text
+const isValidImageUrl = (text: string) => text.length <= 255 && /^https?:\/\/[^\s/$.?#][^\s]*$/i.test(text)
+
+// Usa la URL escrita como imagen del producto y avisa si no es válida
+const applyImageUrl = () => {
+  imageError.value = ''
+  const url = imageUrl.value.trim()
+  if (!url) return
+  if (!isValidImageUrl(url)) {
+    imageError.value = 'La URL debe empezar con http:// o https://, no tener espacios y medir máximo 255 caracteres.'
+    return
+  }
+  productForm.value.image = url
+  imageUrl.value = url
+}
+
+// Muestra la URL en su campo solo si la imagen actual es una dirección web, recibe image
+const syncImageUrl = (image: string | null) => {
+  imageUrl.value = image && /^https?:\/\//i.test(image) ? image : ''
+  previewFailed.value = false
+}
 
 // Procesa la imagen elegida (la reduce y la deja en el formulario), recibe changeEvent
 const handleImageSelection = async (changeEvent: Event) => {
@@ -95,6 +120,7 @@ const handleImageSelection = async (changeEvent: Event) => {
   if (!(input instanceof HTMLInputElement) || !input.files?.[0]) return
   try {
     productForm.value.image = await readImageAsDataUrl(input.files[0])
+    imageUrl.value = ''
   }
   catch (readError) {
     imageError.value = 'No se pudo leer la imagen. Intenta con otro archivo.'
@@ -108,16 +134,25 @@ const handleImageSelection = async (changeEvent: Event) => {
 // Quita la imagen del formulario
 const removeImage = () => {
   productForm.value.image = null
+  imageUrl.value = ''
+  imageError.value = ''
 }
 
 const isFormDialogOpen = ref(false)
 const editingProductId = ref<number | null>(null)
 const productForm = ref<ProductFormData>(EMPTY_FORM())
 
+// Cuando cambia la imagen se vuelve a intentar la vista previa
+watch(() => productForm.value.image, () => {
+  previewFailed.value = false
+})
+
 // Abre el diálogo para crear un producto con el formulario vacío
 const openCreateDialog = () => {
   editingProductId.value = null
   productForm.value = EMPTY_FORM()
+  syncImageUrl(null)
+  imageError.value = ''
   isFormDialogOpen.value = true
 }
 
@@ -133,6 +168,8 @@ const openEditDialog = (product: Product) => {
     price: product.price,
     stock: product.stock,
   }
+  syncImageUrl(product.image)
+  imageError.value = ''
   isFormDialogOpen.value = true
 }
 
@@ -296,10 +333,12 @@ const confirmDeletion = async () => {
             <div class="flex items-center gap-3">
               <div class="bg-muted flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
                 <img
-                  v-if="productForm.image"
+                  v-if="productForm.image && !previewFailed"
                   :src="productForm.image"
                   alt="Vista previa del producto"
                   class="size-full object-cover"
+                  @load="previewFailed = false"
+                  @error="previewFailed = true"
                 >
                 <span v-else class="text-2xl">{{ productForm.emoji }}</span>
               </div>
@@ -314,9 +353,22 @@ const confirmDeletion = async () => {
                     Quitar
                   </Button>
                 </div>
+                <div class="flex w-full items-center gap-2">
+                  <Input
+                    id="product-image-url"
+                    v-model="imageUrl"
+                    type="url"
+                    placeholder="o pega la URL de la imagen (https://…)"
+                    class="h-8 text-xs"
+                    @keydown.enter.prevent="applyImageUrl"
+                    @change="applyImageUrl"
+                  />
+                  <Button type="button" variant="outline" size="sm" @click="applyImageUrl">Usar URL</Button>
+                </div>
                 <p class="text-muted-foreground text-xs">
-                  Si no subes una imagen se mostrará el emoji como alternativa.
+                  Sube un archivo o pega una URL. Si no pones imagen se mostrará el emoji.
                 </p>
+                <p v-if="previewFailed" class="text-destructive text-xs">No se pudo cargar la imagen de esa dirección.</p>
                 <p v-if="imageError" class="text-destructive text-xs">{{ imageError }}</p>
               </div>
               <input
