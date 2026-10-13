@@ -6,7 +6,8 @@ Los scripts se gestionan con el ejecutor del backend (`backend/scripts/db.js`), 
 | Archivo | Uso |
 |---|---|
 | `schema.sql` | Estructura de las tablas (**borra y recrea**) |
-| `seed.sql` | Datos de demostración (no usar en producción) |
+| `seed.sql` | Datos de demostración, con 24 productos (los 20 últimos con la imagen por URL); no usar en producción |
+| `CREDITOS-IMAGENES.md` | Autor y licencia de las fotos de ejemplo (Wikimedia Commons) |
 | `migrations/NNN_nombre.sql` | Cambios numerados para bases que ya existen |
 
 ## Modelo
