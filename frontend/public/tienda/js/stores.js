@@ -60,19 +60,19 @@ const cartStore = Vue.reactive({
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items));
     },
 
-    // Agrega un producto al carrito; si ya está, suma una unidad, recibe product
-    addItem(product) {
+    // Agrega un producto al carrito; si ya está, suma las unidades, recibe product, quantity
+    addItem(product, quantity = 1) {
         const existingItem = this.items.find((cartItem) => cartItem.id === product.id);
 
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.quantity += quantity;
         } else {
             this.items.push({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: 1
+                quantity
             });
         }
 
@@ -137,6 +137,8 @@ const uiStore = Vue.reactive({
     drawerOpen: false,
     authOpen: false,
     authView: "login",
+    // Identificador del producto cuya ventana de detalle está abierta, o null si está cerrada
+    productId: null,
     // Usuario con sesión iniciada ({ nombre, idRol... }) o null. Lo llena el login y /api/auth/me.
     user: null,
     // true cuando ya se preguntó al servidor si hay sesión (evita mostrar "inicia sesión" mientras carga)
@@ -144,7 +146,7 @@ const uiStore = Vue.reactive({
 });
 
 Vue.watchEffect(() => {
-    document.body.classList.toggle("no-scroll", uiStore.searchOpen || uiStore.drawerOpen || uiStore.authOpen);
+    document.body.classList.toggle("no-scroll", uiStore.searchOpen || uiStore.drawerOpen || uiStore.authOpen || uiStore.productId !== null);
 });
 
 // Mixin de Vue: agrega productos al carrito y muestra un check temporal en el botón
@@ -170,6 +172,11 @@ const addToCartMixin = {
             setTimeout(() => {
                 this.addedIds = this.addedIds.filter((addedId) => addedId !== product.id);
             }, ADDED_FEEDBACK_MS);
+        },
+
+        // Abre la ventana de detalle del producto (foto, descripción y agregar al carrito), recibe product
+        openProduct(product) {
+            uiStore.productId = product.id;
         },
 
         // Indica si el producto fue agregado hace poco (para mostrar el check), recibe productId

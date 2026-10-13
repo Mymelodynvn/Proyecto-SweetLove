@@ -10,3 +10,4 @@ mountComponentApp("#site-footer", SiteFooter);
 mountComponentApp("#cart-app", CartDrawer);
 mountComponentApp("#search-app", SearchModal);
 mountComponentApp("#auth-app", AuthModal);
+mountComponentApp("#product-app", ProductModal);

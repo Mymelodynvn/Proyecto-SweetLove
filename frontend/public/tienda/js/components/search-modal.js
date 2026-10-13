@@ -32,7 +32,7 @@ const SearchModal = {
                         <!-- Cuadrícula de resultados -->
                         <div class="search-modal__grid">
                             <!-- Un resultado por cada producto encontrado -->
-                            <a v-for="product in searchResults" :key="product.id" :href="productsLink" class="search-modal__tile" @click="closeModal">
+                            <a v-for="product in searchResults" :key="product.id" :href="productsLink" class="search-modal__tile" @click.prevent="showProduct(product)">
                                 <!-- Imagen del producto -->
                                 <img :src="product.image" :alt="product.alt">
 
@@ -59,7 +59,7 @@ const SearchModal = {
                         <!-- Cuadrícula de productos más vendidos -->
                         <div class="search-modal__grid">
                             <!-- Un producto de los más vendidos -->
-                            <a v-for="product in featuredProducts" :key="product.id" :href="productsLink" class="search-modal__tile" @click="closeModal">
+                            <a v-for="product in featuredProducts" :key="product.id" :href="productsLink" class="search-modal__tile" @click.prevent="showProduct(product)">
                                 <!-- Imagen del producto -->
                                 <img :src="product.image" :alt="product.alt">
 
@@ -112,6 +112,12 @@ const SearchModal = {
     },
 
     methods: {
+        // Cierra la búsqueda y abre el detalle del producto elegido, recibe product
+        showProduct(product) {
+            this.closeModal();
+            this.openProduct(product);
+        },
+
         // Cierra la ventana de búsqueda
         closeModal() {
             uiStore.searchOpen = false;

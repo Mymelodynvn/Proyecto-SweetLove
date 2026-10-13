@@ -77,13 +77,14 @@ const loadProductCatalog = async () => {
         if (!response.ok) throw new Error('No fue posible obtener los productos.');
         const products = await response.json();
         catalogLoadedFromApi = true;
-        return products.map((product) => ({
+        return products.filter((product) => product.active !== 0 && product.active !== false).map((product) => ({
             id: String(product.id),
             name: product.name,
             price: Number(product.price),
             image: product.image || 'assets/recursos/logo.png',
             alt: product.name,
-            description: product.description || ''
+            description: product.description || '',
+            stock: Number(product.stock)
         }));
     } catch (error) {
         console.warn('Se usará el catálogo local porque la API no respondió.', error);

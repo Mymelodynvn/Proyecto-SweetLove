@@ -1,0 +1,181 @@
+/* Ventana de detalle de un producto: foto, descripción, cantidad y botón de agregar */
+.product-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 225;
+    visibility: hidden;
+    transition: visibility 0s 400ms;
+}
+.product-modal--open{
+    visibility: visible;
+    transition: visibility 0s;
+}
+.product-modal__overlay{
+    position: absolute;
+    inset: 0;
+    background: rgba(74, 99, 76, 0.45);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 400ms var(--transition_ios);
+}
+.product-modal--open .product-modal__overlay{
+    opacity: 1;
+}
+
+/* Panel: foto a la izquierda y datos a la derecha */
+.product-modal__panel{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: min(880px, calc(100% - 32px));
+    max-height: calc(100% - 40px);
+    overflow: hidden;
+    background: var(--main_color-primary);
+    border-radius: var(--radius_modal);
+    box-shadow: var(--box_shadow-primary);
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0;
+    transition: opacity 300ms, transform 350ms var(--transition_ios);
+}
+.product-modal--open .product-modal__panel{
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Botón de cerrar sobre la esquina del panel */
+.product-modal__close{
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--main_color-tertiary);
+    cursor: pointer;
+    transition: background 250ms, transform 200ms var(--transition_ios);
+}
+.product-modal__close:hover{
+    background: rgba(108, 141, 111, 0.18);
+}
+.product-modal__close:active{
+    transform: scale(0.9);
+}
+.product-modal__close i{
+    font-size: 17px;
+    color: var(--color_text-secundary);
+}
+
+/* Foto del producto */
+.product-modal__media{
+    min-height: 360px;
+    background: var(--main_color-tertiary);
+}
+.product-modal__media img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Datos del producto */
+.product-modal__info{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 44px 36px 36px 36px;
+    overflow-y: auto;
+}
+.product-modal__info h2{
+    padding-right: 40px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--main_color-secundary);
+}
+.product-modal__price{
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color_text-secundary);
+}
+.product-modal__description{
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color_text-secundary);
+    opacity: 0.9;
+}
+
+/* Aviso de existencias (pocas unidades o agotado) */
+.product-modal__stock{
+    width: fit-content;
+    padding: 5px 14px;
+    border-radius: var(--radius_pill);
+    background: var(--main_color-tertiary);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color_text-secundary);
+}
+.product-modal__stock--out{
+    background: rgba(192, 80, 77, 0.14);
+    color: #9c3532;
+}
+
+/* Selector de cantidad */
+.product-modal__quantity{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color_text-secundary);
+}
+.product-modal__quantity .qty-btn:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Botón de agregar al carrito */
+.product-modal__add{
+    margin-top: auto;
+}
+.product-modal__add:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.product-modal__cart-link{
+    text-align: center;
+    font-size: 15px;
+}
+.product-modal__cart-link a{
+    color: var(--color_text-secundary);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Celular: foto arriba y datos abajo */
+@media (max-width: 760px){
+    .product-modal__panel{
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        overflow-y: auto;
+    }
+    .product-modal__media{
+        min-height: 0;
+    }
+    .product-modal__media img{
+        aspect-ratio: 4 / 3;
+    }
+    .product-modal__info{
+        padding: 24px 22px 28px 22px;
+        overflow-y: visible;
+    }
+    .product-modal__info h2{
+        font-size: 24px;
+    }
+}
