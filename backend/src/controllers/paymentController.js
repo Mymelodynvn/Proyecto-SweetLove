@@ -1,6 +1,7 @@
 // Controlador de pagos: avisos (webhook) de Mercado Pago y confirmación del pago al volver a la tienda
 import { HttpError } from '../utils/httpError.js'
 import { parsePositiveInt } from '../utils/validate.js'
+import { isValidOrderToken } from '../utils/order-token.js'
 import * as mercadoPago from '../services/mercadoPagoService.js'
 import * as paymentService from '../services/paymentService.js'
 
@@ -35,9 +36,11 @@ export const webhook = async (req, res) => {
   res.json({ ok: true })
 }
 
-// POST /api/payments/confirm — la tienda pide confirmar el pago de un pedido al volver de Mercado Pago, recibe req, res
+// POST /api/payments/confirm — la tienda pide confirmar el pago de un pedido al volver de Mercado Pago; exige el código del enlace de regreso, recibe req, res
 export const confirm = async (req, res) => {
   const orderId = parsePositiveInt(req.body?.orderId, 'El pedido')
+  // Sin el código no se puede consultar el pago de un pedido ajeno solo con adivinar su número
+  if (!isValidOrderToken(orderId, req.body?.token)) throw new HttpError(403, 'El enlace de confirmación no es válido.')
   const { status } = await paymentService.syncOrderPayment(orderId)
   res.json({ ok: true, status })
 }

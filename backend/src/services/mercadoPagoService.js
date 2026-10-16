@@ -2,6 +2,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { config } from '../config/env.js'
 import { HttpError } from '../utils/httpError.js'
+import { orderToken } from '../utils/order-token.js'
 
 const API_URL = 'https://api.mercadopago.com'
 const REQUEST_TIMEOUT_MS = 10000
@@ -35,10 +36,11 @@ const request = async (path, options = {}) => {
   return data
 }
 
-// Direcciones a las que vuelve el cliente según el resultado del pago, sin parámetros extra
-const backUrls = () => {
+// Direcciones a las que vuelve el cliente según el resultado del pago; llevan el pedido y su código para poder confirmar el pago, recibe orderId
+const backUrls = (orderId) => {
   const base = `${config.frontendUrl}/tienda/pagoResultado.html`
-  return { success: `${base}?resultado=exito`, failure: `${base}?resultado=fallo`, pending: `${base}?resultado=pendiente` }
+  const order = `pedido=${orderId}&t=${orderToken(orderId)}`
+  return { success: `${base}?resultado=exito&${order}`, failure: `${base}?resultado=fallo&${order}`, pending: `${base}?resultado=pendiente&${order}` }
 }
 
 // Crea el enlace de pago (preferencia) de un pedido y devuelve su dirección, recibe orderId, items
@@ -56,7 +58,7 @@ export const createPreference = async ({ orderId, items }) => {
     })),
     // Con esto el aviso de pago sabe a qué pedido corresponde
     external_reference: String(orderId),
-    back_urls: backUrls(),
+    back_urls: backUrls(orderId),
     statement_descriptor: 'SWEET LOVE',
     // El enlace vence a los minutos del pedido: así no se puede pagar un pedido que ya se canceló
     expires: true,
