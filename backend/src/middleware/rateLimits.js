@@ -27,10 +27,10 @@ export const loginLimiter = rateLimit({
 // Levanta el bloqueo de login de un correo (se usa cuando su dueño demuestra que lo controla al restablecer la contraseña), recibe email
 export const resetLoginLimit = (email) => loginLimiter.resetKey(String(email ?? '').trim().toLowerCase())
 
-// Limita los registros por IP para frenar el spam de cuentas
+// Limita los registros por IP para frenar el spam de cuentas (generoso: detrás del proxy muchos clientes comparten la misma IP)
 export const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 30,
+  limit: 100,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: tooManyAttempts,
@@ -46,10 +46,10 @@ export const mailLimiter = rateLimit({
   message: tooManyAttempts,
 })
 
-// Limita los intentos de usar enlaces (tokens) por IP
+// Limita los intentos de usar enlaces (tokens) por IP; los enlaces son de 256 bits y no se pueden adivinar, así que el cupo es amplio porque detrás del proxy muchos clientes comparten la misma IP
 export const tokenLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: 100,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: tooManyAttempts,
