@@ -190,7 +190,7 @@ const submitProductForm = async () => {
     isFormDialogOpen.value = false
   } catch (error) {
     console.error('No fue posible guardar el producto.', error)
-    window.alert('No fue posible guardar el producto. Revisa la conexión con la base de datos.')
+    window.alert(apiErrorMessage(error, 'No fue posible guardar el producto. Revisa la conexión con la base de datos.'))
   }
 }
 
@@ -427,11 +427,11 @@ const confirmDeletion = async () => {
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="flex flex-col gap-2">
               <Label for="product-price">Precio (COP)</Label>
-              <Input id="product-price" v-model="productForm.price" type="number" min="0" step="500" required />
+              <Input id="product-price" v-model="productForm.price" type="number" min="500" max="99999999" step="500" required />
             </div>
             <div class="flex flex-col gap-2">
               <Label for="product-stock">Cantidad disponible</Label>
-              <Input id="product-stock" v-model="productForm.stock" type="number" min="0" required />
+              <Input id="product-stock" v-model="productForm.stock" type="number" min="0" max="99999" required />
             </div>
           </div>
         </form>
