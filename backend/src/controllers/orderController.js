@@ -4,6 +4,7 @@ import { parseAddress, parseEmail, parseName, parseOrderItems, parsePhone, parse
 import * as orderModel from '../models/orderModel.js'
 import * as orderService from '../services/orderService.js'
 import * as mercadoPago from '../services/mercadoPagoService.js'
+import { loadSessionUser } from '../middleware/auth.js'
 
 // Estados que un pedido puede tener
 const ORDER_STATUSES = ['Pendiente', 'En preparación', 'Enviado', 'Completado', 'Cancelado']
@@ -108,10 +109,14 @@ export const create = async (req, res) => {
   const paymentMethod = String(body.paymentMethod ?? '').trim() || mercadoPago.MERCADO_PAGO
   if (!PAYMENT_METHODS.includes(paymentMethod)) throw new HttpError(400, 'Medio de pago no disponible.')
 
+  // La sesión (si hay) decide si se puede comprar con el correo de una cuenta ya registrada
+  const sessionUser = await loadSessionUser(req)
+
   const { lines, ...order } = await orderService.createOrder({
     customer: { name, lastName, email, phone, address },
     items,
     paymentMethod,
+    sessionUserId: sessionUser?.idUser ?? null,
   })
 
   // Se crea el enlace de pago de Mercado Pago; si falla, el pedido igual queda registrado como Pendiente

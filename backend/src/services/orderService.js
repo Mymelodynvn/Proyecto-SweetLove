@@ -7,11 +7,16 @@ import * as userModel from '../models/userModel.js'
 import * as productModel from '../models/productModel.js'
 import * as orderModel from '../models/orderModel.js'
 
-// Busca al cliente por correo; si no existe crea una cuenta de invitado, y si existe solo completa los datos que tenga vacíos, recibe connection, customer
-const findOrCreateCustomer = async (connection, customer) => {
+// Busca al cliente por correo; si no existe crea una cuenta de invitado, y si existe solo completa los datos que tenga vacíos, recibe connection, customer, sessionUserId
+const findOrCreateCustomer = async (connection, customer, sessionUserId) => {
   const existing = await userModel.findByEmail(customer.email, connection)
 
   if (existing) {
+    // Un correo con cuenta propia solo compra con la sesión de esa cuenta: así nadie llena de pedidos la cuenta de otra persona
+    if (!existing.esInvitado && existing.idUser !== sessionUserId) {
+      throw new HttpError(409, 'Ese correo ya tiene una cuenta. Inicia sesión para comprar con ella.', 'LOGIN_REQUIRED')
+    }
+
     // Nunca se sobrescriben los datos de una cuenta: la entrega usa los datos del propio pedido
     await userModel.fillMissingContact(existing.idUser, { celular: customer.phone, direccion: customer.address }, connection)
     return existing.idUser
@@ -59,14 +64,14 @@ const validateItems = async (connection, items) => {
   return validated
 }
 
-// Registra un pedido completo: cliente, cabecera, líneas, descuento de stock, pago y envío inicial, recibe customer, items, paymentMethod
-export const createOrder = async ({ customer, items, paymentMethod }) => {
+// Registra un pedido completo: cliente, cabecera, líneas, descuento de stock, pago y envío inicial; sessionUserId es la cuenta con sesión iniciada (si la hay), recibe customer, items, paymentMethod, sessionUserId
+export const createOrder = async ({ customer, items, paymentMethod, sessionUserId = null }) => {
   const connection = await getPool().getConnection()
 
   try {
     await connection.beginTransaction()
 
-    const userId = await findOrCreateCustomer(connection, customer)
+    const userId = await findOrCreateCustomer(connection, customer, sessionUserId)
     const lines = await validateItems(connection, items)
     const total = lines.reduce((sum, line) => sum + line.subtotal, 0)
 

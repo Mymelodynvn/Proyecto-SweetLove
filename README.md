@@ -96,7 +96,7 @@ Un pedido cuyo pago no se aprueba conserva el stock descontado hasta que alguien
 - Límites de intentos: login (10 fallos por correo cada 15 min; el dueño del correo se desbloquea restableciendo la contraseña), correos de recuperación (6 por hora), registros por IP y pedidos (10 por correo por hora).
 - Las sesiones abiertas dejan de valer cuando la contraseña cambia. Los pedidos admiten como máximo 30 productos y 50 unidades por producto, y el stock nunca queda en negativo.
 - Cabeceras de seguridad (`helmet` en la API; `nosniff`, `X-Frame-Options`, `Referrer-Policy` en el frontend). Protección CSRF: la cookie es `SameSite=Lax` y la API solo lee JSON (un formulario de otro sitio no puede enviar nada válido); está cubierto por pruebas.
-- **Compras como invitado:** crean una cuenta sin contraseña que no deja iniciar sesión; no se sobrescriben datos de cuentas existentes (la entrega se guarda en el pedido). El dueño del correo puede activar esa cuenta al registrarse (le llega un enlace).
+- **Compras como invitado:** crean una cuenta sin contraseña que no deja iniciar sesión. Un correo que ya tiene cuenta registrada solo compra iniciando sesión con ella (así nadie llena de pedidos la cuenta de otra persona); no se sobrescriben datos de cuentas existentes (la entrega se guarda en el pedido). El dueño del correo puede activar esa cuenta al registrarse (le llega un enlace).
 - El checkout calcula los precios en el servidor, dentro de una transacción con bloqueo de stock.
 
 ## Publicar (por ejemplo en Render)
