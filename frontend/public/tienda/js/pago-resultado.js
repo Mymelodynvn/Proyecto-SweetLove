@@ -36,12 +36,14 @@ if (document.querySelector("#pago-app")) {
             }
         },
 
-        // Al cargar, pide al backend el estado real del pedido (Mercado Pago lo envía en external_reference) y lo muestra
+        // Al cargar, pide al backend el estado real del pedido (el pedido y su código vienen en la dirección de regreso) y lo muestra
         async mounted() {
-            const orderId = Number(new URLSearchParams(location.search).get("external_reference"));
-            if (!Number.isInteger(orderId) || orderId < 1) return;
+            const params = new URLSearchParams(location.search);
+            const orderId = Number(params.get("pedido"));
+            const token = params.get("t");
+            if (!Number.isInteger(orderId) || orderId < 1 || !token) return;
 
-            const { ok, data } = await postJson("/api/payments/confirm", { orderId });
+            const { ok, data } = await postJson("/api/payments/confirm", { orderId, token });
             if (ok && ESTADO_A_RESULTADO[data.status]) this.resultado = ESTADO_A_RESULTADO[data.status];
         }
     }).mount("#pago-app");
