@@ -27,8 +27,10 @@ function responder(resultado) {
   return ContentService.createTextOutput(JSON.stringify(resultado)).setMimeType(ContentService.MimeType.JSON)
 }
 
-// Se ejecuta a mano, una vez, desde el editor: pide los permisos y envía un correo de prueba a tu propia cuenta
+// Se ejecuta a mano, una vez, desde el editor: pide los permisos y envía un correo de prueba a la cuenta que abrió este script
+// (en el Registro de ejecución muestra esa cuenta y cuántos correos quedan hoy)
 function probarEnvio() {
   const miCorreo = Session.getEffectiveUser().getEmail()
   MailApp.sendEmail(miCorreo, 'Prueba de Sweet Love', 'Si lees esto, el puente de correo funciona.')
+  Logger.log('Enviado a: ' + miCorreo + ' | envíos que quedan hoy: ' + MailApp.getRemainingDailyQuota())
 }
