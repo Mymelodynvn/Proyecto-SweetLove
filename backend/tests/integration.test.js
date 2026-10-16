@@ -222,6 +222,25 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'OtraClave3' } })).status, 400)
     })
 
+    test('quien agota los intentos de un correo ajeno no deja afuera a su dueño: restablecer la contraseña lo desbloquea', async () => {
+      const user = await createVerifiedUser()
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        const wrong = await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: `incorrecta${attempt}` } })
+        assert.equal(wrong.status, 401)
+      }
+
+      // Con los intentos agotados ni la contraseña correcta entra, y el aviso explica cómo desbloquear
+      const locked = await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: user.password } })
+      assert.equal(locked.status, 429)
+      assert.match(locked.data.statusMessage, /Olvidaste tu contraseña/)
+
+      // El dueño pide el enlace por correo y elige una contraseña nueva: queda desbloqueado al instante
+      await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
+      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveDelDueno7' } })
+      assert.equal(reset.status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'ClaveDelDueno7' } })).status, 200)
+    })
+
     test('cambiar contraseña: pide la actual y aplica las reglas', async () => {
       const user = await createVerifiedUser()
       const cookie = await login(user.email, user.password)
