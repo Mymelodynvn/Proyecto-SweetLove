@@ -6,7 +6,14 @@ const tooManyAttempts = { error: true, statusCode: 429, statusMessage: 'Demasiad
 // Normaliza el correo del cuerpo de la petición para usarlo como clave del límite, recibe req
 const emailKey = (req) => String(req.body?.email ?? '').trim().toLowerCase()
 
-// Limita los intentos fallidos de login por correo (no por IP: detrás del proxy de Render todos los usuarios comparten la misma IP)
+const tooManyLogins = {
+  error: true,
+  statusCode: 429,
+  statusMessage: 'Demasiados intentos fallidos con este correo. Espera 15 minutos, o elige una contraseña nueva con «¿Olvidaste tu contraseña?», que desbloquea la cuenta al instante.',
+}
+
+// Limita los intentos fallidos de login por correo (no por IP: detrás del proxy de Render todos los usuarios comparten la misma IP).
+// Quien no es el dueño puede agotar los intentos de un correo ajeno, por eso restablecer la contraseña por correo levanta el bloqueo (ver resetLoginLimit)
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -14,8 +21,11 @@ export const loginLimiter = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   keyGenerator: (req) => emailKey(req) || ipKeyGenerator(req.ip),
-  message: tooManyAttempts,
+  message: tooManyLogins,
 })
+
+// Levanta el bloqueo de login de un correo (se usa cuando su dueño demuestra que lo controla al restablecer la contraseña), recibe email
+export const resetLoginLimit = (email) => loginLimiter.resetKey(String(email ?? '').trim().toLowerCase())
 
 // Limita los registros por IP para frenar el spam de cuentas
 export const registerLimiter = rateLimit({

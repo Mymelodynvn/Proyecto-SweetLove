@@ -141,7 +141,7 @@ export const requestPasswordReset = async (email) => {
   if (user) await safely(() => sendResetLink(user, Boolean(user.esInvitado)))
 }
 
-// Fija una contraseña nueva con el token del enlace; deja la cuenta activa y verificada, recibe token, password
+// Fija una contraseña nueva con el token del enlace; deja la cuenta activa y verificada y devuelve el correo de la cuenta, recibe token, password
 export const resetPassword = async (token, password) => {
   const found = await tokenModel.findValid(RESET, hashToken(token))
   if (!found) throw new HttpError(400, 'El enlace no es válido o ya venció.', 'INVALID_TOKEN')
@@ -152,6 +152,7 @@ export const resetPassword = async (token, password) => {
 
   await userModel.activateWithPassword(found.idUser, await bcrypt.hash(password, 10))
   await tokenModel.invalidateAll(found.idUser, RESET)
+  return { email: found.email }
 }
 
 // Cambia la contraseña de una cuenta con sesión iniciada, pidiendo la actual, recibe idUser, currentPassword, newPassword

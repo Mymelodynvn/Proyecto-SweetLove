@@ -4,6 +4,7 @@ import { HttpError } from '../utils/httpError.js'
 import { cleanText, parseEmail, parseName } from '../utils/validate.js'
 import * as userModel from '../models/userModel.js'
 import * as accountService from '../services/accountService.js'
+import { resetLoginLimit } from '../middleware/rateLimits.js'
 
 // Hash de relleno: se compara aunque el correo no exista para no revelar, por tiempo de respuesta, qué correos están registrados
 const DUMMY_HASH = bcrypt.hashSync('sweetlove-dummy', 10)
@@ -70,7 +71,9 @@ export const resetPassword = async (req, res) => {
   const token = cleanText(req.body?.token)
   if (!token) throw new HttpError(400, 'El enlace no es válido o ya venció.', 'INVALID_TOKEN')
 
-  await accountService.resetPassword(token, String(req.body?.password ?? ''))
+  const { email } = await accountService.resetPassword(token, String(req.body?.password ?? ''))
+  // Si alguien agotó los intentos de login con este correo, su dueño (que acaba de usar el enlace del correo) queda desbloqueado
+  resetLoginLimit(email)
   res.json({ message: 'Tu contraseña se actualizó. Ya puedes iniciar sesión.' })
 }
 
