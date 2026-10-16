@@ -19,6 +19,15 @@ export const findById = async (idUser) => {
   return rows[0]
 }
 
+// Busca al dueño de una sesión incluyendo el hash de su contraseña (solo para comparar su huella), recibe idUser
+export const findSessionUser = async (idUser) => {
+  const [rows] = await getPool().query(
+    'SELECT idUser, nombre, apellido, email, idRol, contrasena FROM usuario WHERE idUser = ? LIMIT 1',
+    [idUser],
+  )
+  return rows[0]
+}
+
 // Busca un usuario por identificador incluyendo el hash de su contraseña (para cambiarla), recibe idUser
 export const findByIdWithPassword = async (idUser) => {
   const [rows] = await getPool().query(

@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { config } from '../config/env.js'
 import { HttpError } from '../utils/httpError.js'
 import { assertStrongPassword } from '../utils/password.js'
+import { passwordStamp } from '../utils/session.js'
 import { ADMIN_ROLE_ID } from '../middleware/auth.js'
 import * as userModel from '../models/userModel.js'
 import * as tokenModel from '../models/tokenModel.js'
@@ -155,7 +156,7 @@ export const resetPassword = async (token, password) => {
   return { email: found.email }
 }
 
-// Cambia la contraseña de una cuenta con sesión iniciada, pidiendo la actual, recibe idUser, currentPassword, newPassword
+// Cambia la contraseña de una cuenta con sesión iniciada, pidiendo la actual; devuelve la huella nueva de la sesión, recibe idUser, currentPassword, newPassword
 export const changePassword = async (idUser, currentPassword, newPassword) => {
   const user = await userModel.findByIdWithPassword(idUser)
   if (!user) throw new HttpError(401, 'Debes iniciar sesión.')
@@ -166,6 +167,8 @@ export const changePassword = async (idUser, currentPassword, newPassword) => {
   if (newPassword === currentPassword) throw new HttpError(400, 'La contraseña nueva debe ser distinta de la actual.')
   assertStrongPassword(newPassword, { email: user.email, name: user.nombre })
 
-  await userModel.setPassword(idUser, await bcrypt.hash(newPassword, 10))
+  const newHash = await bcrypt.hash(newPassword, 10)
+  await userModel.setPassword(idUser, newHash)
   await tokenModel.invalidateAll(idUser, RESET)
+  return { stamp: passwordStamp(newHash) }
 }

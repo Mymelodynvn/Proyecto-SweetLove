@@ -5,6 +5,8 @@ import { cleanText, parseEmail, parseName } from '../utils/validate.js'
 import * as userModel from '../models/userModel.js'
 import * as accountService from '../services/accountService.js'
 import { resetLoginLimit } from '../middleware/rateLimits.js'
+import { loadSessionUser } from '../middleware/auth.js'
+import { passwordStamp } from '../utils/session.js'
 
 // Hash de relleno: se compara aunque el correo no exista para no revelar, por tiempo de respuesta, qué correos están registrados
 const DUMMY_HASH = bcrypt.hashSync('sweetlove-dummy', 10)
@@ -42,7 +44,8 @@ export const login = async (req, res) => {
   // Con las credenciales correctas se avisa si falta verificar el correo (la cuenta existe, así que no se revela nada nuevo)
   if (!user.emailVerificado) throw new HttpError(403, 'Debes verificar tu correo antes de iniciar sesión.', 'EMAIL_NOT_VERIFIED')
 
-  req.session = { idUser: user.idUser, idRol: user.idRol }
+  // La huella de la contraseña hace que esta sesión deje de valer si la contraseña cambia
+  req.session = { idUser: user.idUser, idRol: user.idRol, stamp: passwordStamp(user.contrasena) }
   res.json({ message: 'Inicio de sesión exitoso', user: toPublicUser(user) })
 }
 
@@ -54,9 +57,7 @@ export const logout = (req, res) => {
 
 // GET /api/auth/me — devuelve el usuario de la sesión actual, o `{ user: null }` si no hay sesión, recibe req, res
 export const me = async (req, res) => {
-  if (!req.session?.idUser) return void res.json({ user: null })
-
-  const user = await userModel.findById(req.session.idUser)
+  const user = await loadSessionUser(req)
   res.json({ user: user ? toPublicUser(user) : null })
 }
 
@@ -94,6 +95,8 @@ export const resendVerification = async (req, res) => {
 
 // POST /api/auth/change-password — cambia la contraseña de la cuenta con sesión, pidiendo la actual, recibe req, res
 export const changePassword = async (req, res) => {
-  await accountService.changePassword(req.session.idUser, req.body?.currentPassword, String(req.body?.newPassword ?? ''))
+  const { stamp } = await accountService.changePassword(req.session.idUser, req.body?.currentPassword, String(req.body?.newPassword ?? ''))
+  // Esta sesión sigue abierta con la huella nueva; las demás (otros dispositivos) dejan de valer
+  req.session = { ...req.session, stamp }
   res.json({ message: 'Tu contraseña se actualizó.' })
 }
