@@ -286,6 +286,48 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await loadSessionUser(valid)).idUser, admin.idUser)
     })
 
+    test('las reglas de contraseña y correo (sin espacios ni símbolos, 10 o más) se aplican en registro, restablecer y cambio', async () => {
+      const fullName = 'Ana Prueba'
+
+      // Registro: contraseña con espacios, símbolos, < >, corta; y correos con espacios
+      for (const password of ['Clave 2026abc', 'Clave2026#abc', 'Clave<2026>x', 'Clave2026']) {
+        const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email: uniqueEmail(), password } })
+        assert.equal(result.status, 400, password)
+        assert.equal(result.data.code, 'WEAK_PASSWORD', password)
+      }
+      for (const email of [` ${uniqueEmail()}`, `${uniqueEmail()} `, uniqueEmail().replace('@', ' @')]) {
+        const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1' } })
+        assert.equal(result.status, 400, JSON.stringify(email))
+        assert.equal(result.data.message, 'El correo no puede tener espacios.')
+      }
+
+      // Restablecer: una contraseña inválida no gasta el enlace
+      const user = await createVerifiedUser()
+      await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
+      const token = tokenFromLastMail(user.email)
+      for (const password of ['Nueva clave 2026', 'Nueva#Clave2026', 'Corta2026']) {
+        assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password } })).status, 400, password)
+      }
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2026' } })).status, 200)
+
+      // Cambio de contraseña desde la cuenta
+      const cookie = await login(user.email, 'NuevaClave2026')
+      for (const newPassword of ['Otra clave 2026', 'Otra<Clave>2026', 'Corta2026']) {
+        assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword } })).status, 400, newPassword)
+      }
+
+      // Recuperar contraseña y reenviar verificación también rechazan correos con espacios
+      assert.equal((await call('/api/auth/forgot-password', { method: 'POST', body: { email: `${user.email} ` } })).status, 400)
+      assert.equal((await call('/api/auth/resend-verification', { method: 'POST', body: { email: ` ${user.email}` } })).status, 400)
+    })
+
+    test('un pedido con el correo con espacios se rechaza', async () => {
+      const productId = await createProduct(2)
+      const result = await call('/api/orders', { method: 'POST', body: orderBody(` ${uniqueEmail()} `, productId) })
+      assert.equal(result.status, 400)
+      assert.equal(await stockOf(productId), 2)
+    })
+
     test('cambiar contraseña: pide la actual y aplica las reglas', async () => {
       const user = await createVerifiedUser()
       const cookie = await login(user.email, user.password)
