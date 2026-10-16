@@ -2,14 +2,19 @@
 import { HttpError } from './httpError.js'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Largo de la columna usuario.email (ver database/schema.sql)
+const MAX_EMAIL_LENGTH = 100
 
 // Convierte un valor en texto sin espacios sobrantes, recibe value
 export const cleanText = (value) => String(value ?? '').trim()
 
-// Valida y normaliza un correo electrónico (minúsculas), recibe value
+// Valida y normaliza un correo electrónico (minúsculas); no admite espacios, ni siquiera al inicio o al final, recibe value
 export const parseEmail = (value) => {
-  const email = cleanText(value).toLowerCase()
+  const text = String(value ?? '')
+  if (/\s/.test(text)) throw new HttpError(400, 'El correo no puede tener espacios.')
+  const email = text.toLowerCase()
   if (!EMAIL_PATTERN.test(email)) throw new HttpError(400, 'El correo electrónico no es válido.')
+  if (email.length > MAX_EMAIL_LENGTH) throw new HttpError(400, `El correo admite máximo ${MAX_EMAIL_LENGTH} caracteres.`)
   return email
 }
 

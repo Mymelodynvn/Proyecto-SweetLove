@@ -1,8 +1,8 @@
-// Reglas de contraseña: largo, letras y números, claves obvias y datos de la propia cuenta
+// Reglas de contraseña: sin espacios ni símbolos, largo, letras y números, claves obvias y datos de la propia cuenta
 import { HttpError } from './httpError.js'
 
 // Largo mínimo en caracteres
-export const PASSWORD_MIN_LENGTH = 8
+export const PASSWORD_MIN_LENGTH = 10
 // Largo máximo en bytes: bcrypt ignora lo que pase de 72 bytes, así que se rechaza en lugar de cortarlo en silencio
 export const PASSWORD_MAX_BYTES = 72
 
@@ -29,9 +29,11 @@ const isSequence = (text) => {
 
 // Devuelve el primer problema de la contraseña (texto en español) o una cadena vacía si es válida, recibe password y el contexto { email, name }
 export const passwordProblem = (password, { email = '', name = '' } = {}) => {
-  if (typeof password !== 'string' || password.length < PASSWORD_MIN_LENGTH) {
-    return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`
-  }
+  if (typeof password !== 'string') return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`
+  if (/\s/.test(password)) return 'La contraseña no puede tener espacios.'
+  // Solo letras (con tildes y ñ) y números: los símbolos, como < > # . -, no se aceptan
+  if (/[^\p{L}\d]/u.test(password)) return 'La contraseña solo puede tener letras y números (sin símbolos como < > # . -).'
+  if (password.length < PASSWORD_MIN_LENGTH) return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`
   if (Buffer.byteLength(password, 'utf8') > PASSWORD_MAX_BYTES) {
     return `La contraseña es demasiado larga (máximo ${PASSWORD_MAX_BYTES} caracteres).`
   }
