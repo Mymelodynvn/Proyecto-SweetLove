@@ -90,14 +90,25 @@ Los errores llevan `code: WEAK_PASSWORD`. Los códigos de la respuesta de error 
 
 ### Correo
 
-Los correos de verificación y de recuperación salen por **Gmail**, de una de estas dos formas (si hay las dos, se usa la API):
+Los correos de verificación y de recuperación salen por **Gmail**, de una de estas formas (si hay varias, se usa la primera de la tabla):
 
 | Forma | Variables | Cuándo usarla |
 |---|---|---|
-| **API de Gmail (HTTPS)** | `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `GMAIL_USER` | En **Render gratis**, que bloquea los puertos SMTP |
+| **Puente con Apps Script (HTTPS)** | `MAIL_RELAY_URL`, `MAIL_RELAY_SECRET` | En **Render gratis**, que bloquea los puertos SMTP. **No vence**, no pide publicar ninguna app ni tener dominio. Unos 100 correos al día |
+| API de Gmail (HTTPS) | `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `GMAIL_USER` | Si necesitas más cupo. Con la app en modo *Prueba* el refresh token vence a los 7 días |
 | SMTP con contraseña de aplicación | `SMTP_USER`, `SMTP_PASSWORD` | En local o en un servidor que permita SMTP |
 
-**Sin ninguna de las dos no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
+**Sin ninguna no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
+
+#### Configurar el puente con Apps Script
+
+1. Entra a <https://script.google.com> con la cuenta de Gmail que enviará los correos y pulsa **Proyecto nuevo**.
+2. Borra el contenido y pega el de [`scripts/correo-apps-script.gs`](scripts/correo-apps-script.gs). Cambia `CLAVE` por una clave larga que inventes (la misma irá como `MAIL_RELAY_SECRET`).
+3. Elige la función `probarEnvio` y pulsa **Ejecutar**. Google pide permisos: *Revisar permisos → tu cuenta → Avanzado → Ir a… (no seguro) → Permitir*. Te llega un correo de prueba.
+4. **Implementar → Nueva implementación → Aplicación web**. En *Ejecutar como* elige **Yo** y en *Quién tiene acceso* **Cualquier persona** (el backend no inicia sesión en Google; lo que protege el script es la clave). Pulsa **Implementar** y copia la **URL de la aplicación web** (termina en `/exec`).
+5. En `backend/.env` y en las variables de Render: `MAIL_RELAY_URL=la URL` y `MAIL_RELAY_SECRET=la clave`.
+
+Si cambias el código del script, publica una versión nueva (*Implementar → Administrar implementaciones → editar → Versión nueva*): la URL no cambia. Si los correos fallan, el registro del backend dice la causa: `clave incorrecta` (las dos claves no coinciden) o una página HTML (el acceso no es «Cualquier persona»).
 
 #### Configurar la API de Gmail
 
@@ -117,7 +128,7 @@ Si Google responde `invalid_grant`, el refresh token venció o se revocó (por e
 3. En `backend/.env`: `SMTP_USER=tucorreo@gmail.com` y `SMTP_PASSWORD=la contraseña de aplicación`. El remitente es esa misma cuenta (Gmail no deja usar otro).
 
 Si Gmail rechaza el inicio de sesión (`535 Username and Password not accepted`), la contraseña de aplicación es incorrecta o está revocada: genera otra.
-Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render bloquean los puertos SMTP; allí usa la API de Gmail (o `RESEND_API_KEY`, que también va por HTTPS pero exige un dominio verificado para escribir a terceros).
+Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render bloquean los puertos SMTP; allí usa el puente con Apps Script o la API de Gmail (o `RESEND_API_KEY`, que también va por HTTPS pero exige un dominio verificado para escribir a terceros).
 
 ### Solo administrador
 
