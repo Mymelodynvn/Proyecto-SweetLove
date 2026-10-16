@@ -265,7 +265,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await call('/api/auth/me', { cookie })).data.user.email, user.email)
 
       await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
-      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveRestablecida5' } })
+      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveRestable5' } })
       assert.equal(reset.status, 200)
       assert.equal((await call('/api/auth/me', { cookie })).data.user, null)
     })
@@ -286,11 +286,11 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await loadSessionUser(valid)).idUser, admin.idUser)
     })
 
-    test('las reglas de contraseña y correo (sin espacios ni símbolos, 10 o más) se aplican en registro, restablecer y cambio', async () => {
+    test('las reglas de contraseña y correo (sin espacios ni símbolos, de 8 a 16) se aplican en registro, restablecer y cambio', async () => {
       const fullName = 'Ana Prueba'
 
       // Registro: contraseña con espacios, símbolos, < >, corta; y correos con espacios
-      for (const password of ['Clave 2026abc', 'Clave2026#abc', 'Clave<2026>x', 'Clave2026']) {
+      for (const password of ['Clave 2026abc', 'Clave2026#abc', 'Clave<2026>x', 'Clave20', 'Clave2026Clave2026']) {
         const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email: uniqueEmail(), password } })
         assert.equal(result.status, 400, password)
         assert.equal(result.data.code, 'WEAK_PASSWORD', password)
@@ -305,14 +305,14 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const user = await createVerifiedUser()
       await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
       const token = tokenFromLastMail(user.email)
-      for (const password of ['Nueva clave 2026', 'Nueva#Clave2026', 'Corta2026']) {
+      for (const password of ['Nueva clave 2026', 'Nueva#Clave2026', 'NuevaClave2026Larga']) {
         assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password } })).status, 400, password)
       }
       assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2026' } })).status, 200)
 
       // Cambio de contraseña desde la cuenta
       const cookie = await login(user.email, 'NuevaClave2026')
-      for (const newPassword of ['Otra clave 2026', 'Otra<Clave>2026', 'Corta2026']) {
+      for (const newPassword of ['Otra clave 2026', 'Otra<Clave>2026', 'Corta20', 'OtraClave2026Larga']) {
         assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword } })).status, 400, newPassword)
       }
 
@@ -382,6 +382,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       for (const [label, change] of [
         ['celular con letras', { phone: 'abc1234567' }],
         ['celular corto', { phone: '123' }],
+        ['celular de más de 10 números', { phone: '30012345678' }],
         ['sin dirección', { address: '' }],
         ['dirección corta', { address: 'Cll 1' }],
         ['nombre de una letra', { name: 'A' }],

@@ -5,8 +5,8 @@ import { passwordProblem } from '../src/utils/password.js'
 import { parseEmail } from '../src/utils/validate.js'
 
 describe('contraseña', () => {
-  test('acepta 10 o más caracteres con letras y números', () => {
-    for (const password of ['Clave20261a', 'Abcdefghi1', 'ñandú20262ab', 'CONTRASENA2026x']) {
+  test('acepta de 8 a 16 caracteres con letras y números', () => {
+    for (const password of ['Clave202', 'Clave2026', 'Abcdefghi1', 'ñandú20262ab', 'CONTRASENA2026x', 'Abcdefghijklmn12']) {
       assert.equal(passwordProblem(password), '', password)
     }
   })
@@ -23,9 +23,15 @@ describe('contraseña', () => {
     }
   })
 
-  test('rechaza menos de 10 caracteres', () => {
-    for (const password of ['Clave2026', 'abc12', 'Ab1']) {
-      assert.match(passwordProblem(password), /al menos 10 caracteres/, password)
+  test('rechaza menos de 8 caracteres', () => {
+    for (const password of ['Clave20', 'abc12', 'Ab1']) {
+      assert.match(passwordProblem(password), /al menos 8 caracteres/, password)
+    }
+  })
+
+  test('rechaza más de 16 caracteres', () => {
+    for (const password of ['Abcdefghijklmno12', 'Clave2026Clave2026x']) {
+      assert.equal(passwordProblem(password), 'La contraseña admite máximo 16 caracteres.', password)
     }
   })
 
@@ -34,7 +40,7 @@ describe('contraseña', () => {
     assert.match(passwordProblem('0123456789'), /común/)
     assert.match(passwordProblem('aaaaaaaaaaa'), /común/)
     assert.match(passwordProblem('Clave2026abc', { email: 'clave2026abc@example.com' }), /correo/)
-    assert.match(passwordProblem(`${'x'.repeat(80)}1`), /demasiado larga/)
+    assert.match(passwordProblem(`${'x'.repeat(80)}1`), /máximo 16 caracteres/)
   })
 })
 
