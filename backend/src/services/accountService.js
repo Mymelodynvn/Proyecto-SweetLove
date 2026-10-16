@@ -17,6 +17,8 @@ const RESET_MINUTES = 60
 const VERIFY_MINUTES = 24 * 60
 // Máximo de correos del mismo tipo que se envían a una cuenta por hora
 const MAX_EMAILS_PER_HOUR = 3
+// Largo de las columnas usuario.nombre y usuario.apellido (ver database/schema.sql)
+const MAX_NAME_PART_LENGTH = 50
 
 // Mensaje que se responde siempre, exista o no la cuenta, para no revelar qué correos están registrados
 export const GENERIC_RESET_MESSAGE = 'Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña.'
@@ -91,8 +93,18 @@ const safely = async (task) => {
   }
 }
 
+// Separa el nombre completo en nombre (el primer término) y apellido (el resto, vacío si no hay) y comprueba que quepan, recibe fullName
+const splitFullName = (fullName) => {
+  const [nombre, ...rest] = fullName.split(/\s+/)
+  const apellido = rest.join(' ')
+  if (nombre.length > MAX_NAME_PART_LENGTH) throw new HttpError(400, `El nombre admite máximo ${MAX_NAME_PART_LENGTH} caracteres.`)
+  if (apellido.length > MAX_NAME_PART_LENGTH) throw new HttpError(400, `El apellido admite máximo ${MAX_NAME_PART_LENGTH} caracteres.`)
+  return { nombre, apellido }
+}
+
 // Registra una cuenta de cliente; con correo configurado queda pendiente de verificar, recibe fullName, email, password
 export const registerCustomer = async ({ fullName, email, password }) => {
+  const { nombre, apellido } = splitFullName(fullName)
   assertStrongPassword(password, { email, name: fullName })
   const existing = await userModel.findByEmail(email)
 
@@ -104,12 +116,10 @@ export const registerCustomer = async ({ fullName, email, password }) => {
   }
   if (existing) throw new HttpError(409, 'El correo electrónico ya está registrado.')
 
-  // El primer término es el nombre; el resto, el apellido
-  const [nombre, ...rest] = fullName.split(/\s+/)
   const needsVerification = mailer.isEnabled()
   const idUser = await userModel.create({
     nombre,
-    apellido: rest.join(' ') || ' ',
+    apellido,
     email,
     contrasenaHash: await bcrypt.hash(password, 10),
     rol: 'Cliente',
