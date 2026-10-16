@@ -1,7 +1,7 @@
 // auth-modal.js — ventana de acceso (iniciar sesión, registrarse y recuperar la contraseña)
 
 // Reglas de contraseña que se muestran en los formularios (el servidor las vuelve a comprobar)
-const PASSWORD_RULES_TEXT = "Mínimo 10 caracteres, solo letras y números (sin espacios ni símbolos), con al menos una letra y un número.";
+const PASSWORD_RULES_TEXT = "De 8 a 16 caracteres, solo letras y números (sin espacios ni símbolos), con al menos una letra y un número.";
 
 // Devuelve el problema de un correo (texto) o una cadena vacía si es válido: sin espacios y con forma de correo, recibe email
 const emailProblemClient = (email) => {
@@ -15,8 +15,8 @@ const emailProblemClient = (email) => {
 const passwordProblemClient = (password) => {
     if (/\s/.test(password)) return "La contraseña no puede tener espacios.";
     if (/[^\p{L}\d]/u.test(password)) return "La contraseña solo puede tener letras y números (sin símbolos como < > # . -).";
-    if (password.length < 10) return "La contraseña debe tener al menos 10 caracteres.";
-    if (new TextEncoder().encode(password).length > 72) return "La contraseña es demasiado larga (máximo 72 caracteres).";
+    if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres.";
+    if (password.length > 16) return "La contraseña admite máximo 16 caracteres.";
     if (!/\p{L}/u.test(password) || !/\d/.test(password)) return "La contraseña debe tener al menos una letra y un número.";
     return "";
 };

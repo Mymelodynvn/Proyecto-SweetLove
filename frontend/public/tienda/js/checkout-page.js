@@ -9,7 +9,7 @@ const CHECKOUT_RULES = {
         // Se cuentan solo los dígitos: se aceptan espacios, guiones, paréntesis y el signo +
         const digits = value.replace(/\D/g, "");
         const validChars = /^\+?[\d\s().-]+$/.test(value) && value.length <= 20;
-        return validChars && digits.length >= 7 && digits.length <= 15 ? "" : "Escribe un celular válido (entre 7 y 15 números).";
+        return validChars && digits.length >= 7 && digits.length <= 10 ? "" : "Escribe un celular válido (entre 7 y 10 números).";
     },
     address: (value) => (value.length >= 6 && value.length <= 150 ? "" : "Escribe la dirección de entrega con la ciudad (entre 6 y 150 caracteres).")
 };
