@@ -603,6 +603,52 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('productos: validaciones', () => {
+    // Crea un producto como administrador, recibe body
+    const createRaw = (body) => call('/api/products', { method: 'POST', cookie: adminCookie, body })
+
+    test('rechaza proveedor inexistente, precio 0 o fuera de rango, stock inválido y estado que no es verdadero o falso', async () => {
+      const base = { name: 'Validación', price: 1000, stock: 5 }
+      for (const [label, change] of [
+        ['proveedor inexistente', { supplierId: 99999999 }],
+        ['precio 0', { price: 0 }],
+        ['precio mayor a un INT', { price: 3000000000 }],
+        ['precio con decimales', { price: 1500.5 }],
+        ['precio negativo', { price: -5 }],
+        ['precio en texto', { price: 'barato' }],
+        ['stock negativo', { stock: -1 }],
+        ['stock enorme', { stock: 100000 }],
+        ['estado como texto', { active: 'false' }],
+      ]) {
+        assert.equal((await createRaw({ ...base, ...change })).status, 400, label)
+      }
+      const [[{ total }]] = await getPool().query("SELECT COUNT(*) AS total FROM producto WHERE nombre = 'Validación'")
+      assert.equal(Number(total), 0, 'ningún producto inválido se guarda')
+      assert.equal((await createRaw({ ...base, price: 99999999, stock: 99999 })).status, 201, 'los máximos sí pasan')
+    })
+
+    test('el error de un proveedor que no existe lo dice con claridad (no es un error interno)', async () => {
+      const result = await createRaw({ name: 'Con proveedor falso', price: 1000, stock: 1, supplierId: 99999999 })
+      assert.equal(result.status, 400)
+      assert.equal(result.data.message, 'El proveedor no existe.')
+    })
+
+    test('editar un producto conserva lo que no se envía, y null lo borra a propósito', async () => {
+      const created = await createRaw({ name: 'Conserva', description: 'Descripción original', price: 2000, stock: 3, active: false, supplierId: 1, image: 'https://example.com/a.jpg' })
+      assert.equal(created.status, 201, JSON.stringify(created.data))
+      const id = created.data.producto.id
+      const readRow = async () => (await getPool().query('SELECT nombre, descripcion, precio, cantidad, imagen, estado, idProveedor FROM producto WHERE idProducto = ?', [id]))[0][0]
+
+      // El panel no envía el proveedor ni el estado: no deben perderse
+      assert.equal((await call(`/api/products/${id}`, { method: 'PUT', cookie: adminCookie, body: { name: 'Conserva 2', price: 2500, stock: 4 } })).status, 200)
+      assert.deepEqual({ ...(await readRow()) }, { nombre: 'Conserva 2', descripcion: 'Descripción original', precio: 2500, cantidad: 4, imagen: 'https://example.com/a.jpg', estado: 0, idProveedor: 1 })
+
+      const cleared = await call(`/api/products/${id}`, { method: 'PUT', cookie: adminCookie, body: { name: 'Conserva 2', price: 2500, stock: 4, image: null, supplierId: null, active: true } })
+      assert.equal(cleared.status, 200)
+      assert.deepEqual({ ...(await readRow()) }, { nombre: 'Conserva 2', descripcion: 'Descripción original', precio: 2500, cantidad: 4, imagen: null, estado: 1, idProveedor: null })
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)
