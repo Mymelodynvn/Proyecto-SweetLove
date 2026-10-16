@@ -44,7 +44,7 @@ La vista (V) del MVC es el frontend: el backend responde JSON.
 ## Flujo de un pedido (`POST /api/orders`)
 
 1. `routes/index.js` la enruta a `orderController.create` (ruta pública).
-2. El controlador valida el cuerpo en el servidor (`utils/validate.js`): nombre, correo, celular (7–15 números), dirección (6–150 caracteres) y productos.
+2. El controlador valida el cuerpo en el servidor (`utils/validate.js`): nombre, correo, celular (7–10 números), dirección (6–150 caracteres) y productos.
 3. `orderService.createOrder` abre una transacción: busca al cliente por correo (si no existe crea una **cuenta de invitado**; si existe **no le cambia sus datos**, solo completa los vacíos), bloquea cada producto
    (`FOR UPDATE`), toma el precio **de la base** (no del navegador), crea pedido, líneas, pago y envío, y descuenta stock.
 4. Los datos de entrega se guardan **en el pedido** (`nombreEnvio`, `celularEnvio`, `direccionEnvio`), no en la cuenta.
@@ -83,7 +83,7 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 
 ### Reglas de contraseña
 
-Mínimo 10 caracteres (máximo 72 bytes: bcrypt ignora lo que pase de eso), **solo letras y números**: no se aceptan espacios ni símbolos
+De 8 a 16 caracteres, **solo letras y números**: no se aceptan espacios ni símbolos
 (`< > # . - ! @`…). Debe tener al menos una letra y un número, no ser una clave obvia (`1234567890`, secuencias, una letra repetida)
 ni contener el correo o el nombre. Se comprueban en el servidor (`utils/password.js`); la tienda y el panel muestran las reglas,
 no dejan teclear espacios y las validan también al enviar. Las reglas valen al registrarse, restablecer y cambiar la contraseña:
