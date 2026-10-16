@@ -14,7 +14,9 @@
     "db:init": "node scripts/db.js init",
     "db:migrate": "node scripts/db.js migrate",
     "db:status": "node scripts/db.js status",
-    "db:baseline": "node scripts/db.js baseline"
+    "db:baseline": "node scripts/db.js baseline",
+    "gmail:url": "node scripts/gmail-token.js url",
+    "gmail:token": "node scripts/gmail-token.js token"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
