@@ -40,14 +40,29 @@ export const setImage = async (id, imagePath) => {
   await getPool().execute('UPDATE producto SET imagen = ? WHERE idProducto = ?', [imagePath, id])
 }
 
-// Actualiza todos los campos editables de un producto, recibe id, data
+// Columnas de `producto` que se pueden editar y el campo de `data` que las llena (los nombres vienen de esta lista fija, nunca del cliente)
+const EDITABLE_COLUMNS = {
+  name: 'nombre',
+  description: 'descripcion',
+  price: 'precio',
+  stock: 'cantidad',
+  image: 'imagen',
+  active: 'estado',
+  supplierId: 'idProveedor',
+}
+
+// Actualiza solo los campos que vienen en data: lo que no se envía (undefined) se conserva; null borra el valor, recibe id, data
 export const update = async (id, data) => {
-  const [result] = await getPool().execute(
-    `UPDATE producto
-     SET nombre = ?, descripcion = ?, precio = ?, cantidad = ?, imagen = ?, estado = ?, idProveedor = ?
-     WHERE idProducto = ?`,
-    [data.name, data.description, data.price, data.stock, data.image, data.active ? 1 : 0, data.supplierId, id],
-  )
+  const sets = []
+  const values = []
+  for (const [field, column] of Object.entries(EDITABLE_COLUMNS)) {
+    if (data[field] === undefined) continue
+    sets.push(`${column} = ?`)
+    values.push(field === 'active' ? (data.active ? 1 : 0) : data[field])
+  }
+  if (!sets.length) return 0
+
+  const [result] = await getPool().execute(`UPDATE producto SET ${sets.join(', ')} WHERE idProducto = ?`, [...values, id])
   return result.affectedRows
 }
 

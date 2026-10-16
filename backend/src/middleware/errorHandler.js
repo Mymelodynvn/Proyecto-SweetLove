@@ -5,6 +5,9 @@ import { HttpError } from '../utils/httpError.js'
 const MYSQL_ROW_IS_REFERENCED = 'ER_ROW_IS_REFERENCED_2'
 // Código de MySQL: un texto es más largo que la columna donde se guardaría
 const MYSQL_DATA_TOO_LONG = 'ER_DATA_TOO_LONG'
+// Códigos de MySQL: un número no cabe en su columna, o se apunta a un registro que no existe
+const MYSQL_OUT_OF_RANGE = ['ER_WARN_DATA_OUT_OF_RANGE', 'ER_DATA_OUT_OF_RANGE']
+const MYSQL_NO_REFERENCED_ROW = 'ER_NO_REFERENCED_ROW_2'
 
 // Responde 404 cuando ninguna ruta coincide con la petición, recibe req, next
 export const notFoundHandler = (req, _res, next) => {
@@ -33,6 +36,12 @@ export const errorHandler = (error, _req, res, _next) => {
   } else if (error.code === MYSQL_DATA_TOO_LONG) {
     statusCode = 400
     message = 'Uno de los textos enviados es demasiado largo.'
+  } else if (MYSQL_OUT_OF_RANGE.includes(error.code)) {
+    statusCode = 400
+    message = 'Uno de los números enviados está fuera del rango permitido.'
+  } else if (error.code === MYSQL_NO_REFERENCED_ROW) {
+    statusCode = 400
+    message = 'Uno de los datos enviados apunta a un registro que no existe.'
   } else {
     console.error('[error]', error)
   }

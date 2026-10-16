@@ -25,13 +25,6 @@ export const parsePositiveInt = (value, label = 'El identificador') => {
   return number
 }
 
-// Convierte un valor en entero mayor o igual a cero (precio, stock), recibe value, label
-export const parseNonNegativeInt = (value, label) => {
-  const number = Number(value)
-  if (!Number.isInteger(number) || number < 0) throw new HttpError(400, `${label} debe ser un número entero mayor o igual a 0.`)
-  return number
-}
-
 // Máximos de un pedido: productos distintos y unidades por producto (frenan pedidos abusivos antes de tocar la base)
 export const MAX_ORDER_LINES = 30
 export const MAX_LINE_QUANTITY = 50
@@ -55,6 +48,15 @@ export const parseOrderItems = (items) => {
     if (quantity > MAX_LINE_QUANTITY) throw new HttpError(400, `Puedes pedir máximo ${MAX_LINE_QUANTITY} unidades de cada producto.`)
   }
   return [...byProduct].map(([productId, quantity]) => ({ productId, quantity }))
+}
+
+// Convierte un valor en entero entre un mínimo y un máximo (precio, stock): solo admite dígitos, recibe value, label, min, max
+export const parseIntInRange = (value, label, min, max) => {
+  const text = String(value ?? '').trim()
+  if (!/^\d+$/.test(text) || Number(text) < min || Number(text) > max) {
+    throw new HttpError(400, `${label} debe ser un número entero entre ${min.toLocaleString('es-CO')} y ${max.toLocaleString('es-CO')}.`)
+  }
+  return Number(text)
 }
 
 // Valida un celular: entre 7 y 10 números (se aceptan espacios, guiones, paréntesis y un + inicial) y devuelve el texto limpio, recibe value
