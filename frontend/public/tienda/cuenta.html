@@ -101,7 +101,7 @@
                                 <label for="cuenta-nueva">Contraseña nueva</label>
 
                                 <!-- Entrada de la contraseña nueva -->
-                                <input id="cuenta-nueva" type="password" autocomplete="new-password" v-model="password" required>
+                                <input id="cuenta-nueva" type="password" autocomplete="new-password" v-model="password" @keydown.space.prevent required>
                             </div>
 
                             <!-- Campo: repetir la contraseña nueva -->
@@ -110,7 +110,7 @@
                                 <label for="cuenta-repetir">Repite la contraseña nueva</label>
 
                                 <!-- Entrada para repetir la contraseña nueva -->
-                                <input id="cuenta-repetir" type="password" autocomplete="new-password" v-model="confirm" required>
+                                <input id="cuenta-repetir" type="password" autocomplete="new-password" v-model="confirm" @keydown.space.prevent required>
                             </div>
 
                             <!-- Error de validación o del servidor -->

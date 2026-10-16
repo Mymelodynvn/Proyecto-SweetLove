@@ -128,7 +128,7 @@
                                 <label for="checkout-email">Correo electrónico</label>
 
                                 <!-- Entrada de correo -->
-                                <input id="checkout-email" type="email" v-model.trim="form.email" autocomplete="email" placeholder="tucorreo@ejemplo.com" @blur="validateField('email')">
+                                <input id="checkout-email" type="email" v-model="form.email" @keydown.space.prevent autocomplete="email" placeholder="tucorreo@ejemplo.com" @blur="validateField('email')">
 
                                 <!-- Mensaje de error del campo -->
                                 <p v-if="errors.email" class="checkout__error">{{ errors.email }}</p>

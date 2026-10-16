@@ -18,7 +18,8 @@ const loginError = ref('')
 
 // Envía el correo y la contraseña
 const handleLogin = async () => {
-  loginError.value = ''
+  loginError.value = emailProblem(email.value)
+  if (loginError.value) return
   try {
     const response = await $fetch<{ user: UserSession }>('/api/auth/login', {
       method: 'POST',
@@ -55,7 +56,7 @@ const handleLogin = async () => {
       <form class="flex flex-col gap-4" @submit.prevent="handleLogin">
         <div class="flex flex-col gap-2">
           <Label for="email">Correo electrónico</Label>
-          <Input id="email" v-model="email" type="email" placeholder="hola@sweetlove.com" required />
+          <Input id="email" v-model="email" type="email" placeholder="hola@sweetlove.com" required @keydown.space.prevent />
         </div>
         <div class="flex flex-col gap-2">
           <div class="flex items-center justify-between">

@@ -4,7 +4,7 @@
 const CHECKOUT_RULES = {
     name: (value) => (value.length >= 2 && value.length <= 50 ? "" : "Escribe tu nombre (entre 2 y 50 letras)."),
     lastName: (value) => (value.length >= 2 && value.length <= 50 ? "" : "Escribe tu apellido (entre 2 y 50 letras)."),
-    email: (value) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? "" : "Escribe un correo válido, por ejemplo tucorreo@ejemplo.com."),
+    email: (value) => emailProblemClient(value),
     phone: (value) => {
         // Se cuentan solo los dígitos: se aceptan espacios, guiones, paréntesis y el signo +
         const digits = value.replace(/\D/g, "");

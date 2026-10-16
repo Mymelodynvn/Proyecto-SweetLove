@@ -64,11 +64,11 @@ const submit = async () => {
       <form v-else class="flex flex-col gap-4" @submit.prevent="submit">
         <div class="flex flex-col gap-2">
           <Label for="password">Nueva contraseña</Label>
-          <Input id="password" v-model="password" type="password" autocomplete="new-password" required />
+          <Input id="password" v-model="password" type="password" autocomplete="new-password" required @keydown.space.prevent />
         </div>
         <div class="flex flex-col gap-2">
           <Label for="confirm-password">Confirmar contraseña</Label>
-          <Input id="confirm-password" v-model="confirmPassword" type="password" autocomplete="new-password" required />
+          <Input id="confirm-password" v-model="confirmPassword" type="password" autocomplete="new-password" required @keydown.space.prevent />
         </div>
         <p v-if="errorMessage" class="text-destructive text-sm">{{ errorMessage }}</p>
         <Button type="submit" class="w-full" :disabled="sending">{{ sending ? 'Guardando…' : 'Guardar contraseña' }}</Button>

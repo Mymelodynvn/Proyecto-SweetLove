@@ -16,7 +16,8 @@ const errorMessage = ref('')
 // Pide a la API el enlace de recuperación y muestra su respuesta (igual exista o no la cuenta)
 const submit = async () => {
   message.value = ''
-  errorMessage.value = ''
+  errorMessage.value = emailProblem(email.value)
+  if (errorMessage.value) return
   sending.value = true
   try {
     const response = await $fetch<{ message: string }>('/api/auth/forgot-password', { method: 'POST', body: { email: email.value } })
@@ -43,7 +44,7 @@ const submit = async () => {
       <form class="flex flex-col gap-4" @submit.prevent="submit">
         <div class="flex flex-col gap-2">
           <Label for="email">Correo electrónico</Label>
-          <Input id="email" v-model="email" type="email" placeholder="hola@sweetlove.com" required />
+          <Input id="email" v-model="email" type="email" placeholder="hola@sweetlove.com" required @keydown.space.prevent />
         </div>
         <p v-if="errorMessage" class="text-destructive text-sm">{{ errorMessage }}</p>
         <p v-if="message" class="text-primary text-sm">{{ message }}</p>

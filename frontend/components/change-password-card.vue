@@ -60,11 +60,11 @@ const submit = async () => {
         </div>
         <div class="flex flex-col gap-2">
           <Label for="new-password">Contraseña nueva</Label>
-          <Input id="new-password" v-model="newPassword" type="password" autocomplete="new-password" required />
+          <Input id="new-password" v-model="newPassword" type="password" autocomplete="new-password" required @keydown.space.prevent />
         </div>
         <div class="flex flex-col gap-2">
           <Label for="repeat-password">Repite la contraseña nueva</Label>
-          <Input id="repeat-password" v-model="confirmPassword" type="password" autocomplete="new-password" required />
+          <Input id="repeat-password" v-model="confirmPassword" type="password" autocomplete="new-password" required @keydown.space.prevent />
         </div>
         <p v-if="errorMessage" class="text-destructive text-sm">{{ errorMessage }}</p>
         <p v-if="successMessage" class="text-primary text-sm">{{ successMessage }}</p>

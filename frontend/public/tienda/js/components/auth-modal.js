@@ -1,11 +1,21 @@
 // auth-modal.js — ventana de acceso (iniciar sesión, registrarse y recuperar la contraseña)
 
 // Reglas de contraseña que se muestran en los formularios (el servidor las vuelve a comprobar)
-const PASSWORD_RULES_TEXT = "Mínimo 8 caracteres, con al menos una letra y un número.";
+const PASSWORD_RULES_TEXT = "Mínimo 10 caracteres, solo letras y números (sin espacios ni símbolos), con al menos una letra y un número.";
+
+// Devuelve el problema de un correo (texto) o una cadena vacía si es válido: sin espacios y con forma de correo, recibe email
+const emailProblemClient = (email) => {
+    if (/\s/.test(email)) return "El correo no puede tener espacios.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Escribe un correo válido, por ejemplo tucorreo@ejemplo.com.";
+    if (email.length > 100) return "El correo admite máximo 100 caracteres.";
+    return "";
+};
 
 // Devuelve el problema de una contraseña (texto) o una cadena vacía si cumple las reglas básicas, recibe password
 const passwordProblemClient = (password) => {
-    if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres.";
+    if (/\s/.test(password)) return "La contraseña no puede tener espacios.";
+    if (/[^\p{L}\d]/u.test(password)) return "La contraseña solo puede tener letras y números (sin símbolos como < > # . -).";
+    if (password.length < 10) return "La contraseña debe tener al menos 10 caracteres.";
     if (new TextEncoder().encode(password).length > 72) return "La contraseña es demasiado larga (máximo 72 caracteres).";
     if (!/\p{L}/u.test(password) || !/\d/.test(password)) return "La contraseña debe tener al menos una letra y un número.";
     return "";
@@ -52,7 +62,7 @@ const AuthModal = {
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-envelope"></i>
 
-                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="loginForm.email" required>
+                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model="loginForm.email" @keydown.space.prevent required>
                     </div>
 
                     <!-- Campo: contraseña, con botón para mostrarla u ocultarla -->
@@ -109,14 +119,14 @@ const AuthModal = {
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-envelope"></i>
 
-                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="registerForm.email" required>
+                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model="registerForm.email" @keydown.space.prevent required>
                     </div>
 
                     <!-- Campo: contraseña, con botón para mostrarla u ocultarla -->
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-lock"></i>
 
-                        <input :type="showRegisterPassword ? 'text' : 'password'" placeholder="Contraseña" autocomplete="new-password" v-model="registerForm.password" required>
+                        <input :type="showRegisterPassword ? 'text' : 'password'" placeholder="Contraseña" autocomplete="new-password" v-model="registerForm.password" @keydown.space.prevent required>
 
                         <!-- Botón para mostrar u ocultar la contraseña -->
                         <button type="button" class="auth-modal__toggle-password" @click="showRegisterPassword = !showRegisterPassword" aria-label="Mostrar contraseña"><i :class="showRegisterPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i></button>
@@ -156,7 +166,7 @@ const AuthModal = {
                     <div class="auth-modal__field">
                         <i class="fa-solid fa-envelope"></i>
 
-                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model.trim="forgotForm.email" required>
+                        <input type="email" placeholder="Correo Electrónico" autocomplete="email" v-model="forgotForm.email" @keydown.space.prevent required>
                     </div>
 
                     <!-- Botón para enviar el enlace -->
@@ -194,6 +204,11 @@ const AuthModal = {
         async submitLogin() {
             this.loginMessage = "";
             this.needsVerification = false;
+            const emailProblem = emailProblemClient(this.loginForm.email);
+            if (emailProblem) {
+                this.loginMessage = emailProblem;
+                return;
+            }
             const { ok, data } = await postJson("/api/auth/login", this.loginForm);
             if (!ok) {
                 // Con el código EMAIL_NOT_VERIFIED se ofrece reenviar el correo de verificación
@@ -209,7 +224,7 @@ const AuthModal = {
         // Valida la contraseña y envía los datos de registro a la API; al terminar vuelve al login con el aviso
         async submitRegister() {
             this.registerMessage = "";
-            const problem = passwordProblemClient(this.registerForm.password);
+            const problem = emailProblemClient(this.registerForm.email) || passwordProblemClient(this.registerForm.password);
             if (problem) {
                 this.registerMessage = problem;
                 return;
@@ -239,7 +254,8 @@ const AuthModal = {
 
         // Pide a la API el enlace para restablecer la contraseña y muestra su respuesta
         async submitForgot() {
-            this.forgotMessage = "";
+            this.forgotMessage = emailProblemClient(this.forgotForm.email);
+            if (this.forgotMessage) return;
             this.busy = true;
             const { ok, data } = await postJson("/api/auth/forgot-password", this.forgotForm);
             this.busy = false;
