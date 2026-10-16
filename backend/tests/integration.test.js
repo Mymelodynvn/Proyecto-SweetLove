@@ -28,6 +28,7 @@ let api
 let getPool
 let outbox
 let paymentService
+let orderToken
 let server
 let baseUrl
 let adminCookie
@@ -156,6 +157,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     ;({ getPool } = await import('../src/config/database.js'))
     ;({ outbox } = await import('../src/services/mailer.js'))
     paymentService = await import('../src/services/paymentService.js')
+    ;({ orderToken } = await import('../src/utils/order-token.js'))
     const { createApp } = await import('../src/app.js')
     server = createApp().listen(0)
     await new Promise((resolve) => server.once('listening', resolve))
@@ -573,6 +575,10 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const minutes = (new Date(mp.lastPreference.expiration_date_to) - new Date(mp.lastPreference.expiration_date_from)) / 60000
       assert.equal(Math.round(minutes), 30)
       assert.equal(mp.lastPreference.items[0].unit_price, 20000)
+      // Las direcciones de regreso llevan el pedido y su código para poder confirmar el pago
+      for (const url of Object.values(mp.lastPreference.back_urls)) {
+        assert.match(url, new RegExp(`[?&]pedido=${order.idPedido}&t=${orderToken(order.idPedido)}$`))
+      }
     })
 
     test('aviso firmado con pago aprobado y monto correcto: el pago queda Aprobado', async () => {
@@ -581,6 +587,21 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
 
       const notice = await call('/api/payments/webhook?type=payment&data.id=9001', { method: 'POST', headers: { 'x-signature': sign('9001'), 'x-request-id': 'req-1' }, body: {} })
       assert.equal(notice.status, 200)
+      assert.equal((await orderState(order.idPedido)).estadoPago, 'Aprobado')
+    })
+
+    test('confirmar un pago sin el código del enlace de regreso, o con uno falso, se rechaza y no consulta nada', async () => {
+      const order = await createMercadoPagoOrder(await createProduct(3, 15000))
+      mp.payments.set(String(order.idPedido), [{ id: 9010, status: 'approved', transaction_amount: 15000, currency_id: 'COP', external_reference: String(order.idPedido) }])
+
+      for (const body of [{ orderId: order.idPedido }, { orderId: order.idPedido, token: 'falso' }, { orderId: order.idPedido, token: orderToken(order.idPedido + 1) }]) {
+        const result = await call('/api/payments/confirm', { method: 'POST', body })
+        assert.equal(result.status, 403, JSON.stringify(body))
+      }
+      assert.equal((await orderState(order.idPedido)).estadoPago, 'Pendiente', 'el pago no cambia sin el código')
+
+      const valid = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido, token: orderToken(order.idPedido) } })
+      assert.equal(valid.status, 200)
       assert.equal((await orderState(order.idPedido)).estadoPago, 'Aprobado')
     })
 
@@ -595,7 +616,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const order = await createMercadoPagoOrder(await createProduct(3, 15000))
       mp.payments.set(String(order.idPedido), [{ id: 9003, status: 'approved', transaction_amount: 1, currency_id: 'COP', external_reference: String(order.idPedido) }])
 
-      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido } })
+      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido, token: orderToken(order.idPedido) } })
       assert.equal(confirm.status, 200)
       assert.equal((await orderState(order.idPedido)).estadoPago, 'Pendiente')
     })
@@ -604,7 +625,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const order = await createMercadoPagoOrder(await createProduct(3, 15000))
       mp.payments.set(String(order.idPedido), [{ id: 9004, status: 'approved', transaction_amount: 15000, currency_id: 'COP', external_reference: String(order.idPedido) }])
 
-      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido } })
+      const confirm = await call('/api/payments/confirm', { method: 'POST', body: { orderId: order.idPedido, token: orderToken(order.idPedido) } })
       assert.equal(confirm.data.status, 'Aprobado')
       assert.equal((await orderState(order.idPedido)).estadoPago, 'Aprobado')
     })

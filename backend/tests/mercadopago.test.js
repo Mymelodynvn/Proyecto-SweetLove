@@ -11,6 +11,7 @@ process.env.BACKEND_PUBLIC_URL = 'https://api.example.com/'
 
 const mercadoPago = await import('../src/services/mercadoPagoService.js')
 const { createApp } = await import('../src/app.js')
+const { orderToken } = await import('../src/utils/order-token.js')
 
 const realFetch = globalThis.fetch
 let server
@@ -74,8 +75,11 @@ describe('enlace de pago (preferencia)', () => {
     assert.deepEqual(body.items[0], { id: '1', title: 'Caja de chocolates', quantity: 2, unit_price: 45000, currency_id: 'COP' })
     assert.equal(body.items.length, 2)
     assert.equal(body.external_reference, '7')
-    assert.equal(body.back_urls.success, 'https://tienda.example.com/tienda/pagoResultado.html?resultado=exito')
-    assert.equal(body.back_urls.failure, 'https://tienda.example.com/tienda/pagoResultado.html?resultado=fallo')
+    // las direcciones de regreso llevan el pedido y su código, para poder confirmar el pago
+    const order = `pedido=7&t=${orderToken(7)}`
+    assert.equal(body.back_urls.success, `https://tienda.example.com/tienda/pagoResultado.html?resultado=exito&${order}`)
+    assert.equal(body.back_urls.failure, `https://tienda.example.com/tienda/pagoResultado.html?resultado=fallo&${order}`)
+    assert.equal(body.back_urls.pending, `https://tienda.example.com/tienda/pagoResultado.html?resultado=pendiente&${order}`)
     assert.equal(body.auto_return, 'approved')
     // la barra final de BACKEND_PUBLIC_URL se quita
     assert.equal(body.notification_url, 'https://api.example.com/api/payments/webhook')
