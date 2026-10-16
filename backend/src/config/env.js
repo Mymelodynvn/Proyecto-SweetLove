@@ -65,6 +65,8 @@ export const config = Object.freeze({
     resendApiKey: process.env.RESEND_API_KEY || '',
     from: process.env.MAIL_FROM || (senderAddress ? `Sweet Love <${senderAddress}>` : 'Sweet Love <onboarding@resend.dev>'),
     transport: process.env.MAIL_TRANSPORT || '',
+    // Dirección pública del logo que se muestra en los correos (vacía: se usa el de la tienda en FRONTEND_URL)
+    logoUrl: (process.env.EMAIL_LOGO_URL || '').trim(),
   },
   // Mercado Pago (Checkout Pro): el Access Token es secreto y solo vive en el backend
   mercadoPago: {

@@ -9,6 +9,7 @@ import { ADMIN_ROLE_ID } from '../middleware/auth.js'
 import * as userModel from '../models/userModel.js'
 import * as tokenModel from '../models/tokenModel.js'
 import * as mailer from './mailer.js'
+import { renderEmail } from './emailTemplate.js'
 
 // Tipos de token y su vigencia en minutos
 const RESET = 'reset'
@@ -28,9 +29,6 @@ export const PENDING_MESSAGE = 'Te enviamos un correo para activar tu cuenta. Re
 // Calcula el hash (SHA-256) de un token; en la base solo se guarda el hash, recibe token
 const hashToken = (token) => createHash('sha256').update(String(token)).digest('hex')
 
-// Escapa texto para ponerlo dentro de HTML, recibe text
-const escapeHtml = (text) => String(text).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char])
-
 // Crea un token nuevo para un usuario y devuelve el texto que va en el enlace, recibe user, tipo, minutes
 const issueToken = async (user, tipo, minutes) => {
   const token = randomBytes(32).toString('base64url')
@@ -38,27 +36,13 @@ const issueToken = async (user, tipo, minutes) => {
   return token
 }
 
-// Arma el correo (texto y HTML) con un botón que lleva al enlace, recibe name, title, intro, buttonText, link
-const buildEmail = ({ name, title, intro, buttonText, link }) => ({
-  subject: title,
-  text: `Hola ${name},\n\n${intro}\n\n${buttonText}: ${link}\n\nSi no fuiste tú, ignora este correo.\n\nSweet Love`,
-  html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;color:#5d7b60">
-    <h2>${escapeHtml(title)}</h2>
-    <p>Hola ${escapeHtml(name)},</p>
-    <p>${escapeHtml(intro)}</p>
-    <p><a href="${escapeHtml(link)}" style="display:inline-block;padding:12px 22px;background:#6c8d6f;color:#fffdec;border-radius:999px;text-decoration:none">${escapeHtml(buttonText)}</a></p>
-    <p style="font-size:13px;opacity:.8">Si el botón no funciona, copia este enlace en tu navegador:<br>${escapeHtml(link)}</p>
-    <p style="font-size:13px;opacity:.8">Si no fuiste tú, ignora este correo.</p>
-  </div>`,
-})
-
 // Envía a un usuario el enlace para fijar su contraseña (restablecer o activar cuenta); los administradores usan la pantalla del panel, recibe user, activation
 const sendResetLink = async (user, activation = false) => {
   if ((await tokenModel.countRecent(user.idUser, RESET, 60)) >= MAX_EMAILS_PER_HOUR) return
   const token = await issueToken(user, RESET, RESET_MINUTES)
   const path = user.idRol === ADMIN_ROLE_ID ? '/auth/reset-password' : '/tienda/restablecer.html'
   const link = `${config.frontendUrl}${path}?token=${token}`
-  const email = buildEmail({
+  const email = renderEmail({
     name: user.nombre,
     title: activation ? 'Activa tu cuenta de Sweet Love' : 'Restablece tu contraseña',
     intro: activation
@@ -74,7 +58,7 @@ const sendResetLink = async (user, activation = false) => {
 const sendVerificationLink = async (user) => {
   if ((await tokenModel.countRecent(user.idUser, VERIFY, 60)) >= MAX_EMAILS_PER_HOUR) return
   const token = await issueToken(user, VERIFY, VERIFY_MINUTES)
-  const email = buildEmail({
+  const email = renderEmail({
     name: user.nombre,
     title: 'Verifica tu correo en Sweet Love',
     intro: 'Confirma que este correo es tuyo para poder iniciar sesión. El enlace dura 24 horas.',
