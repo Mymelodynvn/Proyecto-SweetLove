@@ -1,10 +1,9 @@
 // Reglas de contraseña: sin espacios ni símbolos, largo, letras y números, claves obvias y datos de la propia cuenta
 import { HttpError } from './httpError.js'
 
-// Largo mínimo en caracteres
-export const PASSWORD_MIN_LENGTH = 10
-// Largo máximo en bytes: bcrypt ignora lo que pase de 72 bytes, así que se rechaza en lugar de cortarlo en silencio
-export const PASSWORD_MAX_BYTES = 72
+// Largo mínimo y máximo en caracteres (con solo letras y números, 16 caracteres caben de sobra en los 72 bytes que lee bcrypt)
+export const PASSWORD_MIN_LENGTH = 8
+export const PASSWORD_MAX_LENGTH = 16
 
 // Claves muy usadas que no se aceptan (se comparan en minúsculas)
 const COMMON_PASSWORDS = new Set([
@@ -34,9 +33,7 @@ export const passwordProblem = (password, { email = '', name = '' } = {}) => {
   // Solo letras (con tildes y ñ) y números: los símbolos, como < > # . -, no se aceptan
   if (/[^\p{L}\d]/u.test(password)) return 'La contraseña solo puede tener letras y números (sin símbolos como < > # . -).'
   if (password.length < PASSWORD_MIN_LENGTH) return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres.`
-  if (Buffer.byteLength(password, 'utf8') > PASSWORD_MAX_BYTES) {
-    return `La contraseña es demasiado larga (máximo ${PASSWORD_MAX_BYTES} caracteres).`
-  }
+  if (password.length > PASSWORD_MAX_LENGTH) return `La contraseña admite máximo ${PASSWORD_MAX_LENGTH} caracteres.`
   if (isRepeated(password) || isSequence(password) || COMMON_PASSWORDS.has(password.toLowerCase())) {
     return 'Esa contraseña es demasiado común. Elige una más difícil de adivinar.'
   }

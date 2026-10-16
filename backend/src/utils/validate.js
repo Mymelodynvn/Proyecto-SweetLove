@@ -57,12 +57,12 @@ export const parseOrderItems = (items) => {
   return [...byProduct].map(([productId, quantity]) => ({ productId, quantity }))
 }
 
-// Valida un celular: entre 7 y 15 números (se aceptan espacios, guiones, paréntesis y un + inicial) y devuelve el texto limpio, recibe value
+// Valida un celular: entre 7 y 10 números (se aceptan espacios, guiones, paréntesis y un + inicial) y devuelve el texto limpio, recibe value
 export const parsePhone = (value) => {
   const phone = cleanText(value)
   const digits = phone.replace(/\D/g, '')
-  if (!/^\+?[\d\s().-]+$/.test(phone) || digits.length < 7 || digits.length > 15 || phone.length > 20) {
-    throw new HttpError(400, 'El celular no es válido (entre 7 y 15 números).')
+  if (!/^\+?[\d\s().-]+$/.test(phone) || digits.length < 7 || digits.length > 10 || phone.length > 20) {
+    throw new HttpError(400, 'El celular no es válido (entre 7 y 10 números).')
   }
   return phone
 }
