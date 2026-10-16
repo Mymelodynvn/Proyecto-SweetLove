@@ -328,6 +328,27 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal(await stockOf(productId), 2)
     })
 
+    test('el registro guarda el apellido vacío con un solo nombre y avisa qué parte del nombre es muy larga', async () => {
+      const register = (fullName, email = uniqueEmail()) => call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1' } })
+
+      const single = uniqueEmail()
+      assert.equal((await register('Ana', single)).status, 201)
+      const [[saved]] = await getPool().query('SELECT nombre, apellido FROM usuario WHERE email = ?', [single])
+      assert.deepEqual({ ...saved }, { nombre: 'Ana', apellido: '' }, 'el apellido queda vacío, no con un espacio')
+
+      const full = uniqueEmail()
+      assert.equal((await register('María José Pérez Gómez', full)).status, 201)
+      const [[split]] = await getPool().query('SELECT nombre, apellido FROM usuario WHERE email = ?', [full])
+      assert.deepEqual({ ...split }, { nombre: 'María', apellido: 'José Pérez Gómez' })
+
+      const longName = await register('A'.repeat(51))
+      assert.equal(longName.status, 400)
+      assert.equal(longName.data.message, 'El nombre admite máximo 50 caracteres.')
+      const longLastName = await register(`Ana ${'B'.repeat(51)}`)
+      assert.equal(longLastName.status, 400)
+      assert.equal(longLastName.data.message, 'El apellido admite máximo 50 caracteres.')
+    })
+
     test('cambiar contraseña: pide la actual y aplica las reglas', async () => {
       const user = await createVerifiedUser()
       const cookie = await login(user.email, user.password)
