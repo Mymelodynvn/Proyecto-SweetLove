@@ -1,4 +1,4 @@
-// Servicio de correo: envía por la API de Gmail si está configurada, por SMTP, por Resend o guarda en memoria en las pruebas
+// Servicio de correo: envía por el puente de Apps Script, la API de Gmail, SMTP o Resend, o guarda en memoria en las pruebas
 import nodemailer from 'nodemailer'
 import { config } from '../config/env.js'
 import { HttpError } from '../utils/httpError.js'
@@ -18,15 +18,18 @@ const messageBuilder = nodemailer.createTransport({ streamTransport: true, buffe
 // Indica si hay usuario y contraseña SMTP configurados
 const hasSmtp = () => Boolean(config.mail.smtp.user && config.mail.smtp.password)
 
+// Indica si hay dirección y clave del puente de Apps Script (la dirección debe ser https para no enviar la clave en claro)
+const hasRelay = () => config.mail.relay.url.startsWith('https://') && Boolean(config.mail.relay.secret)
+
 // Indica si están las tres credenciales de la API de Gmail (cliente, secreto y refresh token)
 const hasGmailApi = () => {
   const { clientId, clientSecret, refreshToken } = config.mail.gmail
   return Boolean(clientId && clientSecret && refreshToken)
 }
 
-// Indica si se puede enviar correo (API de Gmail, SMTP, Resend o el modo de pruebas)
+// Indica si se puede enviar correo (puente de Apps Script, API de Gmail, SMTP, Resend o el modo de pruebas)
 export const isEnabled = () =>
-  config.mail.transport === 'memory' || hasGmailApi() || hasSmtp() || Boolean(config.mail.resendApiKey)
+  config.mail.transport === 'memory' || hasRelay() || hasGmailApi() || hasSmtp() || Boolean(config.mail.resendApiKey)
 
 // Devuelve la conexión SMTP, creándola si hace falta
 const getSmtpTransport = () => {
@@ -92,10 +95,45 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
   }
 }
 
+// Envía un correo por el puente de Apps Script (un script de Google que manda el mensaje con tu Gmail), recibe to, subject, text, html
+const sendWithRelay = async ({ to, subject, text, html }) => {
+  try {
+    const { url, secret } = config.mail.relay
+    // Apps Script responde con una redirección (302) que fetch sigue sola; no lee cabeceras propias, por eso la clave va en el cuerpo
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, to, subject, text, html }),
+      signal: AbortSignal.timeout(20000),
+    })
+    const raw = await response.text()
+    let data = null
+    try {
+      data = JSON.parse(raw)
+    } catch {
+      // Si no es JSON, Google devolvió una página (por ejemplo, de inicio de sesión)
+    }
+    // El script siempre responde 200: el resultado real va en { ok, error }
+    if (!response.ok || data?.ok !== true) {
+      console.error('[correo] El puente de Apps Script falló:', response.status, data?.error ?? raw.slice(0, 120).replace(/\s+/g, ' '))
+      throw new HttpError(502, 'No se pudo enviar el correo.')
+    }
+  } catch (error) {
+    if (error instanceof HttpError) throw error
+    console.error('[correo] El puente de Apps Script no respondió:', error.name, error.message)
+    throw new HttpError(502, 'No se pudo enviar el correo.')
+  }
+}
+
 // Envía un correo con asunto, texto y HTML, recibe to, subject, text, html
 export const sendMail = async ({ to, subject, text, html }) => {
   if (config.mail.transport === 'memory') {
     outbox.push({ to, subject, text, html })
+    return
+  }
+
+  if (hasRelay()) {
+    await sendWithRelay({ to, subject, text, html })
     return
   }
 

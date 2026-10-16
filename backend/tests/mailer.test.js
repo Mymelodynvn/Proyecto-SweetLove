@@ -10,6 +10,12 @@ process.env.SMTP_PORT = ''
 process.env.MAIL_FROM = ''
 process.env.MAIL_TRANSPORT = ''
 process.env.RESEND_API_KEY = ''
+process.env.MAIL_RELAY_URL = ''
+process.env.MAIL_RELAY_SECRET = ''
+process.env.GMAIL_CLIENT_ID = ''
+process.env.GMAIL_CLIENT_SECRET = ''
+process.env.GMAIL_REFRESH_TOKEN = ''
+process.env.GMAIL_USER = ''
 
 const { config } = await import('../src/config/env.js')
 const mailer = await import('../src/services/mailer.js')

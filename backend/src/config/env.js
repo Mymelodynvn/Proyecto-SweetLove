@@ -41,9 +41,14 @@ export const config = Object.freeze({
   frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, ''),
   // Minutos que un pedido con Mercado Pago espera su pago antes de cancelarse y devolver el stock
   orderTtlMinutes: Number(process.env.ORDER_TTL_MINUTES || 30),
-  // Correo: por la API de Gmail (HTTPS) si hay GMAIL_*, por SMTP si hay SMTP_*, por Resend si hay RESEND_API_KEY;
+  // Correo: por el puente de Apps Script si hay MAIL_RELAY_*, por la API de Gmail si hay GMAIL_*, por SMTP si hay SMTP_*, por Resend si hay RESEND_API_KEY;
   // con MAIL_TRANSPORT=memory (pruebas) se guarda en memoria
   mail: {
+    // Puente con Google Apps Script: un script de tu cuenta de Google envía el correo; no vence y sirve en Render gratis
+    relay: {
+      url: (process.env.MAIL_RELAY_URL || '').trim(),
+      secret: (process.env.MAIL_RELAY_SECRET || '').trim(),
+    },
     // API de Gmail (OAuth): funciona donde el SMTP está bloqueado, como Render gratis; el refresh token se obtiene con `npm run gmail:token`
     gmail: {
       clientId: (process.env.GMAIL_CLIENT_ID || '').trim(),
