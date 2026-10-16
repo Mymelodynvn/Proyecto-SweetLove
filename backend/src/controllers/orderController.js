@@ -1,6 +1,6 @@
 // Controlador de pedidos: listado y cambio de estado para el panel, y creación desde la tienda
 import { HttpError } from '../utils/httpError.js'
-import { parseAddress, parseEmail, parseName, parsePhone, parsePositiveInt } from '../utils/validate.js'
+import { parseAddress, parseEmail, parseName, parseOrderItems, parsePhone, parsePositiveInt } from '../utils/validate.js'
 import * as orderModel from '../models/orderModel.js'
 import * as orderService from '../services/orderService.js'
 import * as mercadoPago from '../services/mercadoPagoService.js'
@@ -60,11 +60,14 @@ export const updateStatus = async (req, res) => {
   res.json({ ok: true })
 }
 
+// Medios de pago que acepta la tienda (el único activo es Mercado Pago; si falta, se usa ese)
+const PAYMENT_METHODS = [mercadoPago.MERCADO_PAGO]
+
 // Devuelve las líneas del pedido (lista `items`, o un solo productId + quantity por compatibilidad), recibe body
 const parseItems = (body) => {
-  if (Array.isArray(body.items) && body.items.length) return body.items
-  if (body.productId && body.quantity) return [{ productId: body.productId, quantity: body.quantity }]
-  return []
+  if (Array.isArray(body.items)) return parseOrderItems(body.items)
+  if (body.productId && body.quantity) return parseOrderItems([{ productId: body.productId, quantity: body.quantity }])
+  return parseOrderItems([])
 }
 
 // POST /api/orders — registra un pedido desde la tienda (público); con Mercado Pago responde también el enlace de pago, recibe req, res
@@ -78,9 +81,10 @@ export const create = async (req, res) => {
   const address = parseAddress(body.address)
 
   const items = parseItems(body)
-  if (!items.length) throw new HttpError(400, 'El pedido debe contener al menos un producto.')
 
-  const paymentMethod = String(body.paymentMethod ?? '').trim() || 'Pendiente'
+  // Una lista cerrada evita pedidos con "medios" inventados, que nunca se cancelarían por falta de pago
+  const paymentMethod = String(body.paymentMethod ?? '').trim() || mercadoPago.MERCADO_PAGO
+  if (!PAYMENT_METHODS.includes(paymentMethod)) throw new HttpError(400, 'Medio de pago no disponible.')
 
   const { lines, ...order } = await orderService.createOrder({
     customer: { name, lastName, email, phone, address },
@@ -88,10 +92,7 @@ export const create = async (req, res) => {
     paymentMethod,
   })
 
-  // Con otro medio de pago el pedido queda registrado y se responde sin enlace de pago
-  if (paymentMethod !== mercadoPago.MERCADO_PAGO) return void res.status(201).json(order)
-
-  // Con Mercado Pago se crea el enlace de pago; si falla, el pedido igual queda registrado como Pendiente
+  // Se crea el enlace de pago de Mercado Pago; si falla, el pedido igual queda registrado como Pendiente
   try {
     const { initPoint } = await mercadoPago.createPreference({ orderId: order.idPedido, items: lines })
     res.status(201).json({ ...order, initPoint })

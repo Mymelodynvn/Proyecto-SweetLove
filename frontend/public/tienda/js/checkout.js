@@ -1,6 +1,6 @@
 // checkout.js — envío del pedido a la API
-// Envía el carrito completo a la API para crear un solo pedido; con 'Mercado Pago' la respuesta trae initPoint (el enlace de pago), recibe customer, paymentMethod
-const createOrder = async (customer, paymentMethod = 'Pendiente') => {
+// Envía el carrito completo a la API para crear un solo pedido; la respuesta trae initPoint (el enlace de pago de Mercado Pago), recibe customer, paymentMethod
+const createOrder = async (customer, paymentMethod = 'Mercado Pago') => {
     const items = cartStore.items.map((item) => ({
         productId: Number(item.id),
         quantity: Number(item.quantity)

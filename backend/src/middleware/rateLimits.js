@@ -64,3 +64,26 @@ export const confirmLimiter = rateLimit({
   legacyHeaders: false,
   message: tooManyAttempts,
 })
+
+const tooManyOrders = { error: true, statusCode: 429, statusMessage: 'Hiciste muchos pedidos seguidos. Espera un rato e inténtalo de nuevo.' }
+
+// Limita los pedidos por correo y por hora (evita reservar el inventario en masa); solo cuentan los pedidos que sí se registran
+export const orderEmailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  skipFailedRequests: true,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (req) => `pedido:${emailKey(req) || ipKeyGenerator(req.ip)}`,
+  message: tooManyOrders,
+})
+
+// Limita los pedidos por IP (generoso, porque detrás del proxy muchos clientes comparten IP); solo cuentan los pedidos que sí se registran
+export const orderIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  skipFailedRequests: true,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: tooManyOrders,
+})

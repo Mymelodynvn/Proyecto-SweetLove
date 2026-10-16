@@ -2,6 +2,8 @@
 const CART_STORAGE_KEY = "sweetlove-cart";
 const TAX_RATE_PERCENT = 19;
 const ADDED_FEEDBACK_MS = 1600;
+// Máximo de unidades de un mismo producto en el carrito (el servidor rechaza más de 50 por pedido)
+const CART_MAX_PER_PRODUCT = 50;
 
 // Devuelve la ruta de imagen lista para usar en la tienda, recibe imagePath
 const normalizeImagePath = (imagePath) => {
@@ -65,14 +67,14 @@ const cartStore = Vue.reactive({
         const existingItem = this.items.find((cartItem) => cartItem.id === product.id);
 
         if (existingItem) {
-            existingItem.quantity += quantity;
+            existingItem.quantity = Math.min(existingItem.quantity + quantity, CART_MAX_PER_PRODUCT);
         } else {
             this.items.push({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity
+                quantity: Math.min(quantity, CART_MAX_PER_PRODUCT)
             });
         }
 
@@ -92,7 +94,7 @@ const cartStore = Vue.reactive({
             return;
         }
 
-        targetItem.quantity += quantityChange;
+        targetItem.quantity = Math.min(targetItem.quantity + quantityChange, CART_MAX_PER_PRODUCT);
         this.persist();
     },
 

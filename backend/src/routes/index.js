@@ -1,7 +1,9 @@
 // Mapa completo de la API (/api)
 import { Router } from 'express'
 import { requireAdmin, requireUser } from '../middleware/auth.js'
-import { changePasswordLimiter, confirmLimiter, loginLimiter, mailLimiter, registerLimiter, tokenLimiter } from '../middleware/rateLimits.js'
+import {
+  changePasswordLimiter, confirmLimiter, loginLimiter, mailLimiter, orderEmailLimiter, orderIpLimiter, registerLimiter, tokenLimiter,
+} from '../middleware/rateLimits.js'
 import * as auth from '../controllers/authController.js'
 import * as products from '../controllers/productController.js'
 import * as orders from '../controllers/orderController.js'
@@ -14,7 +16,7 @@ const router = Router()
 // --- Públicas (tienda) ---
 router.get('/health', health.check)
 router.get('/products', products.list)
-router.post('/orders', orders.create)
+router.post('/orders', orderIpLimiter, orderEmailLimiter, orders.create)
 router.post('/payments/webhook', payments.webhook)
 router.post('/payments/confirm', confirmLimiter, payments.confirm)
 router.post('/auth/login', loginLimiter, auth.login)

@@ -27,6 +27,31 @@ export const parseNonNegativeInt = (value, label) => {
   return number
 }
 
+// Máximos de un pedido: productos distintos y unidades por producto (frenan pedidos abusivos antes de tocar la base)
+export const MAX_ORDER_LINES = 30
+export const MAX_LINE_QUANTITY = 50
+
+// Valida las líneas de un pedido y suma las que repiten el mismo producto; devuelve [{ productId, quantity }], recibe items
+export const parseOrderItems = (items) => {
+  if (!Array.isArray(items) || !items.length) throw new HttpError(400, 'El pedido debe contener al menos un producto.')
+  if (items.length > MAX_ORDER_LINES) throw new HttpError(400, `Un pedido admite máximo ${MAX_ORDER_LINES} productos.`)
+
+  const byProduct = new Map()
+  for (const item of items) {
+    const productId = Number(item?.productId)
+    const quantity = Number(item?.quantity)
+    if (!Number.isInteger(productId) || productId < 1 || !Number.isInteger(quantity) || quantity < 1) {
+      throw new HttpError(400, 'Uno de los productos del pedido no es válido.')
+    }
+    byProduct.set(productId, (byProduct.get(productId) ?? 0) + quantity)
+  }
+
+  for (const quantity of byProduct.values()) {
+    if (quantity > MAX_LINE_QUANTITY) throw new HttpError(400, `Puedes pedir máximo ${MAX_LINE_QUANTITY} unidades de cada producto.`)
+  }
+  return [...byProduct].map(([productId, quantity]) => ({ productId, quantity }))
+}
+
 // Valida un celular: entre 7 y 15 números (se aceptan espacios, guiones, paréntesis y un + inicial) y devuelve el texto limpio, recibe value
 export const parsePhone = (value) => {
   const phone = cleanText(value)
