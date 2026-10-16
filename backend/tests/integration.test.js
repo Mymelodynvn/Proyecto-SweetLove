@@ -515,6 +515,55 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('estados de un pedido', () => {
+    // Cambia el estado de un pedido como administrador, recibe orderId, status
+    const patchStatus = (orderId, status) => call(`/api/orders/${orderId}`, { method: 'PATCH', cookie: adminCookie, body: { status } })
+    // Marca el pago de un pedido como aprobado (lo que haría Mercado Pago), recibe orderId
+    const approvePayment = (orderId) => getPool().query("UPDATE pago SET estadoPago = 'Aprobado' WHERE idPedido = ?", [orderId])
+
+    test('sin pago aprobado no sale de Pendiente; con pago solo avanza y no vuelve atrás', async () => {
+      const order = await createMercadoPagoOrder(await createProduct(5))
+      const id = order.idPedido
+
+      for (const status of ['En preparación', 'Enviado', 'Completado']) {
+        const blocked = await patchStatus(id, status)
+        assert.equal(blocked.status, 409, status)
+        assert.match(blocked.data.message, /pago no está aprobado/)
+      }
+
+      await approvePayment(id)
+      assert.equal((await patchStatus(id, 'En preparación')).status, 200)
+      assert.equal((await patchStatus(id, 'Pendiente')).status, 409, 'no vuelve a Pendiente')
+      assert.equal((await patchStatus(id, 'Enviado')).status, 200)
+      assert.equal((await patchStatus(id, 'Cancelado')).status, 409, 'un pedido enviado ya no se cancela')
+      assert.equal((await patchStatus(id, 'En preparación')).status, 409, 'no vuelve atrás')
+      assert.equal((await patchStatus(id, 'Completado')).status, 200)
+      for (const status of ['Pendiente', 'En preparación', 'Enviado', 'Cancelado']) {
+        assert.equal((await patchStatus(id, status)).status, 409, `Completado no pasa a ${status}`)
+      }
+      assert.equal((await patchStatus(id, 'Completado')).status, 200, 'repetir el estado actual no falla')
+      assert.equal((await orderState(id)).estadoPedido, 'Completado')
+    })
+
+    test('cancelar un pedido ya pagado avisa del reembolso y no toca el pago; uno sin pagar no avisa', async () => {
+      const productId = await createProduct(5)
+      const paid = await createMercadoPagoOrder(productId, 2)
+      await approvePayment(paid.idPedido)
+      assert.equal(await stockOf(productId), 3)
+
+      const cancelPaid = await patchStatus(paid.idPedido, 'Cancelado')
+      assert.equal(cancelPaid.status, 200)
+      assert.equal(cancelPaid.data.refundPending, true)
+      assert.equal(await stockOf(productId), 5, 'el stock vuelve al inventario')
+      assert.equal((await orderState(paid.idPedido)).estadoPago, 'Aprobado', 'el pago aprobado se conserva hasta reembolsarlo')
+
+      const unpaid = await createMercadoPagoOrder(productId, 1)
+      const cancelUnpaid = await patchStatus(unpaid.idPedido, 'Cancelado')
+      assert.equal(cancelUnpaid.status, 200)
+      assert.equal(cancelUnpaid.data.refundPending, undefined)
+    })
+  })
+
   describe('pagos con Mercado Pago (simulado)', () => {
     test('el enlace de pago vence con el plazo del pedido', async () => {
       const productId = await createProduct(3, 20000)
