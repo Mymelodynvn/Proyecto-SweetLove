@@ -162,6 +162,9 @@
                         <!-- Error que devuelve el servidor (por ejemplo, producto sin stock) -->
                         <p v-if="serverError" class="checkout__alert" role="alert">{{ serverError }}</p>
 
+                        <!-- Si el correo ya tiene cuenta, ofrece abrir el inicio de sesión -->
+                        <p v-if="needsLogin" class="checkout__note"><a href="#" @click.prevent="openLogin">Iniciar sesión</a></p>
+
                         <!-- Botón para pagar: se desactiva mientras se envía el pedido -->
                         <button type="submit" class="btn-checkout" :disabled="sending">{{ sending ? 'Procesando…' : 'Pagar con Mercado Pago' }}</button>
 

@@ -24,6 +24,7 @@ if (document.querySelector("#checkout-app")) {
                 form: { name: "", lastName: "", email: "", phone: "", address: "" },
                 errors: {},
                 serverError: "",
+                needsLogin: false,
                 sending: false,
                 placed: null
             };
@@ -64,10 +65,17 @@ if (document.querySelector("#checkout-app")) {
                 return results.every(Boolean);
             },
 
+            // Abre la ventana de inicio de sesión (cuando el correo del pedido ya tiene una cuenta)
+            openLogin() {
+                uiStore.authView = "login";
+                uiStore.authOpen = true;
+            },
+
             // Valida el formulario, crea el pedido y lleva al cliente a pagar en Mercado Pago
             async submit() {
                 if (this.sending) return;
                 this.serverError = "";
+                this.needsLogin = false;
                 if (!this.validateAll()) return;
 
                 this.sending = true;
@@ -85,6 +93,7 @@ if (document.querySelector("#checkout-app")) {
                 } catch (error) {
                     // Muestra el motivo real (producto sin stock, producto no disponible, etc.)
                     this.serverError = error.message || "No pudimos registrar tu pedido. Intenta de nuevo.";
+                    this.needsLogin = error.code === "LOGIN_REQUIRED";
                 } finally {
                     this.sending = false;
                 }

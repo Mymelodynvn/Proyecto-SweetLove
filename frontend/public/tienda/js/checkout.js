@@ -27,7 +27,10 @@ const createOrder = async (customer, paymentMethod = 'Mercado Pago') => {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.statusMessage || 'No se pudo registrar el pedido.');
+        const error = new Error(errorData?.statusMessage || 'No se pudo registrar el pedido.');
+        // El código (por ejemplo LOGIN_REQUIRED) permite a la pantalla ofrecer la acción correcta
+        error.code = errorData?.code;
+        throw error;
     }
 
     const result = await response.json();
