@@ -90,15 +90,34 @@ Los errores llevan `code: WEAK_PASSWORD`. Los códigos de la respuesta de error 
 
 ### Correo
 
-Los correos de verificación y de recuperación salen por **Gmail (SMTP)**. Pasos:
+Los correos de verificación y de recuperación salen por **Gmail**, de una de estas dos formas (si hay las dos, se usa la API):
+
+| Forma | Variables | Cuándo usarla |
+|---|---|---|
+| **API de Gmail (HTTPS)** | `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, `GMAIL_USER` | En **Render gratis**, que bloquea los puertos SMTP |
+| SMTP con contraseña de aplicación | `SMTP_USER`, `SMTP_PASSWORD` | En local o en un servidor que permita SMTP |
+
+**Sin ninguna de las dos no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
+
+#### Configurar la API de Gmail
+
+1. En <https://console.cloud.google.com/> crea un proyecto y activa la **Gmail API** (<https://console.cloud.google.com/apis/library/gmail.googleapis.com>).
+2. En **Google Auth Platform** (pantalla de consentimiento): tipo **Externa**, llena el nombre de la app y el correo de soporte, y en **Público (Audience)** pulsa **Publicar aplicación**. En modo *Testing* el refresh token vence a los 7 días.
+3. En **Credenciales > Crear credenciales > ID de cliente de OAuth** elige **Aplicación de escritorio**. Guarda el *Client ID* y el *Client Secret* en `backend/.env` (`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`).
+4. En `backend/` ejecuta `npm run gmail:url`, abre el enlace con la cuenta de Gmail que enviará los correos y pulsa **Permitir** (si Google avisa que la app no está verificada: *Avanzado > Ir a… (no seguro)*; es tu propia app).
+5. El navegador mostrará un error de conexión a `localhost:8080`: es normal. Copia el `code=…` de la barra de direcciones (o la dirección completa) y ejecuta `npm run gmail:token -- "EL_CODIGO"`. Imprime `GMAIL_REFRESH_TOKEN`.
+6. Pon `GMAIL_REFRESH_TOKEN` y `GMAIL_USER` (el correo autorizado, que será el remitente) en `backend/.env` y, para producción, en las variables de entorno de Render. Son secretos: no los subas a git.
+
+Si Google responde `invalid_grant`, el refresh token venció o se revocó (por ejemplo al cambiar la contraseña de la cuenta): repite los pasos 4 y 5. El código del paso 5 sirve una sola vez y vence en minutos.
+
+#### SMTP
 
 1. En tu cuenta de Google activa la **verificación en dos pasos** (Seguridad).
 2. Crea una **contraseña de aplicación** en <https://myaccount.google.com/apppasswords> (16 letras; los espacios no importan).
 3. En `backend/.env`: `SMTP_USER=tucorreo@gmail.com` y `SMTP_PASSWORD=la contraseña de aplicación`. El remitente es esa misma cuenta (Gmail no deja usar otro).
 
-**Sin esas variables no se envían correos**: las cuentas nuevas no exigen verificación y recuperar la contraseña responde 503.
 Si Gmail rechaza el inicio de sesión (`535 Username and Password not accepted`), la contraseña de aplicación es incorrecta o está revocada: genera otra.
-Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render suelen bloquear los puertos SMTP; allí conviene `RESEND_API_KEY` (envío por HTTPS, requiere un dominio verificado para escribir a terceros).
+Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render bloquean los puertos SMTP; allí usa la API de Gmail (o `RESEND_API_KEY`, que también va por HTTPS pero exige un dominio verificado para escribir a terceros).
 
 ### Solo administrador
 
