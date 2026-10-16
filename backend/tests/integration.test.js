@@ -313,6 +313,78 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const reactivate = await call(`/api/orders/${order.data.idPedido}`, { method: 'PATCH', cookie: adminCookie, body: { status: 'Pendiente' } })
       assert.equal(reactivate.status, 409)
     })
+
+    test('las líneas repetidas del mismo producto se suman y no dejan el stock en negativo', async () => {
+      const productId = await createProduct(5)
+      const twice = (quantity) => ({ items: [{ productId, quantity }, { productId, quantity }] })
+
+      const tooMany = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, 1, twice(3)) })
+      assert.equal(tooMany.status, 409)
+      assert.equal(await stockOf(productId), 5, 'un pedido rechazado no descuenta stock')
+
+      const fits = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, 1, twice(2)) })
+      assert.equal(fits.status, 201)
+      assert.equal(fits.data.cantidadProductos, 1, 'las dos líneas quedan unidas en una sola')
+      assert.equal(await stockOf(productId), 1)
+    })
+
+    test('el descuento de stock se niega si no alcanza (nunca queda en negativo)', async () => {
+      const productId = await createProduct(2)
+      const productModel = await import('../src/models/productModel.js')
+      const connection = await getPool().getConnection()
+      try {
+        assert.equal(await productModel.decreaseStock(connection, productId, 3), false)
+        assert.equal(await productModel.decreaseStock(connection, productId, 2), true)
+      } finally {
+        connection.release()
+      }
+      assert.equal(await stockOf(productId), 0)
+    })
+
+    test('un pedido no puede traer demasiadas líneas ni demasiadas unidades', async () => {
+      const productId = await createProduct(500)
+      const post = (extra) => call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, 1, extra) })
+
+      const manyLines = Array.from({ length: 31 }, () => ({ productId, quantity: 1 }))
+      assert.equal((await post({ items: manyLines })).status, 400, '31 líneas')
+      assert.equal((await post({ items: [{ productId, quantity: 51 }] })).status, 400, '51 unidades')
+      assert.equal((await post({ items: [{ productId, quantity: 30 }, { productId, quantity: 30 }] })).status, 400, 'repetidas que suman 60')
+      assert.equal((await post({ items: 'muchos' })).status, 400, 'items no es una lista')
+      assert.equal((await post({ items: [null] })).status, 400, 'línea vacía')
+      assert.equal((await post({ items: [{ productId, quantity: 1.5 }] })).status, 400, 'cantidad con decimales')
+      assert.equal((await post({ items: [] })).status, 400, 'sin productos')
+      assert.equal(await stockOf(productId), 500, 'ningún pedido inválido descuenta stock')
+      assert.equal((await post({ items: [{ productId, quantity: 50 }] })).status, 201, 'el máximo permitido sí pasa')
+    })
+
+    test('el medio de pago es de una lista cerrada: uno inventado se rechaza y sin medio se usa Mercado Pago', async () => {
+      const productId = await createProduct(5)
+      const invented = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId, 1, { paymentMethod: 'Bitcoin' }) })
+      assert.equal(invented.status, 400)
+      assert.equal(await stockOf(productId), 5)
+
+      const missing = await call('/api/orders', { method: 'POST', body: orderBody(uniqueEmail(), productId) })
+      assert.equal(missing.status, 201)
+      assert.ok(missing.data.initPoint.includes('mercadopago'), 'sin medio de pago se crea el enlace de Mercado Pago')
+      const [[{ medio }]] = await getPool().query('SELECT proveedorPago AS medio FROM pago WHERE idPedido = ?', [missing.data.idPedido])
+      assert.equal(medio, 'Mercado Pago')
+    })
+
+    test('un mismo correo no puede crear más de 10 pedidos por hora (los rechazados no cuentan)', async () => {
+      const productId = await createProduct(30)
+      const email = uniqueEmail('masivo')
+
+      // Pedidos inválidos: se rechazan y no gastan el cupo
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        assert.equal((await call('/api/orders', { method: 'POST', body: orderBody(email, productId, 1, { phone: 'abc' }) })).status, 400)
+      }
+      for (let order = 1; order <= 10; order += 1) {
+        assert.equal((await call('/api/orders', { method: 'POST', body: orderBody(email, productId) })).status, 201, `pedido ${order}`)
+      }
+      const blocked = await call('/api/orders', { method: 'POST', body: orderBody(email, productId) })
+      assert.equal(blocked.status, 429)
+      assert.equal(await stockOf(productId), 20, 'el pedido bloqueado no descuenta stock')
+    })
   })
 
   describe('pagos con Mercado Pago (simulado)', () => {
