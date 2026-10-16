@@ -129,9 +129,3 @@ export const cancelAndRestock = async (idPedido, paymentStatus) => {
     connection.release()
   }
 }
-
-// Devuelve el estado actual de un pedido, o undefined si no existe, recibe idPedido
-export const findStatus = async (idPedido) => {
-  const [rows] = await getPool().query('SELECT estadoPedido FROM pedido WHERE idPedido = ?', [idPedido])
-  return rows[0]?.estadoPedido
-}

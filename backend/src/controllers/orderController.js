@@ -8,6 +8,15 @@ import * as mercadoPago from '../services/mercadoPagoService.js'
 // Estados que un pedido puede tener
 const ORDER_STATUSES = ['Pendiente', 'En preparación', 'Enviado', 'Completado', 'Cancelado']
 
+// Estados a los que puede pasar un pedido desde cada estado: solo hacia adelante, y se puede cancelar hasta que se envía
+const ALLOWED_TRANSITIONS = {
+  Pendiente: ['En preparación', 'Enviado', 'Completado', 'Cancelado'],
+  'En preparación': ['Enviado', 'Completado', 'Cancelado'],
+  Enviado: ['Completado'],
+  Completado: [],
+  Cancelado: [],
+}
+
 // Traduce el estado guardado en la base al que muestra la interfaz, recibe status
 const normalizeOrderStatus = (status) => (status === 'Pagado' ? 'Completado' : status || 'Pendiente')
 
@@ -42,21 +51,34 @@ export const list = async (_req, res) => {
   res.json([...grouped.values()].map(({ itemNames, ...order }) => ({ ...order, items: itemNames.join(', ') })))
 }
 
-// PATCH /api/orders/:id — cambia el estado de un pedido (solo administrador), recibe req, res
+// PATCH /api/orders/:id — cambia el estado de un pedido (solo administrador); el pedido solo avanza y, si se paga con Mercado Pago, no sale de Pendiente sin el pago aprobado, recibe req, res
 export const updateStatus = async (req, res) => {
   const id = parsePositiveInt(String(req.params.id).replace('#SL', ''), 'El identificador de pedido')
   const status = req.body?.status
 
   if (!ORDER_STATUSES.includes(status)) throw new HttpError(400, 'Estado de pedido inválido.')
 
-  const current = await orderModel.findStatus(id)
-  if (!current) throw new HttpError(404, 'El pedido no existe.')
-  if (current === 'Cancelado' && status !== 'Cancelado') throw new HttpError(409, 'Un pedido cancelado no se puede reactivar.')
+  const order = await orderModel.findPaymentByOrder(id)
+  if (!order) throw new HttpError(404, 'El pedido no existe.')
+  const current = normalizeOrderStatus(order.estadoPedido)
 
-  // Cancelar devuelve los productos al inventario; los demás estados solo cambian el pedido
-  if (status === 'Cancelado') await orderModel.cancelAndRestock(id, 'Cancelado')
-  else await orderModel.updateStatus(id, status)
+  // Repetir el estado actual no cambia nada
+  if (status === current) return void res.json({ ok: true })
+  if (current === 'Cancelado') throw new HttpError(409, 'Un pedido cancelado no se puede reactivar.')
+  if (!ALLOWED_TRANSITIONS[current]?.includes(status)) throw new HttpError(409, `No se puede pasar un pedido de «${current}» a «${status}».`)
 
+  const paidWithMercadoPago = order.proveedorPago === mercadoPago.MERCADO_PAGO
+  if (current === 'Pendiente' && status !== 'Cancelado' && paidWithMercadoPago && order.estadoPago !== 'Aprobado') {
+    throw new HttpError(409, `No se puede pasar a «${status}» porque el pago no está aprobado (estado del pago: ${order.estadoPago}).`)
+  }
+
+  // Cancelar devuelve los productos al inventario; un pago ya aprobado no se devuelve solo, así que se avisa para reembolsarlo en Mercado Pago
+  if (status === 'Cancelado') {
+    await orderModel.cancelAndRestock(id, 'Cancelado')
+    return void res.json({ ok: true, ...(order.estadoPago === 'Aprobado' ? { refundPending: true } : {}) })
+  }
+
+  await orderModel.updateStatus(id, status)
   res.json({ ok: true })
 }
 
