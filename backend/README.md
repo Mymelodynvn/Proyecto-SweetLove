@@ -138,6 +138,8 @@ Si Google responde `invalid_grant`, el refresh token venció o se revocó (por e
 2. Crea una **contraseña de aplicación** en <https://myaccount.google.com/apppasswords> (16 letras; los espacios no importan).
 3. En `backend/.env`: `SMTP_USER=tucorreo@gmail.com` y `SMTP_PASSWORD=la contraseña de aplicación`. El remitente es esa misma cuenta (Gmail no deja usar otro).
 
+**Diseño de los correos:** lo arma `src/services/emailTemplate.js` (tarjeta con el logo, botón y enlace de respaldo, con estilos en línea para que lo lean Gmail y Outlook). El logo es una imagen que el cliente de correo descarga, así que debe tener una dirección pública: por defecto `FRONTEND_URL/tienda/assets/recursos/logo-email.png`, o la que pongas en `EMAIL_LOGO_URL` si la tienda aún no está publicada.
+
 Si Gmail rechaza el inicio de sesión (`535 Username and Password not accepted`), la contraseña de aplicación es incorrecta o está revocada: genera otra.
 Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuitos como Render bloquean los puertos SMTP; allí usa el puente con Apps Script o la API de Gmail (o `RESEND_API_KEY`, que también va por HTTPS pero exige un dominio verificado para escribir a terceros).
 
