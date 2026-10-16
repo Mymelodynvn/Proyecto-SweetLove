@@ -92,8 +92,9 @@ Un pedido cuyo pago no se aprueba conserva el stock descontado hasta que alguien
 
 - Contraseñas con **bcrypt**; sesión en cookie **firmada y httpOnly** (8 h), con atributo `secure` en producción.
 - Todas las rutas del panel exigen rol Administrador en el backend; el rol se consulta a la base en cada petición.
-- **Contraseñas:** 8–72 caracteres, con letra y número, sin claves obvias; el servidor las valida siempre. Recuperación por correo con enlaces de un solo uso (1 h), verificación de correo, y cambio de contraseña pidiendo la actual.
-- Límites de intentos: login (10 fallos por correo cada 15 min), correos de recuperación (6 por hora) y registros por IP.
+- **Contraseñas:** mínimo 10 caracteres, solo letras y números (sin espacios ni símbolos), con letra y número y sin claves obvias; el servidor las valida siempre. El correo no admite espacios. Recuperación por correo con enlaces de un solo uso (1 h), verificación de correo, y cambio de contraseña pidiendo la actual.
+- Límites de intentos: login (10 fallos por correo cada 15 min; el dueño del correo se desbloquea restableciendo la contraseña), correos de recuperación (6 por hora), registros por IP y pedidos (10 por correo por hora).
+- Las sesiones abiertas dejan de valer cuando la contraseña cambia. Los pedidos admiten como máximo 30 productos y 50 unidades por producto, y el stock nunca queda en negativo.
 - Cabeceras de seguridad (`helmet` en la API; `nosniff`, `X-Frame-Options`, `Referrer-Policy` en el frontend). Protección CSRF: la cookie es `SameSite=Lax` y la API solo lee JSON (un formulario de otro sitio no puede enviar nada válido); está cubierto por pruebas.
 - **Compras como invitado:** crean una cuenta sin contraseña que no deja iniciar sesión; no se sobrescriben datos de cuentas existentes (la entrega se guarda en el pedido). El dueño del correo puede activar esa cuenta al registrarse (le llega un enlace).
 - El checkout calcula los precios en el servidor, dentro de una transacción con bloqueo de stock.

@@ -66,7 +66,7 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 |---|---|
 | `GET /health` | Comprueba API y MySQL |
 | `GET /products` | Catálogo: `id, name, description, price, stock, image, active, supplierId` |
-| `POST /orders` | Crea un pedido. Body: `{ name, lastName?, email, phone, address, paymentMethod?, items: [{ productId, quantity }] }` (`phone` y `address` son obligatorios y se validan). Responde `201 { ok, idPedido, total, cantidadProductos }`; con `paymentMethod: "Mercado Pago"` agrega `initPoint` (enlace de pago) o `paymentError` si no se pudo crear |
+| `POST /orders` | Crea un pedido. Body: `{ name, lastName?, email, phone, address, paymentMethod?, items: [{ productId, quantity }] }` (`phone` y `address` son obligatorios y se validan). Máximo 30 productos y 50 unidades por producto (las líneas repetidas se suman); `paymentMethod` solo admite `"Mercado Pago"` (el valor por defecto). Si no alcanza el stock responde `409` y nunca queda en negativo. Límites: 10 pedidos por correo cada hora y 100 por IP cada 15 minutos (`429`). Responde `201 { ok, idPedido, total, cantidadProductos, initPoint }`, con `initPoint` (enlace de pago) o `paymentError` si no se pudo crear |
 | `POST /payments/webhook` | Aviso de Mercado Pago. Consulta el pago a su API y actualiza `pago.estadoPago` solo si el monto y la moneda coinciden con el pedido. Valida la firma `x-signature`; **en producción sin `MP_WEBHOOK_SECRET` rechaza todos los avisos** |
 | `POST /payments/confirm` | Body `{ orderId }`. La tienda lo llama al volver de Mercado Pago: el backend consulta el pago y actualiza el estado (respaldo del webhook). Responde `{ status }` |
 | `POST /auth/register` | Cuenta de cliente. Body `{ fullName, email, password }` (ver reglas de contraseña abajo). `201 { message, needsVerification }`. Con correo configurado la cuenta queda pendiente de verificar; si el correo era de una cuenta de invitado, se envía un enlace para activarla |
@@ -83,9 +83,20 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 
 ### Reglas de contraseña
 
-Entre 8 y 72 caracteres (bcrypt ignora lo que pase de 72 bytes), al menos una letra y un número, que no sea una clave
-obvia (`12345678`, `Password1`, secuencias, una letra repetida) ni contenga el correo o el nombre. Se comprueban en el
-servidor (`utils/password.js`); la tienda y el panel muestran las reglas y las validan también al escribir.
+Mínimo 10 caracteres (máximo 72 bytes: bcrypt ignora lo que pase de eso), **solo letras y números**: no se aceptan espacios ni símbolos
+(`< > # . - ! @`…). Debe tener al menos una letra y un número, no ser una clave obvia (`1234567890`, secuencias, una letra repetida)
+ni contener el correo o el nombre. Se comprueban en el servidor (`utils/password.js`); la tienda y el panel muestran las reglas,
+no dejan teclear espacios y las validan también al enviar. Las reglas valen al registrarse, restablecer y cambiar la contraseña:
+las cuentas que ya existían con otra clave siguen entrando igual hasta que la cambien.
+
+El **correo** no admite espacios (ni al inicio ni al final) y tiene máximo 100 caracteres.
+
+**Sesiones:** la sesión lleva una huella de la contraseña. Si la contraseña cambia (desde la cuenta o con el enlace del correo), las sesiones
+abiertas en otros dispositivos dejan de valer; la que hizo el cambio sigue abierta.
+
+**Bloqueo de login:** 10 intentos fallidos por correo en 15 minutos. Como cualquiera podría agotar los intentos de un correo ajeno, quien es dueño
+del correo lo desbloquea al instante eligiendo una contraseña nueva con el enlace de «¿Olvidaste tu contraseña?».
+
 Los errores llevan `code: WEAK_PASSWORD`. Los códigos de la respuesta de error que la interfaz reconoce: `EMAIL_NOT_VERIFIED`, `INVALID_TOKEN`, `WRONG_PASSWORD`, `WEAK_PASSWORD`.
 
 ### Correo

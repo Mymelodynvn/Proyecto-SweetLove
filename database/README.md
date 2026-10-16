@@ -66,7 +66,7 @@ Comprueba el resultado con `npm run db:status`.
 
 ## Cuentas de demostración
 
-`seed.sql` crea tres usuarios con contraseña `SweetLove#2026`: `carlos@gmail.com` (Administrador),
+`seed.sql` crea tres usuarios con contraseña `SweetLove#2026` (esa clave solo sirve para entrar: tiene un símbolo y por eso no cumple las reglas actuales, así que al cambiarla hay que elegir una de solo letras y números, mínimo 10): `carlos@gmail.com` (Administrador),
 `laura@gmail.com` (Cliente) y `ana@gmail.com` (Proveedor). **No los uses en producción.** Para una base real,
 aplica solo `schema.sql` y crea el administrador con un hash propio:
 `node -e "console.log(require('bcryptjs').hashSync('TU_CLAVE', 10))"` (dentro de `backend/`).
