@@ -14,6 +14,8 @@ export interface Order {
   status: OrderStatus
   paymentStatus?: string
 }
+// Resultado de cambiar el estado de un pedido: si salió bien (y si queda un reembolso pendiente) o el mensaje del servidor
+export interface StatusChangeResult { ok: boolean, message: string, refundPending: boolean }
 // Composable de pedidos: estado compartido y operaciones
 export const useOrders = () => {
   const orders = useState<Order[]>('orders-db', () => [])
@@ -26,14 +28,20 @@ export const useOrders = () => {
     catch (error) { console.warn('No se pudieron cargar pedidos desde MySQL.', error) }
     finally { loaded.value = true }
   }
-  // Cambia el estado de un pedido en el servidor y, si resulta bien, también en pantalla, recibe orderId, status
-  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+  // Cambia el estado de un pedido en el servidor y, si resulta bien, también en pantalla; devuelve el resultado o el motivo del rechazo, recibe orderId, status
+  const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<StatusChangeResult> => {
     // Se envía el número sin "#SL": el proxy de Nuxt decodifica "%23" a "#", que cortaría la URL.
     const numericId = Number(orderId.replace(/^#SL/, ''))
-    try { await $fetch(`/api/orders/${numericId}`, { method: 'PATCH', body: { status } }) }
-    catch (error) { console.warn('No se pudo actualizar el pedido en MySQL.', error); return }
-    const target = orders.value.find((order) => order.id === orderId)
-    if (target) target.status = status
+    try {
+      const response = await $fetch<{ ok: boolean, refundPending?: boolean }>(`/api/orders/${numericId}`, { method: 'PATCH', body: { status } })
+      const target = orders.value.find((order) => order.id === orderId)
+      if (target) target.status = status
+      return { ok: true, message: '', refundPending: Boolean(response.refundPending) }
+    }
+    catch (error) {
+      console.warn('No se pudo actualizar el pedido en MySQL.', error)
+      return { ok: false, message: apiErrorMessage(error, 'No se pudo actualizar el pedido.'), refundPending: false }
+    }
   }
   return { orders, loadFromStorage: load, updateOrderStatus }
 }

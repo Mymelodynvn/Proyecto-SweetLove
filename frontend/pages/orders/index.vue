@@ -68,18 +68,28 @@ const statusBadgeClass: Record<OrderStatus, string> = {
 const selectedOrder = ref<Order | null>(null)
 const isDetailDialogOpen = ref(false)
 const detailStatus = ref<OrderStatus>('Pendiente')
+// Aviso que se muestra en el diálogo: el motivo de un rechazo o el recordatorio de reembolsar un pedido pagado
+const statusNotice = ref<{ kind: 'error' | 'warning', text: string } | null>(null)
 
 // Abre el detalle de un pedido, listo para cambiar su estado, recibe order
 const openOrderDetail = (order: Order) => {
   selectedOrder.value = order
   detailStatus.value = order.status
+  statusNotice.value = null
   isDetailDialogOpen.value = true
 }
 
-// Guarda el nuevo estado del pedido en el servidor y cierra el diálogo
-const saveOrderStatus = () => {
-  if (selectedOrder.value) {
-    updateOrderStatus(selectedOrder.value.id, detailStatus.value)
+// Guarda el nuevo estado del pedido en el servidor; si el servidor lo rechaza o queda un reembolso pendiente, lo muestra en el diálogo en vez de cerrarlo
+const saveOrderStatus = async () => {
+  if (!selectedOrder.value) return
+  const result = await updateOrderStatus(selectedOrder.value.id, detailStatus.value)
+  if (!result.ok) {
+    statusNotice.value = { kind: 'error', text: result.message }
+    return
+  }
+  if (result.refundPending) {
+    statusNotice.value = { kind: 'warning', text: 'Pedido cancelado. Ya estaba pagado: devuelve el dinero desde tu cuenta de Mercado Pago (Actividad, abre el pago y pulsa Devolver).' }
+    return
   }
   isDetailDialogOpen.value = false
 }
@@ -183,6 +193,7 @@ const saveOrderStatus = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <p v-if="statusNotice" role="alert" class="text-sm" :class="statusNotice.kind === 'error' ? 'text-destructive' : 'text-amber-600'">{{ statusNotice.text }}</p>
           </div>
         </div>
         <DialogFooter>
