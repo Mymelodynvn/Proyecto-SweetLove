@@ -241,6 +241,51 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'ClaveDelDueno7' } })).status, 200)
     })
 
+    test('cambiar la contraseña cierra las sesiones de otros dispositivos y mantiene la actual', async () => {
+      const user = await createVerifiedUser()
+      const phone = await login(user.email, user.password)
+      const laptop = await login(user.email, user.password)
+
+      const change = await call('/api/auth/change-password', { method: 'POST', cookie: laptop, body: { currentPassword: user.password, newPassword: 'ClaveNueva2026' } })
+      assert.equal(change.status, 200)
+
+      // La sesión que hizo el cambio recibe una cookie nueva y sigue abierta
+      assert.ok(change.cookie, 'el cambio entrega la cookie con la huella nueva')
+      assert.equal((await call('/api/auth/me', { cookie: change.cookie })).data.user.email, user.email)
+
+      // La otra sesión (abierta antes del cambio) ya no vale, ni para ver la cuenta ni para las rutas protegidas
+      assert.equal((await call('/api/auth/me', { cookie: phone })).data.user, null)
+      const blocked = await call('/api/auth/change-password', { method: 'POST', cookie: phone, body: { currentPassword: 'ClaveNueva2026', newPassword: 'OtraClave2026x' } })
+      assert.equal(blocked.status, 401)
+    })
+
+    test('restablecer la contraseña con el enlace cierra todas las sesiones abiertas', async () => {
+      const user = await createVerifiedUser()
+      const cookie = await login(user.email, user.password)
+      assert.equal((await call('/api/auth/me', { cookie })).data.user.email, user.email)
+
+      await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
+      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveRestablecida5' } })
+      assert.equal(reset.status, 200)
+      assert.equal((await call('/api/auth/me', { cookie })).data.user, null)
+    })
+
+    test('una sesión sin huella (de antes de esta versión) o con otra huella no vale', async () => {
+      const { loadSessionUser } = await import('../src/middleware/auth.js')
+      const { passwordStamp } = await import('../src/utils/session.js')
+      const [[admin]] = await getPool().query("SELECT idUser, contrasena FROM usuario WHERE email = 'carlos@gmail.com'")
+
+      const old = { session: { idUser: admin.idUser, idRol: 1 } }
+      assert.equal(await loadSessionUser(old), null)
+      assert.equal(old.session, null, 'la sesión inválida se cierra')
+
+      const forged = { session: { idUser: admin.idUser, idRol: 1, stamp: 'huella-falsa' } }
+      assert.equal(await loadSessionUser(forged), null)
+
+      const valid = { session: { idUser: admin.idUser, idRol: 1, stamp: passwordStamp(admin.contrasena) } }
+      assert.equal((await loadSessionUser(valid)).idUser, admin.idUser)
+    })
+
     test('cambiar contraseña: pide la actual y aplica las reglas', async () => {
       const user = await createVerifiedUser()
       const cookie = await login(user.email, user.password)
