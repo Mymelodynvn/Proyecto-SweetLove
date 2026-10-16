@@ -20,6 +20,9 @@ const parseList = (value) =>
     .map((item) => item.trim())
     .filter(Boolean)
 
+// Correo desde el que se envía: el de SMTP o, si no hay, el de la API de Gmail (Gmail solo deja enviar con la cuenta autenticada)
+const senderAddress = (process.env.SMTP_USER || process.env.GMAIL_USER || '').trim()
+
 export const config = Object.freeze({
   isProduction,
   port: Number(process.env.PORT || 4000),
@@ -38,8 +41,15 @@ export const config = Object.freeze({
   frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, ''),
   // Minutos que un pedido con Mercado Pago espera su pago antes de cancelarse y devolver el stock
   orderTtlMinutes: Number(process.env.ORDER_TTL_MINUTES || 30),
-  // Correo: con RESEND_API_KEY se envía por Resend; con MAIL_TRANSPORT=memory (pruebas) se guarda en memoria
+  // Correo: por la API de Gmail (HTTPS) si hay GMAIL_*, por SMTP si hay SMTP_*, por Resend si hay RESEND_API_KEY;
+  // con MAIL_TRANSPORT=memory (pruebas) se guarda en memoria
   mail: {
+    // API de Gmail (OAuth): funciona donde el SMTP está bloqueado, como Render gratis; el refresh token se obtiene con `npm run gmail:token`
+    gmail: {
+      clientId: (process.env.GMAIL_CLIENT_ID || '').trim(),
+      clientSecret: (process.env.GMAIL_CLIENT_SECRET || '').trim(),
+      refreshToken: (process.env.GMAIL_REFRESH_TOKEN || '').trim(),
+    },
     // SMTP: por defecto Gmail con una contraseña de aplicación (los espacios que muestra Google se ignoran)
     smtp: {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -48,8 +58,7 @@ export const config = Object.freeze({
       password: (process.env.SMTP_PASSWORD || '').replace(/\s+/g, ''),
     },
     resendApiKey: process.env.RESEND_API_KEY || '',
-    // Gmail solo deja enviar con el correo de la cuenta autenticada
-    from: process.env.MAIL_FROM || (process.env.SMTP_USER ? `Sweet Love <${process.env.SMTP_USER.trim()}>` : 'Sweet Love <onboarding@resend.dev>'),
+    from: process.env.MAIL_FROM || (senderAddress ? `Sweet Love <${senderAddress}>` : 'Sweet Love <onboarding@resend.dev>'),
     transport: process.env.MAIL_TRANSPORT || '',
   },
   // Mercado Pago (Checkout Pro): el Access Token es secreto y solo vive en el backend

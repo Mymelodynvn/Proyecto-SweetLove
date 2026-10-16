@@ -1,4 +1,4 @@
-// Servicio de correo: envía por SMTP (Gmail) si está configurado, por Resend si hay clave, o guarda en memoria en las pruebas
+// Servicio de correo: envía por la API de Gmail si está configurada, por SMTP, por Resend o guarda en memoria en las pruebas
 import nodemailer from 'nodemailer'
 import { config } from '../config/env.js'
 import { HttpError } from '../utils/httpError.js'
@@ -9,11 +9,24 @@ export const outbox = []
 // Conexión SMTP reutilizable (se crea la primera vez que se envía un correo)
 let smtpTransport
 
+// Token de acceso de Gmail con su hora de vencimiento (se renueva con el refresh token)
+let gmailToken = { value: '', expiresAt: 0 }
+
+// Arma el mensaje completo (cabeceras y partes de texto y HTML) sin enviarlo, para mandarlo por la API de Gmail
+const messageBuilder = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: 'unix' })
+
 // Indica si hay usuario y contraseña SMTP configurados
 const hasSmtp = () => Boolean(config.mail.smtp.user && config.mail.smtp.password)
 
-// Indica si se puede enviar correo (SMTP, Resend o el modo de pruebas)
-export const isEnabled = () => config.mail.transport === 'memory' || hasSmtp() || Boolean(config.mail.resendApiKey)
+// Indica si están las tres credenciales de la API de Gmail (cliente, secreto y refresh token)
+const hasGmailApi = () => {
+  const { clientId, clientSecret, refreshToken } = config.mail.gmail
+  return Boolean(clientId && clientSecret && refreshToken)
+}
+
+// Indica si se puede enviar correo (API de Gmail, SMTP, Resend o el modo de pruebas)
+export const isEnabled = () =>
+  config.mail.transport === 'memory' || hasGmailApi() || hasSmtp() || Boolean(config.mail.resendApiKey)
 
 // Devuelve la conexión SMTP, creándola si hace falta
 const getSmtpTransport = () => {
@@ -31,10 +44,63 @@ const getSmtpTransport = () => {
   return smtpTransport
 }
 
+// Devuelve un token de acceso de Gmail vigente; si venció, pide uno nuevo a Google con el refresh token (dura cerca de una hora)
+const getGmailAccessToken = async () => {
+  if (gmailToken.value && Date.now() < gmailToken.expiresAt) return gmailToken.value
+
+  const { clientId, clientSecret, refreshToken } = config.mail.gmail
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken, grant_type: 'refresh_token' }),
+    signal: AbortSignal.timeout(10000),
+  })
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok || !data.access_token) {
+    // "invalid_grant" suele significar que el refresh token venció o se revocó: hay que generar otro
+    console.error('[correo] Google no entregó el token de acceso:', response.status, data.error ?? '', data.error_description ?? '')
+    throw new HttpError(502, 'No se pudo enviar el correo.')
+  }
+
+  // Se descuenta un minuto para no usar un token a punto de vencer
+  gmailToken = { value: data.access_token, expiresAt: Date.now() + (Number(data.expires_in) || 3600) * 1000 - 60000 }
+  return gmailToken.value
+}
+
+// Envía un correo por la API de Gmail (HTTPS), recibe to, subject, text, html
+const sendWithGmailApi = async ({ to, subject, text, html }) => {
+  try {
+    const { message } = await messageBuilder.sendMail({ from: config.mail.from, to, subject, text, html })
+    const accessToken = await getGmailAccessToken()
+    const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      // La API pide el mensaje completo codificado en base64 seguro para URL
+      body: JSON.stringify({ raw: message.toString('base64url') }),
+      signal: AbortSignal.timeout(10000),
+    })
+    if (!response.ok) {
+      // Con 401 el token ya no sirve: se descarta para pedir otro en el próximo envío
+      if (response.status === 401) gmailToken = { value: '', expiresAt: 0 }
+      console.error('[correo] Gmail API respondió', response.status, await response.text().catch(() => ''))
+      throw new HttpError(502, 'No se pudo enviar el correo.')
+    }
+  } catch (error) {
+    if (error instanceof HttpError) throw error
+    console.error('[correo] Gmail API falló:', error.name, error.message)
+    throw new HttpError(502, 'No se pudo enviar el correo.')
+  }
+}
+
 // Envía un correo con asunto, texto y HTML, recibe to, subject, text, html
 export const sendMail = async ({ to, subject, text, html }) => {
   if (config.mail.transport === 'memory') {
     outbox.push({ to, subject, text, html })
+    return
+  }
+
+  if (hasGmailApi()) {
+    await sendWithGmailApi({ to, subject, text, html })
     return
   }
 
