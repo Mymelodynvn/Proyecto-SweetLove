@@ -364,12 +364,38 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2' } })).status, 200)
     })
 
+    test('un correo con cuenta registrada solo compra con la sesión de esa cuenta; el de un invitado no necesita sesión', async () => {
+      const owner = await createVerifiedUser()
+      const other = await createVerifiedUser()
+      const productId = await createProduct(5)
+      const buy = (cookie) => call('/api/orders', { method: 'POST', cookie, body: orderBody(owner.email, productId) })
+
+      // Sin sesión, o con la sesión de otra persona, se pide iniciar sesión y no se descuenta stock
+      const anonymous = await buy(undefined)
+      assert.equal(anonymous.status, 409)
+      assert.equal(anonymous.data.code, 'LOGIN_REQUIRED')
+      assert.equal((await buy(await login(other.email, other.password))).status, 409)
+      assert.equal(await stockOf(productId), 5)
+      const [[{ pedidos }]] = await getPool().query('SELECT COUNT(*) AS pedidos FROM pedido p JOIN usuario u ON u.idUser = p.idUser WHERE u.email = ?', [owner.email])
+      assert.equal(Number(pedidos), 0, 'la cuenta ajena no recibe pedidos')
+
+      // Con su propia sesión sí puede comprar
+      assert.equal((await buy(await login(owner.email, owner.password))).status, 201)
+      assert.equal(await stockOf(productId), 4)
+
+      // Un invitado (cuenta creada al comprar) compra sin sesión las veces que quiera
+      const guest = uniqueEmail('invitado')
+      assert.equal((await call('/api/orders', { method: 'POST', body: orderBody(guest, productId) })).status, 201)
+      assert.equal((await call('/api/orders', { method: 'POST', body: orderBody(guest, productId) })).status, 201)
+    })
+
     test('invitado: la compra no sobrescribe cuentas y el dueño del correo puede activar la suya', async () => {
       // Cuenta existente con datos propios: la compra no los cambia, pero el pedido guarda su propia entrega
       const user = await createVerifiedUser()
       await getPool().execute("UPDATE usuario SET celular = '3000000000', direccion = 'Mi casa 123' WHERE email = ?", [user.email])
       const productId = await createProduct(5)
-      const order = await call('/api/orders', { method: 'POST', body: orderBody(user.email, productId, 1, { name: 'Otra', address: 'Entrega en otro lugar 45' }) })
+      const cookie = await login(user.email, user.password)
+      const order = await call('/api/orders', { method: 'POST', cookie, body: orderBody(user.email, productId, 1, { name: 'Otra', address: 'Entrega en otro lugar 45' }) })
       assert.equal(order.status, 201)
       const [[account]] = await getPool().query('SELECT nombre, celular, direccion FROM usuario WHERE email = ?', [user.email])
       assert.equal(account.nombre, 'Ana')
