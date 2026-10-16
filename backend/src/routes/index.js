@@ -1,74 +1,13 @@
 // Mapa completo de la API (/api)
 import { Router } from 'express'
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import { requireAdmin, requireUser } from '../middleware/auth.js'
+import { changePasswordLimiter, confirmLimiter, loginLimiter, mailLimiter, registerLimiter, tokenLimiter } from '../middleware/rateLimits.js'
 import * as auth from '../controllers/authController.js'
 import * as products from '../controllers/productController.js'
 import * as orders from '../controllers/orderController.js'
 import * as panel from '../controllers/panelController.js'
 import * as health from '../controllers/healthController.js'
 import * as payments from '../controllers/paymentController.js'
-
-const tooManyAttempts = { error: true, statusCode: 429, statusMessage: 'Demasiados intentos. Intenta de nuevo en unos minutos.' }
-
-// Limita los intentos fallidos de login por correo (no por IP: detrás del proxy de Render todos los usuarios comparten la misma IP)
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  skipSuccessfulRequests: true,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  keyGenerator: (req) => String(req.body?.email ?? '').trim().toLowerCase() || ipKeyGenerator(req.ip),
-  message: tooManyAttempts,
-})
-
-// Limita los registros por IP para frenar el spam de cuentas
-const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 30,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  message: tooManyAttempts,
-})
-
-// Limita los correos de recuperación y verificación por correo y por hora (evita enviar correos sin fin)
-const mailLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 6,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  keyGenerator: (req) => `mail:${String(req.body?.email ?? '').trim().toLowerCase() || ipKeyGenerator(req.ip)}`,
-  message: tooManyAttempts,
-})
-
-// Limita los intentos de usar enlaces (tokens) por IP
-const tokenLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  message: tooManyAttempts,
-})
-
-// Limita los intentos fallidos de cambiar la contraseña por cuenta
-const changePasswordLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  skipSuccessfulRequests: true,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  keyGenerator: (req) => `cambio:${req.session?.idUser ?? ipKeyGenerator(req.ip)}`,
-  message: tooManyAttempts,
-})
-
-// Limita las confirmaciones de pago por IP
-const confirmLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: 30,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  message: tooManyAttempts,
-})
 
 const router = Router()
 
