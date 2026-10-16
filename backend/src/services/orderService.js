@@ -79,7 +79,10 @@ export const createOrder = async ({ customer, items, paymentMethod }) => {
 
     for (const line of lines) {
       await orderModel.insertItem(connection, orderId, line)
-      await productModel.decreaseStock(connection, line.productId, line.quantity)
+      // Segunda barrera contra la sobreventa: el descuento solo se aplica si todavía alcanza el stock
+      if (!(await productModel.decreaseStock(connection, line.productId, line.quantity))) {
+        throw new HttpError(409, `No hay suficiente stock para el producto ${line.productId}.`)
+      }
     }
 
     const paymentId = await orderModel.insertPayment(connection, orderId, total, paymentMethod)

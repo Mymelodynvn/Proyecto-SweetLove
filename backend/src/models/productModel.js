@@ -66,7 +66,11 @@ export const lockForSale = async (connection, id) => {
   return rows[0]
 }
 
-// Descuenta unidades vendidas del inventario, recibe connection, id, quantity
+// Descuenta unidades vendidas del inventario solo si alcanzan (nunca deja el stock en negativo); devuelve false si no alcanzaron, recibe connection, id, quantity
 export const decreaseStock = async (connection, id, quantity) => {
-  await connection.execute('UPDATE producto SET cantidad = cantidad - ? WHERE idProducto = ?', [quantity, id])
+  const [result] = await connection.execute(
+    'UPDATE producto SET cantidad = cantidad - ? WHERE idProducto = ? AND cantidad >= ?',
+    [quantity, id, quantity],
+  )
+  return result.affectedRows === 1
 }
