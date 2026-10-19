@@ -22,8 +22,8 @@ const DEFAULT_PROFILE: ProfileData = {
     + 'Su mayor placer: servir y crear momentos dulces y memorables para los demás.',
   location: 'Medellín, Colombia',
   avatar: null,
-  instagramUrl: 'https://www.instagram.com/sweetlove',
-  facebookUrl: 'https://www.facebook.com/sweetlove',
+  instagramUrl: 'https://www.instagram.com/sweetlove.bymaryuri',
+  facebookUrl: 'https://www.facebook.com/share/18tvevPvjz/',
 }
 
 // Composable del perfil

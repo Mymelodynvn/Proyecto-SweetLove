@@ -52,10 +52,10 @@ const SiteFooter = {
                 <!-- Redes sociales -->
                 <div class="footer-social">
                     <!-- Enlace a Instagram -->
-                    <a href="https://www.instagram.com/sweetlove" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/sweetlove.bymaryuri" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
 
                     <!-- Enlace a Facebook -->
-                    <a href="https://www.facebook.com/sweetlove" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/share/18tvevPvjz/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
 
