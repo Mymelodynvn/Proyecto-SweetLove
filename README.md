@@ -39,7 +39,7 @@ cd frontend && npm run dev     # http://localhost:3000
 
 - **Tienda** (la raíz `/` redirige aquí): <http://localhost:3000/tienda/index.html>. Los clientes inician sesión con el icono de perfil.
 - **Panel de administración**: <http://localhost:3000/admin>. Solo entran cuentas con rol Administrador.
-- Cuentas de demostración (de `database/seed.sql`), contraseña `SweetLove#2026`: `carlos@gmail.com` (administrador), `laura@gmail.com` (cliente). **Cámbialas o elimínalas antes de publicar.**
+- Cuentas de demostración (de `database/seed.sql`), contraseña `SweetLove2026`: `admin@example.com` (administrador) y `laura@example.com` (cliente con pedidos); la lista completa está en [`database/README.md`](database/README.md). **No las publiques: en producción usa `npm run db:init -- --sin-demo`.**
 
 ## Comandos útiles
 
@@ -48,10 +48,10 @@ Se ejecutan dentro de la carpeta indicada.
 | Carpeta | Comando | Qué hace |
 |---|---|---|
 | `backend/` | `npm test` | Pruebas del backend (no necesitan MySQL) |
-| `backend/` | `npm run db:init` | Crea la base con esquema y datos de demostración |
+| `backend/` | `npm run db:init` | Crea la base con esquema, datos base y datos de demostración (con `-- --sin-demo`, sin estos últimos) |
 | `backend/` | `npm run db:migrate` | Aplica migraciones pendientes a una base existente |
 | `backend/` | `npm run db:status` | Muestra el estado de las migraciones |
-| `backend/` | `npm run db:baseline -- 001` | Registra como aplicadas migraciones que ya hiciste a mano |
+| `backend/` | `npm run db:baseline -- 003` | Registra como aplicadas migraciones que ya hiciste a mano |
 | `frontend/` | `npm run build` | Compila el frontend para producción |
 
 ## Variables de entorno
@@ -103,7 +103,7 @@ Un pedido cuyo pago no se aprueba conserva el stock descontado hasta que alguien
 
 Dos servicios Node más una base MySQL:
 
-1. **Base de datos:** una MySQL externa (Render no ofrece MySQL gestionado). Aplica solo `database/schema.sql` (sin datos de demostración) y crea tu administrador con un hash propio; ver [`database/README.md`](database/README.md).
+1. **Base de datos:** una MySQL externa (Render no ofrece MySQL gestionado). Desde `backend/`, `npm run db:init -- --sin-demo` crea las tablas y los datos base (roles y estados de envío) sin cuentas ni productos de ejemplo; luego crea tu administrador con un hash propio. Ver [`database/README.md`](database/README.md).
 2. **Backend:** carpeta `backend`, build `npm install`, start `npm start`, health check `/api/health`. Variables: `NODE_ENV=production`, `SESSION_SECRET` y los `DATABASE_*` (con `DATABASE_SSL=true` si aplica).
 3. **Frontend:** carpeta `frontend`, build `npm install && npm run build`, start `node .output/server/index.mjs`. Variable `API_URL` con la URL del backend.
 4. **Imágenes de productos:** se guardan en `backend/uploads/`. En Render el disco se borra en cada despliegue: usa un disco persistente o cambia `backend/src/utils/product-image.js` para subirlas a un servicio de imágenes.
