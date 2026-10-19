@@ -40,8 +40,8 @@ const appliedMigrations = async (connection) => {
   return new Set(rows.map((row) => row.name))
 }
 
-// Comando `init`: crea la base y carga esquema y datos de demostración, recibe force
-const init = async (force) => {
+// Comando `init`: crea la base y carga esquema, datos base y, salvo con --sin-demo, los datos de demostración, recibe force, demo
+const init = async (force, demo) => {
   const server = await connect(false)
   await server.query(
     `CREATE DATABASE IF NOT EXISTS \`${config.database.name}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci`,
@@ -55,7 +55,8 @@ const init = async (force) => {
   }
 
   await connection.query(await readFile(join(DATABASE_DIR, 'schema.sql'), 'utf8'))
-  await connection.query(await readFile(join(DATABASE_DIR, 'seed.sql'), 'utf8'))
+  await connection.query(await readFile(join(DATABASE_DIR, 'datos-base.sql'), 'utf8'))
+  if (demo) await connection.query(await readFile(join(DATABASE_DIR, 'seed.sql'), 'utf8'))
 
   await ensureMigrationsTable(connection)
   await connection.query('DELETE FROM schema_migrations')
@@ -64,7 +65,7 @@ const init = async (force) => {
   }
 
   await connection.end()
-  console.log(`Base "${config.database.name}" creada con esquema y datos de demostración.`)
+  console.log(`Base "${config.database.name}" creada con esquema y datos base${demo ? ' y datos de demostración' : ' (sin datos de demostración: crea tu cuenta de administrador)'}.`)
 }
 
 // Comando `migrate`: aplica las migraciones pendientes en orden
@@ -114,10 +115,10 @@ const baseline = async (upTo) => {
 }
 
 const [command, ...flags] = process.argv.slice(2)
-const commands = { init: () => init(flags.includes('--force')), migrate, status, baseline: () => baseline(flags[0]) }
+const commands = { init: () => init(flags.includes('--force'), !flags.includes('--sin-demo')), migrate, status, baseline: () => baseline(flags[0]) }
 
 if (!commands[command]) {
-  console.error('Uso: node scripts/db.js <init|migrate|status|baseline>')
+  console.error('Uso: node scripts/db.js <init [--force] [--sin-demo]|migrate|status|baseline>')
   process.exit(1)
 }
 

@@ -1,12 +1,7 @@
--- Sweet Love: datos de DEMOSTRACIÓN. Se carga después de schema.sql.
+-- Sweet Love: datos de DEMOSTRACIÓN. Se carga después de schema.sql y datos-base.sql.
 -- No incluir en producción: contiene cuentas de ejemplo.
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
-INSERT INTO rol (idRol, nombre) VALUES
-(1, 'Administrador'),
-(2, 'Cliente'),
-(3, 'Proveedor');
 
 -- Usuarios de DEMOSTRACIÓN. Contraseña de los tres: SweetLove#2026 (hash bcrypt).
 -- Cámbialas o elimínalas antes de publicar el sitio.
@@ -49,11 +44,6 @@ INSERT INTO producto (idProducto, nombre, descripcion, precio, cantidad, imagen,
 (23, 'Muffins de arándanos x6', 'Seis muffins esponjosos con arándanos naturales y un toque de limón. Horneados al día.', 24000, 35, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Blueberry_muffins%2C_whole_and_partial.jpg/500px-Blueberry_muffins%2C_whole_and_partial.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', 1, 1),
 (24, 'Rollos de canela x6', 'Seis rollos de canela suaves y calientes con glaseado de queso crema. El aroma perfecto para la tarde.', 30000, 24, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Homemade_Cinnamon_rolls_03.jpg/500px-Homemade_Cinnamon_rolls_03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', 1, 2);
 
-INSERT INTO estadoenvio (idEstado, nombre) VALUES
-(1, 'Pendiente'),
-(2, 'En camino'),
-(3, 'Entregado');
-
 -- Pedido 1: un producto.
 INSERT INTO pedido (idPedido, precioTotal, fecha, estadoPedido, idUser) VALUES
 (1, 45000, '2026-03-01', 'Completado', 1),
@@ -75,11 +65,9 @@ INSERT INTO envio (idEnvio, idPago, idEstado) VALUES
 (2, 2, 2),
 (3, 3, 1);
 
-ALTER TABLE rol AUTO_INCREMENT = 4;
 ALTER TABLE usuario AUTO_INCREMENT = 4;
 ALTER TABLE proveedor AUTO_INCREMENT = 3;
 ALTER TABLE producto AUTO_INCREMENT = 25;
-ALTER TABLE estadoenvio AUTO_INCREMENT = 4;
 ALTER TABLE pedido AUTO_INCREMENT = 4;
 ALTER TABLE itempedido AUTO_INCREMENT = 4;
 ALTER TABLE pago AUTO_INCREMENT = 4;
