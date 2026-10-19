@@ -162,7 +162,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     server = createApp().listen(0)
     await new Promise((resolve) => server.once('listening', resolve))
     baseUrl = `http://127.0.0.1:${server.address().port}`
-    adminCookie = await login('carlos@gmail.com', 'SweetLove#2026')
+    adminCookie = await login('admin@example.com', 'SweetLove2026')
   })
 
   after(async () => {
@@ -171,9 +171,113 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     await getPool?.().end()
   })
 
+  // Se comprueban solo las filas del seed (ids hasta 24 productos, 10 pedidos, 6 usuarios): este bloque va primero, antes de que otras pruebas creen datos
+  describe('datos de ejemplo (seed.sql y datos-base.sql)', () => {
+    test('los roles y los estados de envío están cargados', async () => {
+      const [roles] = await getPool().query('SELECT idRol, nombre FROM rol ORDER BY idRol')
+      assert.deepEqual(roles.map((row) => row.nombre), ['Administrador', 'Cliente', 'Proveedor'])
+      const [states] = await getPool().query('SELECT nombre FROM estadoenvio ORDER BY idEstado')
+      assert.deepEqual(states.map((row) => row.nombre), ['Pendiente', 'En camino', 'Entregado'])
+    })
+
+    test('las cuentas de ejemplo usan correos example.com, entran con la clave publicada y cumplen las reglas de contraseña', async () => {
+      const { passwordProblem } = await import('../src/utils/password.js')
+      const [users] = await getPool().query('SELECT email, idRol FROM usuario WHERE idUser <= 6 ORDER BY idUser')
+      assert.equal(users.length, 6)
+      assert.equal(passwordProblem('SweetLove2026'), '', 'la clave de ejemplo debe cumplir las reglas actuales')
+      for (const user of users) {
+        assert.match(user.email, /@example\.com$/, `${user.email} no debe ser una dirección real`)
+        // Los proveedores no entran a la tienda ni al panel, pero su cuenta sí es válida
+        assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'SweetLove2026' } })).status, 200, user.email)
+      }
+      assert.equal(users.filter((user) => user.idRol === 1).length, 1, 'una sola cuenta de administrador de ejemplo')
+    })
+
+    test('cada pedido cuadra: el total es la suma de sus líneas, el pago coincide y tiene un solo pago y un solo envío', async () => {
+      const [orders] = await getPool().query(
+        `SELECT p.idPedido, p.precioTotal,
+                (SELECT COALESCE(SUM(i.subTotal), 0) FROM itempedido i WHERE i.idPedido = p.idPedido) AS lineas,
+                (SELECT COUNT(*) FROM pago pa WHERE pa.idPedido = p.idPedido) AS pagos,
+                (SELECT COUNT(*) FROM pago pa JOIN envio e ON e.idPago = pa.idPago WHERE pa.idPedido = p.idPedido) AS envios,
+                (SELECT MAX(pa.monto) FROM pago pa WHERE pa.idPedido = p.idPedido) AS monto
+         FROM pedido p WHERE p.idPedido <= 10 ORDER BY p.idPedido`,
+      )
+      assert.equal(orders.length, 10)
+      for (const order of orders) {
+        assert.equal(Number(order.precioTotal), Number(order.lineas), `pedido ${order.idPedido}: el total no es la suma de las líneas`)
+        assert.equal(Number(order.monto), Number(order.precioTotal), `pedido ${order.idPedido}: el pago no coincide con el total`)
+        assert.equal(Number(order.pagos), 1, `pedido ${order.idPedido}: debe tener un solo pago`)
+        assert.equal(Number(order.envios), 1, `pedido ${order.idPedido}: debe tener un solo envío`)
+      }
+
+      const [lines] = await getPool().query(
+        `SELECT i.idItem, i.cantidad, i.precioUnitario, i.subTotal, pr.precio
+         FROM itempedido i JOIN producto pr ON pr.idProducto = i.idProducto WHERE i.idPedido <= 10`,
+      )
+      for (const line of lines) {
+        assert.equal(Number(line.subTotal), Number(line.cantidad) * Number(line.precioUnitario), `línea ${line.idItem}: subtotal mal calculado`)
+        assert.equal(Number(line.precioUnitario), Number(line.precio), `línea ${line.idItem}: el precio no es el del producto`)
+      }
+    })
+
+    test('los pedidos usan estados y medios válidos, traen los datos de entrega y ninguno vence solo', async () => {
+      const [orders] = await getPool().query(
+        `SELECT p.idPedido, p.estadoPedido, p.nombreEnvio, p.celularEnvio, p.direccionEnvio, pa.proveedorPago, pa.estadoPago
+         FROM pedido p JOIN pago pa ON pa.idPedido = p.idPedido WHERE p.idPedido <= 10`,
+      )
+      const statuses = ['Pendiente', 'En preparación', 'Enviado', 'Completado', 'Cancelado']
+      const payments = ['Pendiente', 'En proceso', 'Aprobado', 'Rechazado', 'Reembolsado', 'Expirado', 'Cancelado']
+      for (const order of orders) {
+        assert.ok(statuses.includes(order.estadoPedido), `pedido ${order.idPedido}: estado ${order.estadoPedido}`)
+        assert.ok(payments.includes(order.estadoPago), `pedido ${order.idPedido}: estado de pago ${order.estadoPago}`)
+        assert.equal(order.proveedorPago, 'Mercado Pago', `pedido ${order.idPedido}: el único medio de pago es Mercado Pago`)
+        assert.ok(order.nombreEnvio && order.celularEnvio && order.direccionEnvio, `pedido ${order.idPedido}: faltan los datos de entrega`)
+        // El vencimiento automático cancela los de Mercado Pago sin pagar: ninguno de ejemplo debe quedar en ese caso
+        const unpaid = ['Pendiente', 'Rechazado'].includes(order.estadoPago) && order.estadoPedido !== 'Cancelado'
+        assert.equal(unpaid, false, `pedido ${order.idPedido}: se cancelaría solo al arrancar el servidor`)
+        // Un pedido que ya avanzó (o se completó) debe estar pagado
+        if (['En preparación', 'Enviado', 'Completado'].includes(order.estadoPedido)) assert.equal(order.estadoPago, 'Aprobado', `pedido ${order.idPedido}`)
+      }
+      assert.deepEqual([...new Set(orders.map((order) => order.estadoPedido))].sort(), [...statuses].sort(), 'hay un pedido de cada estado para que el panel tenga qué mostrar')
+    })
+
+    test('los 24 productos están activos, con imagen válida, precio, stock y nombre únicos', async () => {
+      const { parseImageReference } = await import('../src/utils/product-image.js')
+      const [products] = await getPool().query('SELECT idProducto, nombre, descripcion, precio, cantidad, imagen, estado FROM producto WHERE idProducto <= 24 ORDER BY idProducto')
+      assert.equal(products.length, 24)
+      assert.equal(new Set(products.map((product) => product.nombre)).size, 24, 'nombres repetidos')
+      for (const product of products) {
+        assert.equal(Number(product.estado), 1, `${product.nombre}: debe estar activo`)
+        assert.ok(Number(product.precio) >= 1 && Number(product.cantidad) >= 0, `${product.nombre}: precio o stock inválido`)
+        assert.ok(product.descripcion && product.descripcion.length >= 20, `${product.nombre}: falta la descripción`)
+        assert.ok(product.imagen, `${product.nombre}: sin imagen`)
+        assert.equal(parseImageReference(product.imagen), product.imagen, `${product.nombre}: la imagen no pasa la validación del backend`)
+      }
+      // Las imágenes de la propia tienda existen de verdad en el repositorio
+      const { existsSync } = await import('node:fs')
+      const { join, dirname } = await import('node:path')
+      const { fileURLToPath } = await import('node:url')
+      const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'frontend', 'public')
+      for (const product of products.filter((item) => item.imagen.startsWith('/tienda/'))) {
+        assert.ok(existsSync(join(publicDir, decodeURIComponent(product.imagen))), `${product.nombre}: no existe el archivo ${product.imagen}`)
+      }
+    })
+
+    test('el panel clasifica a los clientes de ejemplo: VIP, Frecuente y Nuevo', async () => {
+      const customers = (await call('/api/customers', { cookie: adminCookie })).data
+      const tier = (email) => customers.find((customer) => customer.email === email)?.tier
+      assert.equal(tier('laura@example.com'), 'VIP')
+      assert.equal(tier('mateo@example.com'), 'Frecuente')
+      assert.equal(tier('sofia@example.com'), 'Nuevo')
+      assert.equal(tier('camila@example.com'), 'Nuevo')
+      assert.equal((await call('/api/dashboard', { cookie: adminCookie })).status, 200)
+      assert.equal((await call('/api/reports', { cookie: adminCookie })).status, 200)
+    })
+  })
+
   describe('cuentas y contraseñas', () => {
     test('login: credenciales válidas entran y las incorrectas dan 401', async () => {
-      const wrong = await call('/api/auth/login', { method: 'POST', body: { email: 'carlos@gmail.com', password: 'otra-clave-1' } })
+      const wrong = await call('/api/auth/login', { method: 'POST', body: { email: 'admin@example.com', password: 'otra-clave-1' } })
       assert.equal(wrong.status, 401)
       assert.ok(adminCookie.includes('sweetlove-session'))
     })
@@ -275,7 +379,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     test('una sesión sin huella (de antes de esta versión) o con otra huella no vale', async () => {
       const { loadSessionUser } = await import('../src/middleware/auth.js')
       const { passwordStamp } = await import('../src/utils/session.js')
-      const [[admin]] = await getPool().query("SELECT idUser, contrasena FROM usuario WHERE email = 'carlos@gmail.com'")
+      const [[admin]] = await getPool().query("SELECT idUser, contrasena FROM usuario WHERE email = 'admin@example.com'")
 
       const old = { session: { idUser: admin.idUser, idRol: 1 } }
       assert.equal(await loadSessionUser(old), null)
