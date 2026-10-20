@@ -5,13 +5,6 @@ import { isImageDataUrl, parseImageReference, saveProductImage } from '../utils/
 import * as productModel from '../models/productModel.js'
 import * as supplierModel from '../models/supplierModel.js'
 
-// Imágenes de la tienda para los productos de ejemplo cuando la base aún no tiene imagen propia
-const FALLBACK_IMAGE_BY_ID = {
-  1: '/tienda/assets/images/trufas.jpeg',
-  2: '/tienda/assets/images/combox3.jpeg',
-  3: '/tienda/assets/images/combox6.jpeg',
-  4: '/tienda/assets/images/fresas.jpeg',
-}
 // Largos máximos de las columnas `producto.nombre` y `producto.descripcion` (ver database/schema.sql)
 const MAX_NAME_LENGTH = 100
 const MAX_DESCRIPTION_LENGTH = 255
@@ -19,6 +12,7 @@ const MAX_DESCRIPTION_LENGTH = 255
 const MAX_PRICE = 99999999
 const MAX_STOCK = 99999
 
+// Imagen de un producto que todavía no tiene una propia (el logo: nunca la foto de otro producto)
 const DEFAULT_IMAGE = '/tienda/assets/recursos/logo1.png'
 
 // Convierte una fila de producto en la forma que consumen la tienda y el panel, recibe row
@@ -28,7 +22,7 @@ const toProductResponse = (row) => ({
   emoji: '🍰',
   category: 'Repostería',
   rating: '—',
-  image: row.image || FALLBACK_IMAGE_BY_ID[row.id] || DEFAULT_IMAGE,
+  image: row.image || DEFAULT_IMAGE,
 })
 
 // Lee y valida los campos de un producto enviados por el administrador; al editar (partial), lo que no se envía queda sin tocar (undefined), recibe body, partial
