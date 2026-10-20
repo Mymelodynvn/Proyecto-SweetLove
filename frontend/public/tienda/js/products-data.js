@@ -52,10 +52,10 @@ const fallbackProductCatalog = [
     },
     {
         id: "chocolate-truffles-x12",
-        name: "Trufas de Chocolate x12",
+        name: "Cake Pops Pastel",
         price: 50000,
         image: "assets/images/trufas.jpeg",
-        alt: "Trufas de chocolate x12"
+        alt: "Cake pops en tonos pastel"
     },
     {
         id: "meringues-x12",
