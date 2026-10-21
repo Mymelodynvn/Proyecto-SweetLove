@@ -392,11 +392,11 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await loadSessionUser(valid)).idUser, admin.idUser)
     })
 
-    test('las reglas de contraseña y correo (sin espacios ni símbolos, de 8 a 16) se aplican en registro, restablecer y cambio', async () => {
+    test('las reglas de contraseña y correo (sin espacios ni < ni >, de 8 a 16) se aplican en registro, restablecer y cambio', async () => {
       const fullName = 'Ana Prueba'
 
-      // Registro: contraseña con espacios, símbolos, < >, corta; y correos con espacios
-      for (const password of ['Clave 2026abc', 'Clave2026#abc', 'Clave<2026>x', 'Clave20', 'Clave2026Clave2026']) {
+      // Registro: contraseña con espacios, con < >, corta o larga; y correos con espacios
+      for (const password of ['Clave 2026abc', 'Clave<2026>x', 'Clave20', 'Clave2026Clave2026']) {
         const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email: uniqueEmail(), password } })
         assert.equal(result.status, 400, password)
         assert.equal(result.data.code, 'WEAK_PASSWORD', password)
@@ -407,11 +407,18 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
         assert.equal(result.data.message, 'El correo no puede tener espacios.')
       }
 
+      // Los demás símbolos sí se aceptan
+      const symbolEmail = uniqueEmail()
+      const withSymbol = await call('/api/auth/register', { method: 'POST', body: { fullName, email: symbolEmail, password: 'Clave2026#abc' } })
+      assert.equal(withSymbol.status, 201)
+      await call('/api/auth/verify-email', { method: 'POST', body: { token: tokenFromLastMail(symbolEmail) } })
+      assert.equal((await login(symbolEmail, 'Clave2026#abc')).length > 0, true)
+
       // Restablecer: una contraseña inválida no gasta el enlace
       const user = await createVerifiedUser()
       await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
       const token = tokenFromLastMail(user.email)
-      for (const password of ['Nueva clave 2026', 'Nueva#Clave2026', 'NuevaClave2026Larga']) {
+      for (const password of ['Nueva clave 2026', 'NuevaClave2026Larga']) {
         assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password } })).status, 400, password)
       }
       assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2026' } })).status, 200)
@@ -421,6 +428,8 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       for (const newPassword of ['Otra clave 2026', 'Otra<Clave>2026', 'Corta20', 'OtraClave2026Larga']) {
         assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword } })).status, 400, newPassword)
       }
+      // Un símbolo distinto de < > sí se acepta al cambiar la contraseña
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword: 'Nueva#Clave2026' } })).status, 200)
 
       // Recuperar contraseña y reenviar verificación también rechazan correos con espacios
       assert.equal((await call('/api/auth/forgot-password', { method: 'POST', body: { email: `${user.email} ` } })).status, 400)

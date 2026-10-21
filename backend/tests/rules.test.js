@@ -11,15 +11,21 @@ describe('contraseña', () => {
     }
   })
 
+  test('acepta símbolos que no sean < ni >', () => {
+    for (const password of ['Clave#2026abc', 'Clave.2026abc', 'Clave-2026abc', 'SweetLove#2026', 'Clave2026abc!', 'Cl@ve2026abc']) {
+      assert.equal(passwordProblem(password), '', password)
+    }
+  })
+
   test('rechaza los espacios, dentro, al inicio y al final', () => {
     for (const password of ['Clave 2026abc', ' Clave2026abc', 'Clave2026abc ', 'Clave\t2026abc']) {
       assert.equal(passwordProblem(password), 'La contraseña no puede tener espacios.', JSON.stringify(password))
     }
   })
 
-  test('rechaza los símbolos, incluidos < y >', () => {
-    for (const password of ['Clave2026<abc', 'Clave2026>abc', 'Clave#2026abc', 'Clave.2026abc', 'Clave-2026abc', 'SweetLove#2026', 'Clave2026abc!', 'Cl@ve2026abc']) {
-      assert.match(passwordProblem(password), /solo puede tener letras y números/, password)
+  test('rechaza los caracteres < y >', () => {
+    for (const password of ['Clave2026<abc', 'Clave2026>abc', '<script>2026ab']) {
+      assert.equal(passwordProblem(password), 'La contraseña no puede tener los caracteres < ni >.', password)
     }
   })
 
