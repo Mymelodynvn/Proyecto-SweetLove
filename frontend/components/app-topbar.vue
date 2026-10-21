@@ -1,4 +1,4 @@
-<!-- app-topbar.vue — barra superior: buscador, tema, notificaciones y menú de la cuenta (perfil, ajustes, ver tienda y cerrar sesión) -->
+<!-- app-topbar.vue — barra superior: buscador, botón para volver a la tienda, tema, notificaciones y menú de la cuenta (perfil, ajustes, ver tienda y cerrar sesión) -->
 <script setup lang="ts">
 import { IconBuildingStore, IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-vue'
 import { SidebarTrigger } from '~/components/ui/sidebar'
@@ -31,6 +31,14 @@ const { logout } = useAuth()
     </div>
 
     <div class="ml-auto flex items-center gap-1">
+      <!-- Botón visible para volver a la tienda. Es un enlace normal: la tienda es HTML estático fuera del router de Nuxt -->
+      <Button variant="outline" size="sm" as-child class="mr-1">
+        <a href="/tienda/index.html" title="Ir a la tienda" aria-label="Ir a la tienda">
+          <IconBuildingStore class="size-4" />
+          <span class="hidden sm:inline">Ir a la tienda</span>
+        </a>
+      </Button>
+
       <ThemeToggle />
 
       <AppNotifications />

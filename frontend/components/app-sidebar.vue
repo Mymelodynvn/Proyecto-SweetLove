@@ -156,6 +156,15 @@ const isSectionOpen = (section: NavSection) =>
                 </NuxtLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            <!-- Vuelve a la tienda pública. Es un enlace normal porque la tienda está fuera del router de Nuxt -->
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="Ir a la tienda" as-child>
+                <a href="/tienda/index.html">
+                  <IconBuildingStore />
+                  <span>Ir a la tienda</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
