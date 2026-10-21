@@ -40,9 +40,12 @@ const CartDrawer = {
                                 <!-- Cantidad actual -->
                                 <span class="qty-value">{{ cartItem.quantity }}</span>
 
-                                <!-- Agregar una unidad -->
-                                <button class="qty-btn" @click="cart.changeQuantity(cartItem.id, 1)" aria-label="Agregar uno"><i class="fa-solid fa-plus"></i></button>
+                                <!-- Agregar una unidad (se desactiva al llegar al stock disponible) -->
+                                <button class="qty-btn" @click="cart.changeQuantity(cartItem.id, 1)" :disabled="cartItem.quantity >= cart.maxFor(cartItem.id)" :aria-label="cartItem.quantity >= cart.maxFor(cartItem.id) ? 'No hay más unidades disponibles' : 'Agregar uno'"><i class="fa-solid fa-plus"></i></button>
                             </div>
+
+                            <!-- Aviso cuando ya se alcanzó el stock disponible -->
+                            <p v-if="cartItem.quantity >= cart.maxFor(cartItem.id)" class="cart-drawer__item-limit">No hay más unidades disponibles</p>
                         </div>
 
                         <!-- Subtotal del producto y botón de eliminar -->

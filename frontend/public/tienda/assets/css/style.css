@@ -1499,6 +1499,13 @@ header{
 .qty-btn:active{
     transform: scale(0.88);
 }
+.qty-btn:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.qty-btn:disabled:hover{
+    background: transparent;
+}
 .qty-btn i{
     font-size: 14px;
     color: var(--color_text-secundary);
