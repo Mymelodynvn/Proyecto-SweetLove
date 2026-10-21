@@ -56,6 +56,8 @@ interface StatCard {
 }
 
 const { chartTheme } = useChartTheme()
+// Nombre de la cuenta con sesión, el mismo que ve la tienda
+const { firstName } = useProfile()
 
 // Consulta asíncrona de datos del dashboard desde la API REST
 const { data, pending, error, refresh } = await useFetch<DashboardData>('/api/dashboard', {
@@ -224,9 +226,9 @@ const topProducts = computed(() => data.value.topProducts.map((product) => ({
     <!-- Encabezado y Carrusel de Consejos -->
     <div class="grid gap-6 lg:grid-cols-3">
       <div class="from-secondary to-background flex flex-col items-start gap-2 rounded-xl bg-gradient-to-r p-8 lg:col-span-2">
-        <h1 class="font-heading text-2xl font-bold">👋 Hola Maryuri,</h1>
+        <h1 class="font-heading text-2xl font-bold">👋 Hola {{ firstName }},</h1>
         <p class="text-muted-foreground">
-          Bienvenida a tu panel de Sweet Love. Revisa las ventas y el estado real de tu negocio.
+          Te damos la bienvenida a tu panel de Sweet Love. Revisa las ventas y el estado real de tu negocio.
         </p>
         <Button class="mt-2" as-child>
           <NuxtLink to="/reports">Ver reportes</NuxtLink>

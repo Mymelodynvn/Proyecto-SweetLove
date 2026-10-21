@@ -50,7 +50,7 @@ const handleLogin = async () => {
   <Card class="w-full max-w-sm">
     <CardHeader>
       <CardTitle class="text-xl">Iniciar sesión</CardTitle>
-      <CardDescription>Bienvenida de nuevo. Ingresa tus datos para continuar.</CardDescription>
+      <CardDescription>Te damos la bienvenida de nuevo. Ingresa tus datos para continuar.</CardDescription>
     </CardHeader>
     <CardContent>
       <form class="flex flex-col gap-4" @submit.prevent="handleLogin">

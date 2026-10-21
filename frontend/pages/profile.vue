@@ -122,11 +122,13 @@ const recentActivity = computed(() => dashboardData.value.recentOrders.slice(0, 
                   </div>
                   <div class="flex flex-col gap-2">
                     <Label for="profile-name">Nombre</Label>
-                    <Input id="profile-name" v-model="editForm.name" required />
+                    <!-- El nombre sale de la cuenta (el mismo que ve la tienda): no se edita aquí -->
+                    <Input id="profile-name" :model-value="profile.name" disabled />
+                    <p class="text-muted-foreground text-xs">Tu nombre sale de tu cuenta y es el mismo que ves en la tienda.</p>
                   </div>
                   <div class="flex flex-col gap-2">
                     <Label for="profile-role">Cargo</Label>
-                    <Input id="profile-role" v-model="editForm.role" required />
+                    <Input id="profile-role" v-model="editForm.role" placeholder="Administrador" required />
                   </div>
                   <div class="flex flex-col gap-2">
                     <Label for="profile-bio">Descripción</Label>

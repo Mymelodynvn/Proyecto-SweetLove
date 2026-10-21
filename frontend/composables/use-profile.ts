@@ -1,4 +1,4 @@
-// use-profile.ts — perfil de la persona administradora
+// use-profile.ts — perfil de la persona administradora: el nombre y el cargo salen de la cuenta con sesión, y el resto se guarda en este navegador
 export interface ProfileData {
   name: string
   role: string
@@ -13,10 +13,13 @@ export interface ProfileData {
 // Clave de localStorage donde se guarda el perfil
 const PROFILE_STORAGE_KEY = 'sweet-love-admin-profile'
 
-// Perfil por defecto, usado hasta que se guarde uno propio
+// Cargo que se muestra según el rol de la cuenta, cuando la persona no escribió uno propio
+const ROLE_LABELS: Record<number, string> = { 1: 'Administrador', 2: 'Cliente', 3: 'Proveedor' }
+
+// Perfil por defecto, usado hasta que se guarde uno propio (sin nombre ni cargo: salen de la sesión)
 const DEFAULT_PROFILE: ProfileData = {
-  name: 'Maryuri de Mendoza',
-  role: 'CEO & Fundadora',
+  name: '',
+  role: '',
   bio: 'Emprendedora venezolana radicada en Medellín, apasionada por la repostería artesanal '
     + 'y en formación constante para estar al día con las últimas tendencias. '
     + 'Su mayor placer: servir y crear momentos dulces y memorables para los demás.',
@@ -28,7 +31,19 @@ const DEFAULT_PROFILE: ProfileData = {
 
 // Composable del perfil
 export const useProfile = () => {
-  const profile = useState<ProfileData>('profile', () => ({ ...DEFAULT_PROFILE }))
+  // Lo guardado en este navegador (descripción, ubicación, avatar, redes y, si se escribió, el cargo)
+  const stored = useState<ProfileData>('profile', () => ({ ...DEFAULT_PROFILE }))
+  const { user } = useAuth()
+
+  // Nombre completo de la cuenta con sesión: es el mismo que muestra la tienda al iniciar sesión
+  const sessionName = computed(() => (user.value ? `${user.value.nombre} ${user.value.apellido ?? ''}`.trim() : ''))
+
+  // Perfil que se muestra: el nombre sale siempre de la sesión y el cargo, de lo guardado o del rol de la cuenta
+  const profile = computed<ProfileData>(() => ({
+    ...stored.value,
+    name: sessionName.value || stored.value.name,
+    role: stored.value.role || (user.value ? (ROLE_LABELS[user.value.idRol] ?? '') : ''),
+  }))
 
   // Palabras que no cuentan para las iniciales (de, del, la...)
   const NAME_CONNECTORS = new Set(['de', 'del', 'la', 'las', 'los', 'y'])
@@ -43,17 +58,17 @@ export const useProfile = () => {
       .join(''),
   )
 
-  // Primer nombre, para saludos y la barra superior
-  const firstName = computed(() => profile.value.name.split(' ')[0] ?? '')
+  // Nombre para saludos y la barra superior: el de la cuenta, tal cual lo muestra la tienda
+  const firstName = computed(() => user.value?.nombre?.trim() || profile.value.name.split(' ')[0] || '')
 
   // Lee el perfil guardado y lo mezcla con el predeterminado; si está dañado, lo descarta
   const loadFromStorage = () => {
-    const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
-    if (!stored) return
+    const savedText = localStorage.getItem(PROFILE_STORAGE_KEY)
+    if (!savedText) return
     try {
-      const parsed: unknown = JSON.parse(stored)
+      const parsed: unknown = JSON.parse(savedText)
       if (parsed && typeof parsed === 'object') {
-        profile.value = { ...DEFAULT_PROFILE, ...parsed }
+        stored.value = { ...DEFAULT_PROFILE, ...parsed }
       }
     }
     catch (parseError) {
@@ -64,8 +79,8 @@ export const useProfile = () => {
 
   // Actualiza el perfil en pantalla y lo guarda en localStorage, recibe updated
   const save = (updated: ProfileData) => {
-    profile.value = { ...updated }
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile.value))
+    stored.value = { ...updated }
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(stored.value))
   }
 
   return { profile, initials, firstName, loadFromStorage, save }

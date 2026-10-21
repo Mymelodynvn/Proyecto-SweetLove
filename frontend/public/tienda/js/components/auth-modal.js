@@ -217,7 +217,7 @@ const AuthModal = {
                 return;
             }
             uiStore.user = data.user; // la sesión real es la cookie del servidor; esto solo actualiza la pantalla
-            this.loginMessage = `Bienvenida, ${data.user.nombre}.`;
+            this.loginMessage = `Hola, ${data.user.nombre}.`;
             setTimeout(() => this.closeAuth(), 700);
         },
 
