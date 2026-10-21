@@ -5,6 +5,9 @@ const ADDED_FEEDBACK_MS = 1600;
 // Máximo de unidades de un mismo producto en el carrito (el servidor rechaza más de 50 por pedido)
 const CART_MAX_PER_PRODUCT = 50;
 
+// Cuántas unidades de un producto se pueden tener en el carrito: su stock si se conoce (nunca más de lo que hay), si no, el tope general, recibe stock
+const quantityLimitFor = (stock) => (Number.isFinite(stock) ? Math.max(0, Math.min(stock, CART_MAX_PER_PRODUCT)) : CART_MAX_PER_PRODUCT);
+
 // Devuelve la ruta de imagen lista para usar en la tienda, recibe imagePath
 const normalizeImagePath = (imagePath) => {
     if (!imagePath) return "assets/recursos/logo.png";
@@ -62,26 +65,33 @@ const cartStore = Vue.reactive({
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.items));
     },
 
-    // Agrega un producto al carrito; si ya está, suma las unidades, recibe product, quantity
+    // Unidades máximas que se pueden tener de un producto (según su stock actual en el catálogo), recibe productId
+    maxFor(productId) {
+        const product = catalogStore.products.find((item) => item.id === productId);
+        return quantityLimitFor(product?.stock);
+    },
+
+    // Agrega un producto al carrito sin pasar de su stock; si ya está, suma las unidades, recibe product, quantity
     addItem(product, quantity = 1) {
+        const limit = quantityLimitFor(product.stock);
         const existingItem = this.items.find((cartItem) => cartItem.id === product.id);
 
         if (existingItem) {
-            existingItem.quantity = Math.min(existingItem.quantity + quantity, CART_MAX_PER_PRODUCT);
+            existingItem.quantity = Math.min(existingItem.quantity + quantity, limit);
         } else {
             this.items.push({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: Math.min(quantity, CART_MAX_PER_PRODUCT)
+                quantity: Math.min(quantity, limit)
             });
         }
 
         this.persist();
     },
 
-    // Suma o resta unidades de un producto; si queda en 0 o menos, lo quita, recibe productId, quantityChange
+    // Suma o resta unidades de un producto sin pasar de su stock; si queda en 0 o menos, lo quita, recibe productId, quantityChange
     changeQuantity(productId, quantityChange) {
         const targetItem = this.items.find((cartItem) => cartItem.id === productId);
 
@@ -94,7 +104,7 @@ const cartStore = Vue.reactive({
             return;
         }
 
-        targetItem.quantity = Math.min(targetItem.quantity + quantityChange, CART_MAX_PER_PRODUCT);
+        targetItem.quantity = Math.min(targetItem.quantity + quantityChange, this.maxFor(productId));
         this.persist();
     },
 
