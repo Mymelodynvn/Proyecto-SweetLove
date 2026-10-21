@@ -83,8 +83,7 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 
 ### Reglas de contraseña
 
-De 8 a 16 caracteres, **solo letras y números**: no se aceptan espacios ni símbolos
-(`< > # . - ! @`…). Debe tener al menos una letra y un número, no ser una clave obvia (`1234567890`, secuencias, una letra repetida)
+De 8 a 16 caracteres, sin espacios ni los caracteres `<` o `>` (el resto de símbolos sí se aceptan). Debe tener al menos una letra y un número, no ser una clave obvia (`1234567890`, secuencias, una letra repetida)
 ni contener el correo o el nombre. Se comprueban en el servidor (`utils/password.js`); la tienda y el panel muestran las reglas,
 no dejan teclear espacios y las validan también al enviar. Las reglas valen al registrarse, restablecer y cambiar la contraseña:
 las cuentas que ya existían con otra clave siguen entrando igual hasta que la cambien.

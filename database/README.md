@@ -67,7 +67,7 @@ No cargues `seed.sql`. Crea la base limpia y agrega tu administrador:
 ```bash
 cd backend
 npm run db:init -- --sin-demo
-node -e "console.log(require('bcryptjs').hashSync('TuContrasena1', 10))"    # de 8 a 16 caracteres, solo letras y números
+node -e "console.log(require('bcryptjs').hashSync('TuContrasena1', 10))"    # de 8 a 16 caracteres, sin espacios ni < ni >
 ```
 
 ```sql
