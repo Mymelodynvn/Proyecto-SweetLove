@@ -94,74 +94,8 @@ export interface TeamMember {
 // Campos editables desde el formulario (el resto lo asigna el sistema)
 export type TeamMemberFormData = Omit<TeamMember, 'id' | 'joinedDate' | 'activity' | 'isOwner'>
 
-// Equipo de ejemplo, usado la primera vez
-const DEFAULT_TEAM = (): TeamMember[] => [
-  {
-    id: 1,
-    name: 'Maryuri de Mendoza',
-    email: 'maryuri@sweetlove.com',
-    phone: '300 000 0000',
-    avatar: null,
-    role: 'Administrador',
-    permissions: rolePermissions('Administrador'),
-    active: true,
-    joinedDate: 'ene 2020',
-    activity: [
-      { title: 'Publicó una nueva entrada en el blog', detail: 'Cómo elegimos los ingredientes de nuestras tortas', date: '15 ago 2026' },
-      { title: 'Agregó un nuevo producto', detail: 'Cheesecake de frutos rojos', date: '12 ago 2026' },
-      { title: 'Actualizó la configuración de la tienda', detail: 'Datos de contacto y ubicación', date: '8 ago 2026' },
-    ],
-    isOwner: true,
-  },
-  {
-    id: 2,
-    name: 'Daniela Cárdenas',
-    email: 'daniela@sweetlove.com',
-    phone: '310 555 2211',
-    avatar: null,
-    role: 'Gerente',
-    permissions: rolePermissions('Gerente'),
-    active: true,
-    joinedDate: 'mar 2023',
-    activity: [
-      { title: 'Completó 25 pedidos esta semana', detail: 'Semana del 11 al 17 de agosto', date: '17 ago 2026' },
-      { title: 'Exportó el reporte de ingresos', detail: 'Últimos 6 meses', date: '14 ago 2026' },
-      { title: 'Actualizó el stock de 4 productos', detail: 'Cupcakes y cheesecakes', date: '11 ago 2026' },
-    ],
-    isOwner: false,
-  },
-  {
-    id: 3,
-    name: 'Paula Jiménez',
-    email: 'paula@sweetlove.com',
-    phone: '316 444 8899',
-    avatar: null,
-    role: 'Vendedor',
-    permissions: rolePermissions('Vendedor'),
-    active: true,
-    joinedDate: 'jul 2024',
-    activity: [
-      { title: 'Registró 8 pedidos nuevos', detail: 'Principalmente por WhatsApp', date: '17 ago 2026' },
-      { title: 'Marcó 6 pedidos como enviados', detail: 'Entregas en Medellín y Envigado', date: '16 ago 2026' },
-    ],
-    isOwner: false,
-  },
-  {
-    id: 4,
-    name: 'Miguel Ángel Rojas',
-    email: 'miguel@sweetlove.com',
-    phone: '302 777 1144',
-    avatar: null,
-    role: 'Repostero',
-    permissions: rolePermissions('Repostero'),
-    active: false,
-    joinedDate: 'feb 2025',
-    activity: [
-      { title: 'Preparó 14 pedidos', detail: 'Antes de su licencia', date: '30 jul 2026' },
-    ],
-    isOwner: false,
-  },
-]
+// Equipo: vacío hasta que la persona administradora agregue a su equipo real
+const DEFAULT_TEAM = (): TeamMember[] => []
 
 // Fecha de hoy en formato corto, para registrar el ingreso de un miembro
 const formatJoinDate = () =>

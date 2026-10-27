@@ -47,16 +47,16 @@ Se pueden combinar: `npm run db:init -- --force --sin-demo`. Usan las variables 
 
 ## Datos de demostración
 
-`seed.sql` crea seis cuentas, todas con la contraseña `SweetLove2026`. Los correos usan `example.com` (dominio reservado para ejemplos), así que «Olvidé mi contraseña» nunca escribe a una persona real:
+`seed.sql` crea seis cuentas (correos y contraseña en el comentario al inicio del archivo). Los correos usan `example.com` (dominio reservado para ejemplos), así que «Olvidé mi contraseña» nunca escribe a una persona real:
 
-| Cuenta | Rol | Qué muestra |
-|---|---|---|
-| `admin@example.com` | Administrador | Entra al panel |
-| `laura@example.com` | Cliente | 6 pedidos: nivel VIP |
-| `mateo@example.com` | Cliente | 2 pedidos: nivel Frecuente |
-| `sofia@example.com` | Cliente | 1 pedido con el pago en proceso: nivel Nuevo |
-| `camila@example.com` | Cliente | 1 pedido cancelado: nivel Nuevo |
-| `ana@example.com` | Proveedor | Dueña del proveedor «Dulces del Valle» |
+| Rol | Qué muestra |
+|---|---|
+| Administrador | Entra al panel |
+| Cliente | 6 pedidos: nivel VIP |
+| Cliente | 2 pedidos: nivel Frecuente |
+| Cliente | 1 pedido con el pago en proceso: nivel Nuevo |
+| Cliente | 1 pedido cancelado: nivel Nuevo |
+| Proveedor | Dueña del proveedor «Dulces del Valle» |
 
 Los 10 pedidos cubren todos los estados (Pendiente, En preparación, Enviado, Completado y Cancelado), todos con Mercado Pago y con los datos de entrega. Sus fechas son relativas al día en que se carga el archivo, y ninguno vence solo. Los 10 primeros productos usan las fotos propias de la tienda; el resto enlaza fotos de Wikimedia Commons.
 
@@ -67,7 +67,7 @@ No cargues `seed.sql`. Crea la base limpia y agrega tu administrador:
 ```bash
 cd backend
 npm run db:init -- --sin-demo
-node -e "console.log(require('bcryptjs').hashSync('TuContrasena1', 10))"    # de 8 a 16 caracteres, sin espacios ni < ni >
+node -e "console.log(require('bcryptjs').hashSync('TuContrasena1!', 10))"    # 8-16 caracteres, con letra, número y carácter especial (@ # $ ! ? * .), sin espacios ni < ni >
 ```
 
 ```sql
