@@ -1,5 +1,6 @@
 <!-- change-password-card.vue — tarjeta para cambiar la contraseña de la cuenta con sesión iniciada -->
 <script setup lang="ts">
+import { IconEye, IconEyeOff } from '@tabler/icons-vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -12,6 +13,11 @@ const confirmPassword = ref('')
 const sending = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+
+// Cada campo muestra u oculta su contraseña por separado
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 // Valida las contraseñas y pide a la API el cambio; al terminar limpia los campos
 const submit = async () => {
@@ -56,15 +62,71 @@ const submit = async () => {
       <form class="flex max-w-md flex-col gap-4" @submit.prevent="submit">
         <div class="flex flex-col gap-2">
           <Label for="current-password">Contraseña actual</Label>
-          <Input id="current-password" v-model="currentPassword" type="password" autocomplete="current-password" required />
+          <div class="relative">
+            <Input
+              id="current-password"
+              v-model="currentPassword"
+              :type="showCurrentPassword ? 'text' : 'password'"
+              class="pr-10"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+              :aria-label="showCurrentPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              @click="showCurrentPassword = !showCurrentPassword"
+            >
+              <IconEyeOff v-if="showCurrentPassword" class="size-4" />
+              <IconEye v-else class="size-4" />
+            </button>
+          </div>
         </div>
         <div class="flex flex-col gap-2">
           <Label for="new-password">Contraseña nueva</Label>
-          <Input id="new-password" v-model="newPassword" type="password" autocomplete="new-password" required @keydown.space.prevent />
+          <div class="relative">
+            <Input
+              id="new-password"
+              v-model="newPassword"
+              :type="showNewPassword ? 'text' : 'password'"
+              class="pr-10"
+              autocomplete="new-password"
+              required
+              @keydown.space.prevent
+            />
+            <button
+              type="button"
+              class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+              :aria-label="showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              @click="showNewPassword = !showNewPassword"
+            >
+              <IconEyeOff v-if="showNewPassword" class="size-4" />
+              <IconEye v-else class="size-4" />
+            </button>
+          </div>
         </div>
         <div class="flex flex-col gap-2">
           <Label for="repeat-password">Repite la contraseña nueva</Label>
-          <Input id="repeat-password" v-model="confirmPassword" type="password" autocomplete="new-password" required @keydown.space.prevent />
+          <div class="relative">
+            <Input
+              id="repeat-password"
+              v-model="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              class="pr-10"
+              autocomplete="new-password"
+              required
+              @keydown.space.prevent
+            />
+            <button
+              type="button"
+              class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+              :aria-label="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              @click="showConfirmPassword = !showConfirmPassword"
+            >
+              <IconEyeOff v-if="showConfirmPassword" class="size-4" />
+              <IconEye v-else class="size-4" />
+            </button>
+          </div>
         </div>
         <p v-if="errorMessage" class="text-destructive text-sm">{{ errorMessage }}</p>
         <p v-if="successMessage" class="text-primary text-sm">{{ successMessage }}</p>
