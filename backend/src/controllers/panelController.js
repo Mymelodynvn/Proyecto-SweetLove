@@ -1,8 +1,7 @@
-// Controlador del panel administrativo: clientes, pagos, envíos, proveedores, dashboard y reportes
+// Controlador del panel administrativo: clientes, pagos, envíos, dashboard y reportes
 import * as userModel from '../models/userModel.js'
 import * as paymentModel from '../models/paymentModel.js'
 import * as shipmentModel from '../models/shipmentModel.js'
-import * as supplierModel from '../models/supplierModel.js'
 import * as statsModel from '../models/statsModel.js'
 
 // Pedidos desde los que un cliente se considera "VIP"
@@ -55,21 +54,6 @@ export const shipments = async (_req, res) => {
       paymentId: Number(row.paymentId ?? 0),
       statusId: Number(row.statusId ?? 0),
       status: String(row.status ?? 'Pendiente'),
-    })),
-  )
-}
-
-// GET /api/suppliers — proveedores registrados, recibe res
-export const suppliers = async (_req, res) => {
-  const rows = await supplierModel.findAll()
-
-  res.json(
-    rows.map((row) => ({
-      id: Number(row.id),
-      name: String(row.name),
-      email: String(row.email ?? ''),
-      phone: String(row.phone ?? ''),
-      userId: row.userId == null ? null : Number(row.userId),
     })),
   )
 }

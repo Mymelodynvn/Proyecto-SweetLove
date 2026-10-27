@@ -879,6 +879,51 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('proveedores', () => {
+    test('crea, edita y elimina un proveedor', async () => {
+      const created = await call('/api/suppliers', { method: 'POST', cookie: adminCookie, body: { name: 'Nuevo Proveedor', email: 'contacto@nuevo.example.com', phone: '3001234567' } })
+      assert.equal(created.status, 201, JSON.stringify(created.data))
+      const id = created.data.proveedor.id
+
+      const list = await call('/api/suppliers', { cookie: adminCookie })
+      assert.ok(list.data.some((supplier) => supplier.id === id && supplier.name === 'Nuevo Proveedor'))
+
+      const updated = await call(`/api/suppliers/${id}`, { method: 'PUT', cookie: adminCookie, body: { name: 'Proveedor Editado', phone: '3009876543' } })
+      assert.equal(updated.status, 200)
+      const [[row]] = await getPool().query('SELECT nombre, email, celular FROM proveedor WHERE idProveedor = ?', [id])
+      // Editar no envía el correo: debe conservarse
+      assert.deepEqual(row, { nombre: 'Proveedor Editado', email: 'contacto@nuevo.example.com', celular: '3009876543' })
+
+      assert.equal((await call(`/api/suppliers/${id}`, { method: 'DELETE', cookie: adminCookie })).status, 200)
+      const [[{ total }]] = await getPool().query('SELECT COUNT(*) AS total FROM proveedor WHERE idProveedor = ?', [id])
+      assert.equal(Number(total), 0)
+    })
+
+    test('rechaza nombre muy corto, celular inválido y correo inválido', async () => {
+      const base = { name: 'Proveedor Válido', phone: '3001234567' }
+      for (const [label, change] of [
+        ['nombre muy corto', { name: 'A' }],
+        ['celular inválido', { phone: 'abc' }],
+        ['correo inválido', { email: 'no-es-correo' }],
+      ]) {
+        assert.equal((await call('/api/suppliers', { method: 'POST', cookie: adminCookie, body: { ...base, ...change } })).status, 400, label)
+      }
+    })
+
+    test('al eliminar un proveedor, los productos que lo tenían quedan sin proveedor (no se borran)', async () => {
+      const supplier = await call('/api/suppliers', { method: 'POST', cookie: adminCookie, body: { name: 'Proveedor Temporal', phone: '3001112222' } })
+      const supplierId = supplier.data.proveedor.id
+
+      const product = await call('/api/products', { method: 'POST', cookie: adminCookie, body: { name: 'Producto con proveedor temporal', price: 1000, stock: 1, supplierId } })
+      const productId = product.data.producto.id
+
+      assert.equal((await call(`/api/suppliers/${supplierId}`, { method: 'DELETE', cookie: adminCookie })).status, 200)
+
+      const [[row]] = await getPool().query('SELECT idProveedor FROM producto WHERE idProducto = ?', [productId])
+      assert.equal(row.idProveedor, null)
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)

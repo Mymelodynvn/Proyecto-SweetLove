@@ -33,6 +33,9 @@ describe('rutas de administrador sin sesión', () => {
     ['GET', '/api/payments'],
     ['GET', '/api/shipments'],
     ['GET', '/api/suppliers'],
+    ['POST', '/api/suppliers'],
+    ['PUT', '/api/suppliers/1'],
+    ['DELETE', '/api/suppliers/1'],
     ['GET', '/api/dashboard'],
     ['GET', '/api/reports'],
   ]

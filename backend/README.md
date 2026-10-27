@@ -28,7 +28,7 @@ src/
 ├── app.js           arma Express (exporta createApp para las pruebas)
 ├── config/          env.js (variables) y database.js (pool MySQL, TLS opcional)
 ├── routes/          index.js: todas las URL y quién puede usarlas
-├── controllers/     validan la petición y responden (auth, product, order, panel, health)
+├── controllers/     validan la petición y responden (auth, product, order, supplier, panel, health)
 ├── services/        orderService (checkout), accountService (registro, verificación y contraseñas), paymentService (concilia pagos y cancela pedidos vencidos), mercadoPagoService y mailer (correo)
 ├── models/          SQL por tabla (user, token, product, order, payment, shipment, supplier, stats)
 ├── middleware/      auth.js (requireAdmin) y errorHandler.js
@@ -152,7 +152,11 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 | `GET /orders` | Pedidos con sus productos resumidos |
 | `PATCH /orders/:id` | Cambia estado. **Cancelar** devuelve el stock una sola vez y un pedido cancelado no se puede reactivar (409). Body `{ status }`: `Pendiente`, `En preparación`, `Enviado`, `Completado`, `Cancelado`. `:id` admite `7` o `#SL0007`; por el proxy del frontend usa el número, porque `#` rompe la URL |
 | `GET /customers` | Clientes con `orderCount`, `totalSpent` y `tier` (VIP ≥ 6 pedidos, Frecuente ≥ 2, Nuevo) |
-| `GET /payments`, `/shipments`, `/suppliers` | Pagos, envíos y proveedores |
+| `GET /payments`, `/shipments` | Pagos y envíos |
+| `POST /suppliers` | Crea proveedor. Body `{ name, email?, phone }` |
+| `PUT /suppliers/:id` | Actualiza proveedor (mismo body; lo que no se envía se conserva) |
+| `DELETE /suppliers/:id` | Elimina proveedor; los productos que lo tenían quedan sin proveedor (no se bloquea ni se borran) |
+| `GET /suppliers` | Lista los proveedores |
 | `GET /dashboard` | Resumen del panel (totales, ventas por producto y ciudad, recientes, semana) |
 | `GET /reports` | KPIs, ventas por producto, pedidos por estado, medios de pago, ranking de clientes |
 

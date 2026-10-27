@@ -10,6 +10,7 @@ import * as orders from '../controllers/orderController.js'
 import * as panel from '../controllers/panelController.js'
 import * as health from '../controllers/healthController.js'
 import * as payments from '../controllers/paymentController.js'
+import * as suppliers from '../controllers/supplierController.js'
 
 const router = Router()
 
@@ -38,7 +39,10 @@ router.patch('/orders/:id', requireAdmin, orders.updateStatus)
 router.get('/customers', requireAdmin, panel.customers)
 router.get('/payments', requireAdmin, panel.payments)
 router.get('/shipments', requireAdmin, panel.shipments)
-router.get('/suppliers', requireAdmin, panel.suppliers)
+router.get('/suppliers', requireAdmin, suppliers.list)
+router.post('/suppliers', requireAdmin, suppliers.create)
+router.put('/suppliers/:id', requireAdmin, suppliers.update)
+router.delete('/suppliers/:id', requireAdmin, suppliers.remove)
 router.get('/dashboard', requireAdmin, panel.dashboard)
 router.get('/reports', requireAdmin, panel.reports)
 
