@@ -38,6 +38,7 @@ export const passwordProblem = (password, { email = '', name = '' } = {}) => {
     return 'Esa contraseña es demasiado común. Elige una más difícil de adivinar.'
   }
   if (!/\p{L}/u.test(password) || !/\d/.test(password)) return 'La contraseña debe tener al menos una letra y un número.'
+  if (!/[@#$!?*.]/.test(password)) return 'La contraseña debe tener al menos un carácter especial (@, #, $, !, ?, * o .).'
 
   const lower = password.toLowerCase()
   const emailName = String(email).split('@')[0].toLowerCase()

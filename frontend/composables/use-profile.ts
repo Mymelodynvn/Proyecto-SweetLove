@@ -8,6 +8,7 @@ export interface ProfileData {
   avatar: string | null
   instagramUrl: string
   facebookUrl: string
+  whatsappUrl: string
 }
 
 // Clave de localStorage donde se guarda el perfil
@@ -27,6 +28,7 @@ const DEFAULT_PROFILE: ProfileData = {
   avatar: null,
   instagramUrl: 'https://www.instagram.com/sweetlove.bymaryuri',
   facebookUrl: 'https://www.facebook.com/share/18tvevPvjz/',
+  whatsappUrl: 'https://wa.me/573215771432?text=Hola%2C%20deseo%20endulzar%20un%20momento%20especial',
 }
 
 // Composable del perfil

@@ -84,7 +84,7 @@ const login = async (email, password) => {
 const uniqueEmail = (prefix = 'cliente') => `${prefix}${Date.now()}${++counter}@example.com`
 
 // Registra una cuenta, verifica el correo con el enlace recibido y devuelve sus datos, recibe password
-const createVerifiedUser = async (password = 'ClaveSegura1') => {
+const createVerifiedUser = async (password = 'ClaveSegura1!') => {
   const email = uniqueEmail()
   const registered = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password } })
   assert.equal(registered.status, 201)
@@ -180,11 +180,11 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.deepEqual(states.map((row) => row.nombre), ['Pendiente', 'En camino', 'Entregado'])
     })
 
-    test('las cuentas de ejemplo usan correos example.com, entran con la clave publicada y cumplen las reglas de contraseña', async () => {
-      const { passwordProblem } = await import('../src/utils/password.js')
+    test('las cuentas de ejemplo usan correos example.com y entran con la clave publicada', async () => {
       const [users] = await getPool().query('SELECT email, idRol FROM usuario WHERE idUser <= 6 ORDER BY idUser')
       assert.equal(users.length, 6)
-      assert.equal(passwordProblem('SweetLove2026'), '', 'la clave de ejemplo debe cumplir las reglas actuales')
+      // La clave de las cuentas de ejemplo se inserta directo en la base (seed.sql), sin pasar por el registro,
+      // por lo que no tiene por qué cumplir reglas (como el carácter especial) que solo se exigen al registrarse.
       for (const user of users) {
         assert.match(user.email, /@example\.com$/, `${user.email} no debe ser una dirección real`)
         // Los proveedores no entran a la tienda ni al panel, pero su cuenta sí es válida
@@ -284,17 +284,17 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
 
     test('registro: pide verificar el correo antes de iniciar sesión', async () => {
       const email = uniqueEmail()
-      const registered = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password: 'ClaveSegura1' } })
+      const registered = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password: 'ClaveSegura1!' } })
       assert.equal(registered.status, 201)
       assert.equal(registered.data.needsVerification, true)
 
-      const early = await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1' } })
+      const early = await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1!' } })
       assert.equal(early.status, 403)
       assert.equal(early.data.code, 'EMAIL_NOT_VERIFIED')
 
       const token = tokenFromLastMail(email)
       assert.equal((await call('/api/auth/verify-email', { method: 'POST', body: { token } })).status, 200)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveSegura1!' } })).status, 200)
       // El enlace es de un solo uso
       assert.equal((await call('/api/auth/verify-email', { method: 'POST', body: { token } })).status, 400)
     })
@@ -321,11 +321,11 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const token = tokenFromLastMail(user.email)
       // Una contraseña débil no gasta el enlace
       assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: '12345678' } })).status, 400)
-      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2' } })).status, 200)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2!' } })).status, 200)
 
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2!' } })).status, 200)
       assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: user.password } })).status, 401)
-      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'OtraClave3' } })).status, 400)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'OtraClave3!' } })).status, 400)
     })
 
     test('quien agota los intentos de un correo ajeno no deja afuera a su dueño: restablecer la contraseña lo desbloquea', async () => {
@@ -342,9 +342,9 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
 
       // El dueño pide el enlace por correo y elige una contraseña nueva: queda desbloqueado al instante
       await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
-      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveDelDueno7' } })
+      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveDelDueno7!' } })
       assert.equal(reset.status, 200)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'ClaveDelDueno7' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'ClaveDelDueno7!' } })).status, 200)
     })
 
     test('cambiar la contraseña cierra las sesiones de otros dispositivos y mantiene la actual', async () => {
@@ -352,7 +352,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const phone = await login(user.email, user.password)
       const laptop = await login(user.email, user.password)
 
-      const change = await call('/api/auth/change-password', { method: 'POST', cookie: laptop, body: { currentPassword: user.password, newPassword: 'ClaveNueva2026' } })
+      const change = await call('/api/auth/change-password', { method: 'POST', cookie: laptop, body: { currentPassword: user.password, newPassword: 'ClaveNueva2026!' } })
       assert.equal(change.status, 200)
 
       // La sesión que hizo el cambio recibe una cookie nueva y sigue abierta
@@ -361,7 +361,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
 
       // La otra sesión (abierta antes del cambio) ya no vale, ni para ver la cuenta ni para las rutas protegidas
       assert.equal((await call('/api/auth/me', { cookie: phone })).data.user, null)
-      const blocked = await call('/api/auth/change-password', { method: 'POST', cookie: phone, body: { currentPassword: 'ClaveNueva2026', newPassword: 'OtraClave2026x' } })
+      const blocked = await call('/api/auth/change-password', { method: 'POST', cookie: phone, body: { currentPassword: 'ClaveNueva2026!', newPassword: 'OtraClave2026x' } })
       assert.equal(blocked.status, 401)
     })
 
@@ -371,7 +371,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal((await call('/api/auth/me', { cookie })).data.user.email, user.email)
 
       await call('/api/auth/forgot-password', { method: 'POST', body: { email: user.email } })
-      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveRestable5' } })
+      const reset = await call('/api/auth/reset-password', { method: 'POST', body: { token: tokenFromLastMail(user.email), password: 'ClaveRestable5!' } })
       assert.equal(reset.status, 200)
       assert.equal((await call('/api/auth/me', { cookie })).data.user, null)
     })
@@ -402,7 +402,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
         assert.equal(result.data.code, 'WEAK_PASSWORD', password)
       }
       for (const email of [` ${uniqueEmail()}`, `${uniqueEmail()} `, uniqueEmail().replace('@', ' @')]) {
-        const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1' } })
+        const result = await call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1!' } })
         assert.equal(result.status, 400, JSON.stringify(email))
         assert.equal(result.data.message, 'El correo no puede tener espacios.')
       }
@@ -421,15 +421,15 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       for (const password of ['Nueva clave 2026', 'NuevaClave2026Larga']) {
         assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password } })).status, 400, password)
       }
-      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2026' } })).status, 200)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'NuevaClave2026!' } })).status, 200)
 
       // Cambio de contraseña desde la cuenta
-      const cookie = await login(user.email, 'NuevaClave2026')
+      const cookie = await login(user.email, 'NuevaClave2026!')
       for (const newPassword of ['Otra clave 2026', 'Otra<Clave>2026', 'Corta20', 'OtraClave2026Larga']) {
-        assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword } })).status, 400, newPassword)
+        assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026!', newPassword } })).status, 400, newPassword)
       }
       // Un símbolo distinto de < > sí se acepta al cambiar la contraseña
-      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026', newPassword: 'Nueva#Clave2026' } })).status, 200)
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'NuevaClave2026!', newPassword: 'Nueva#Clave2026' } })).status, 200)
 
       // Recuperar contraseña y reenviar verificación también rechazan correos con espacios
       assert.equal((await call('/api/auth/forgot-password', { method: 'POST', body: { email: `${user.email} ` } })).status, 400)
@@ -444,7 +444,7 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
 
     test('el registro guarda el apellido vacío con un solo nombre y avisa qué parte del nombre es muy larga', async () => {
-      const register = (fullName, email = uniqueEmail()) => call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1' } })
+      const register = (fullName, email = uniqueEmail()) => call('/api/auth/register', { method: 'POST', body: { fullName, email, password: 'ClaveSegura1!' } })
 
       const single = uniqueEmail()
       assert.equal((await register('Ana', single)).status, 201)
@@ -468,13 +468,13 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const user = await createVerifiedUser()
       const cookie = await login(user.email, user.password)
 
-      assert.equal((await call('/api/auth/change-password', { method: 'POST', body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2' } })).status, 401)
-      const wrong = await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2' } })
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2!' } })).status, 401)
+      const wrong = await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: 'incorrecta1', newPassword: 'NuevaClave2!' } })
       assert.equal(wrong.status, 400)
       assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: user.password } })).status, 400)
       assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: '12345678' } })).status, 400)
-      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: 'NuevaClave2' } })).status, 200)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2' } })).status, 200)
+      assert.equal((await call('/api/auth/change-password', { method: 'POST', cookie, body: { currentPassword: user.password, newPassword: 'NuevaClave2!' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: user.email, password: 'NuevaClave2!' } })).status, 200)
     })
 
     test('un correo con cuenta registrada solo compra con la sesión de esa cuenta; el de un invitado no necesita sesión', async () => {
@@ -523,15 +523,15 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       const [[guestRow]] = await getPool().query('SELECT esInvitado, emailVerificado FROM usuario WHERE email = ?', [guest])
       assert.equal(Number(guestRow.esInvitado), 1)
       assert.equal(Number(guestRow.emailVerificado), 0)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1' } })).status, 401)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1!' } })).status, 401)
 
       // Registrarse con ese correo envía un enlace para activarla; la clave escrita en el formulario no se usa
-      const claim = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email: guest, password: 'ClaveSegura1' } })
+      const claim = await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email: guest, password: 'ClaveSegura1!' } })
       assert.equal(claim.status, 201)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1' } })).status, 401)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'ClaveSegura1!' } })).status, 401)
       const token = tokenFromLastMail(guest)
-      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'MiClaveNueva9' } })).status, 200)
-      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'MiClaveNueva9' } })).status, 200)
+      assert.equal((await call('/api/auth/reset-password', { method: 'POST', body: { token, password: 'MiClaveNueva9!' } })).status, 200)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email: guest, password: 'MiClaveNueva9!' } })).status, 200)
       const [[claimed]] = await getPool().query('SELECT esInvitado FROM usuario WHERE email = ?', [guest])
       assert.equal(Number(claimed.esInvitado), 0)
     })

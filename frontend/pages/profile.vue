@@ -3,6 +3,7 @@
 import {
   IconBrandFacebook,
   IconBrandInstagram,
+  IconBrandWhatsapp,
   IconCake,
   IconMapPin,
   IconRosette,
@@ -147,6 +148,10 @@ const recentActivity = computed(() => dashboardData.value.recentOrders.slice(0, 
                       <Label for="profile-facebook">Facebook</Label>
                       <Input id="profile-facebook" v-model="editForm.facebookUrl" type="url" />
                     </div>
+                    <div class="flex flex-col gap-2">
+                      <Label for="profile-whatsapp">WhatsApp</Label>
+                      <Input id="profile-whatsapp" v-model="editForm.whatsappUrl" type="url" placeholder="https://wa.me/573000000000" />
+                    </div>
                   </div>
                 </form>
                 <DialogFooter>
@@ -163,6 +168,11 @@ const recentActivity = computed(() => dashboardData.value.recentOrders.slice(0, 
             <Button variant="outline" size="icon" as-child>
               <a :href="profile.facebookUrl" target="_blank" rel="noopener" aria-label="Facebook">
                 <IconBrandFacebook class="size-4" />
+              </a>
+            </Button>
+            <Button variant="outline" size="icon" as-child>
+              <a :href="profile.whatsappUrl" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <IconBrandWhatsapp class="size-4" />
               </a>
             </Button>
           </div>

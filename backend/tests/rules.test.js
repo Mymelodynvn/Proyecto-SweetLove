@@ -5,15 +5,21 @@ import { passwordProblem } from '../src/utils/password.js'
 import { parseEmail } from '../src/utils/validate.js'
 
 describe('contraseña', () => {
-  test('acepta de 8 a 16 caracteres con letras y números', () => {
-    for (const password of ['Clave202', 'Clave2026', 'Abcdefghi1', 'ñandú20262ab', 'CONTRASENA2026x', 'Abcdefghijklmn12']) {
+  test('acepta de 8 a 16 caracteres con letras, números y un carácter especial', () => {
+    for (const password of ['Clave20!', 'Clave2026!', 'Abcdefghi1!', 'ñandú20262ab!', 'CONTRASENA2026x!', 'Abcdefghijklmn1!']) {
       assert.equal(passwordProblem(password), '', password)
     }
   })
 
-  test('acepta símbolos que no sean < ni >', () => {
-    for (const password of ['Clave#2026abc', 'Clave.2026abc', 'Clave-2026abc', 'SweetLove#2026', 'Clave2026abc!', 'Cl@ve2026abc']) {
+  test('acepta símbolos que no sean < ni >, siempre que incluya uno de los especiales obligatorios', () => {
+    for (const password of ['Clave#2026abc', 'Clave.2026abc', 'Clave-2026abc!', 'SweetLove#2026', 'Clave2026abc!', 'Cl@ve2026abc']) {
       assert.equal(passwordProblem(password), '', password)
+    }
+  })
+
+  test('rechaza si falta el carácter especial obligatorio', () => {
+    for (const password of ['Clave2026abc', 'Abcdefghi123', 'CONTRASENA2026x']) {
+      assert.match(passwordProblem(password), /carácter especial/, password)
     }
   })
 
@@ -45,7 +51,7 @@ describe('contraseña', () => {
     assert.match(passwordProblem('soloLetrasAqui'), /letra y un número/)
     assert.match(passwordProblem('0123456789'), /común/)
     assert.match(passwordProblem('aaaaaaaaaaa'), /común/)
-    assert.match(passwordProblem('Clave2026abc', { email: 'clave2026abc@example.com' }), /correo/)
+    assert.match(passwordProblem('Clave2026abc!', { email: 'clave2026abc@example.com' }), /correo/)
     assert.match(passwordProblem(`${'x'.repeat(80)}1`), /máximo 16 caracteres/)
   })
 })

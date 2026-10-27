@@ -56,6 +56,9 @@ const SiteFooter = {
 
                     <!-- Enlace a Facebook -->
                     <a href="https://www.facebook.com/share/18tvevPvjz/" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+
+                    <!-- Enlace a WhatsApp -->
+                    <a href="https://wa.me/573215771432?text=Hola%2C%20deseo%20endulzar%20un%20momento%20especial" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 </div>
             </div>
 
