@@ -11,3 +11,4 @@ mountComponentApp("#cart-app", CartDrawer);
 mountComponentApp("#search-app", SearchModal);
 mountComponentApp("#auth-app", AuthModal);
 mountComponentApp("#product-app", ProductModal);
+mountComponentApp("#back-to-top-app", BackToTop);

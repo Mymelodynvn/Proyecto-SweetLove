@@ -1728,3 +1728,50 @@ header{
     margin-bottom: 28px;
     line-height: 1.5;
 }
+
+/* Botón flotante "volver arriba": oculto hasta que se desplaza la página */
+.back-to-top{
+    position: fixed;
+    bottom: 4rem;
+    left: 3rem;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+    color: var(--color_text-primary);
+    background: var(--main_color-secundary);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    z-index: 90;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 250ms var(--transition_ios), transform 250ms var(--transition_ios), background 250ms, visibility 0s 250ms;
+}
+.back-to-top--visible{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 250ms var(--transition_ios), transform 250ms var(--transition_ios), background 250ms;
+}
+.back-to-top:hover{
+    background: var(--main_color-secundary-dark);
+    box-shadow: 0px 8px 20px rgba(108, 141, 111, 0.35);
+    transform: translateY(-3px);
+}
+.back-to-top:active{
+    transform: scale(0.92);
+}
+@media (max-width: 768px){
+    .back-to-top{
+        width: 46px;
+        height: 46px;
+        font-size: 1.1rem;
+        bottom: 2rem;
+        left: 1.5rem;
+    }
+}
