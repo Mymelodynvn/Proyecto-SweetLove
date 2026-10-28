@@ -1,38 +1,58 @@
 // Modelo de estadísticas: consultas agregadas que alimentan el dashboard y los reportes del panel
 import { getPool } from '../config/database.js'
 
-// Ejecuta una consulta y devuelve únicamente sus filas, recibe sql
-const rows = async (sql) => {
-  const [result] = await getPool().query(sql)
+// Ejecuta una consulta y devuelve únicamente sus filas, recibe sql, params
+const rows = async (sql, params = []) => {
+  const [result] = await getPool().query(sql, params)
   return result
 }
 
-// Totales generales de pedidos: cantidad, valor, ingresos aprobados, cancelados y ticket promedio
-export const orderSummary = async () => {
-  const [summary] = await rows(`
+// Construye el filtro de fecha de los reportes (columna BETWEEN/≥/≤ desde-hasta); sin rango no filtra nada, recibe range { from, to }, column
+const dateFilter = ({ from, to } = {}, column) => {
+  if (from && to) return { clause: `${column} BETWEEN ? AND ?`, params: [from, to] }
+  if (from) return { clause: `${column} >= ?`, params: [from] }
+  if (to) return { clause: `${column} <= ?`, params: [to] }
+  return { clause: '', params: [] }
+}
+
+// Totales generales de pedidos: cantidad, valor, ingresos aprobados, cancelados y ticket promedio; recibe range { from, to } (fechas "YYYY-MM-DD", opcionales)
+export const orderSummary = async (range = {}) => {
+  const { clause, params } = dateFilter(range, 'pd.fecha')
+
+  const [[orderStats]] = await getPool().query(`
     SELECT
       COUNT(*) AS totalOrders,
       COALESCE(SUM(CASE WHEN pd.estadoPedido <> 'Cancelado' THEN pd.precioTotal ELSE 0 END), 0) AS orderValue,
-      COALESCE((SELECT SUM(pa.monto) FROM pago pa WHERE pa.estadoPago = 'Aprobado'), 0) AS approvedRevenue,
       COALESCE(SUM(CASE WHEN pd.estadoPedido = 'Cancelado' THEN 1 ELSE 0 END), 0) AS cancelledOrders,
       COALESCE(AVG(CASE WHEN pd.estadoPedido <> 'Cancelado' THEN pd.precioTotal END), 0) AS averageOrder
     FROM pedido pd
-  `)
-  return summary ?? {}
+    ${clause ? `WHERE ${clause}` : ''}
+  `, params)
+
+  const [[{ approvedRevenue }]] = await getPool().query(`
+    SELECT COALESCE(SUM(pa.monto), 0) AS approvedRevenue
+    FROM pago pa
+    INNER JOIN pedido pd ON pd.idPedido = pa.idPedido
+    WHERE pa.estadoPago = 'Aprobado' ${clause ? `AND ${clause}` : ''}
+  `, params)
+
+  return { ...(orderStats ?? {}), approvedRevenue }
 }
 
-// Ventas por producto (unidades e ingresos), excluyendo pedidos cancelados, recibe limit
-export const productSales = (limit) =>
-  rows(`
+// Ventas por producto (unidades e ingresos), excluyendo pedidos cancelados, recibe limit, range { from, to }
+export const productSales = (limit, range = {}) => {
+  const { clause, params } = dateFilter(range, 'pd.fecha')
+  return rows(`
     SELECT pr.nombre AS name, COALESCE(SUM(ip.cantidad), 0) AS units, COALESCE(SUM(ip.subTotal), 0) AS revenue
     FROM itempedido ip
     INNER JOIN producto pr ON pr.idProducto = ip.idProducto
     INNER JOIN pedido pd ON pd.idPedido = ip.idPedido
-    WHERE pd.estadoPedido <> 'Cancelado'
+    WHERE pd.estadoPedido <> 'Cancelado' ${clause ? `AND ${clause}` : ''}
     GROUP BY pr.idProducto, pr.nombre
     ORDER BY revenue DESC
     ${limit ? `LIMIT ${Number(limit)}` : ''}
-  `)
+  `, params)
+}
 
 // Ingresos agrupados por ciudad (dirección del cliente), top 6
 export const citySales = () =>
@@ -93,34 +113,43 @@ export const weeklyRevenue = () =>
     ORDER BY pd.fecha ASC
   `)
 
-// Cantidad de pedidos por estado
-export const ordersByStatus = () =>
-  rows(`
+// Cantidad de pedidos por estado, recibe range { from, to }
+export const ordersByStatus = (range = {}) => {
+  const { clause, params } = dateFilter(range, 'fecha')
+  return rows(`
     SELECT estadoPedido AS status, COUNT(*) AS count
     FROM pedido
+    ${clause ? `WHERE ${clause}` : ''}
     GROUP BY estadoPedido
     ORDER BY count DESC
-  `)
+  `, params)
+}
 
-// Pagos agrupados por medio de pago
-export const paymentMethods = () =>
-  rows(`
+// Pagos agrupados por medio de pago, recibe range { from, to }
+export const paymentMethods = (range = {}) => {
+  const { clause, params } = dateFilter(range, 'pd.fecha')
+  return rows(`
     SELECT COALESCE(pa.proveedorPago, 'Sin especificar') AS name, COUNT(*) AS count, COALESCE(SUM(pa.monto), 0) AS amount
     FROM pago pa
+    INNER JOIN pedido pd ON pd.idPedido = pa.idPedido
+    ${clause ? `WHERE ${clause}` : ''}
     GROUP BY pa.proveedorPago
     ORDER BY amount DESC
-  `)
+  `, params)
+}
 
-// Clientes ordenados por lo gastado (incluye clientes sin pedidos)
-export const customerRanking = () =>
-  rows(`
+// Clientes ordenados por lo gastado (incluye clientes sin pedidos en el rango, con 0), recibe range { from, to }
+export const customerRanking = (range = {}) => {
+  const { clause, params } = dateFilter(range, 'pd.fecha')
+  return rows(`
     SELECT
       CONCAT(u.nombre, ' ', u.apellido) AS name,
       COUNT(pd.idPedido) AS orderCount,
       COALESCE(SUM(pd.precioTotal), 0) AS totalSpent
     FROM usuario u
-    LEFT JOIN pedido pd ON pd.idUser = u.idUser
+    LEFT JOIN pedido pd ON pd.idUser = u.idUser ${clause ? `AND ${clause}` : ''}
     WHERE u.idRol = (SELECT idRol FROM rol WHERE nombre = 'Cliente' LIMIT 1)
     GROUP BY u.idUser, u.nombre, u.apellido
     ORDER BY totalSpent DESC
-  `)
+  `, params)
+}

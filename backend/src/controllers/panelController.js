@@ -1,4 +1,5 @@
 // Controlador del panel administrativo: clientes, pagos, envíos, dashboard y reportes
+import { HttpError } from '../utils/httpError.js'
 import * as userModel from '../models/userModel.js'
 import * as paymentModel from '../models/paymentModel.js'
 import * as shipmentModel from '../models/shipmentModel.js'
@@ -11,6 +12,23 @@ const FREQUENT_MIN_ORDERS = 2
 
 // Calcula un porcentaje seguro (0 si el total es 0), recibe part, total
 const percent = (part, total) => (total > 0 ? (part / total) * 100 : 0)
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+// Lee el rango de fechas de los reportes (from/to, "YYYY-MM-DD", ambos opcionales), recibe query
+const parseDateRange = (query = {}) => {
+  const range = {}
+  if (query.from !== undefined) {
+    if (!DATE_PATTERN.test(query.from)) throw new HttpError(400, 'La fecha "desde" no es válida.')
+    range.from = query.from
+  }
+  if (query.to !== undefined) {
+    if (!DATE_PATTERN.test(query.to)) throw new HttpError(400, 'La fecha "hasta" no es válida.')
+    range.to = query.to
+  }
+  if (range.from && range.to && range.from > range.to) throw new HttpError(400, 'La fecha "desde" no puede ser posterior a "hasta".')
+  return range
+}
 
 // GET /api/customers — clientes con su nivel (VIP, Frecuente, Nuevo) según cantidad de pedidos, recibe res
 export const customers = async (_req, res) => {
@@ -96,14 +114,16 @@ export const dashboard = async (_req, res) => {
   })
 }
 
-// GET /api/reports — indicadores (KPIs) y series del módulo de reportes, recibe res
-export const reports = async (_req, res) => {
+// GET /api/reports — indicadores (KPIs) y series del módulo de reportes; admite ?from=YYYY-MM-DD&to=YYYY-MM-DD para acotar el período, recibe req, res
+export const reports = async (req, res) => {
+  const range = parseDateRange(req.query)
+
   const [summary, productSales, ordersByStatus, paymentMethods, customerRanking] = await Promise.all([
-    statsModel.orderSummary(),
-    statsModel.productSales(),
-    statsModel.ordersByStatus(),
-    statsModel.paymentMethods(),
-    statsModel.customerRanking(),
+    statsModel.orderSummary(range),
+    statsModel.productSales(undefined, range),
+    statsModel.ordersByStatus(range),
+    statsModel.paymentMethods(range),
+    statsModel.customerRanking(range),
   ])
 
   const topCustomers = customerRanking.map((row) => ({

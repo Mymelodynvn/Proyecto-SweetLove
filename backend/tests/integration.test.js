@@ -924,6 +924,33 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('reportes: filtro de fechas', () => {
+    test('from/to acotan los indicadores a los pedidos de ese rango', async () => {
+      const productId = await createProduct(5)
+      const order = await createMercadoPagoOrder(productId, 1)
+
+      // Se "envejece" el pedido a una fecha fija y lejana que ningún otro dato de la prueba usa
+      await getPool().execute("UPDATE pedido SET fecha = '2019-05-01' WHERE idPedido = ?", [order.idPedido])
+
+      const inRange = await call('/api/reports?from=2019-05-01&to=2019-05-01', { cookie: adminCookie })
+      assert.equal(inRange.status, 200)
+      assert.equal(inRange.data.kpis.totalOrders, 1)
+      assert.equal(inRange.data.kpis.orderValue, order.total)
+
+      const outOfRange = await call('/api/reports?from=2019-05-02&to=2019-05-02', { cookie: adminCookie })
+      assert.equal(outOfRange.status, 200)
+      assert.equal(outOfRange.data.kpis.totalOrders, 0)
+
+      const unbounded = await call('/api/reports?from=2019-05-01', { cookie: adminCookie })
+      assert.ok(unbounded.data.kpis.totalOrders >= 1, 'sin "hasta", incluye el pedido y lo que venga después')
+    })
+
+    test('rechaza fechas con formato inválido o "desde" posterior a "hasta"', async () => {
+      assert.equal((await call('/api/reports?from=01-01-2024', { cookie: adminCookie })).status, 400)
+      assert.equal((await call('/api/reports?from=2024-02-01&to=2024-01-01', { cookie: adminCookie })).status, 400)
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)

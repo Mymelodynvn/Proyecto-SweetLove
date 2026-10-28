@@ -158,7 +158,7 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 | `DELETE /suppliers/:id` | Elimina proveedor; los productos que lo tenían quedan sin proveedor (no se bloquea ni se borran) |
 | `GET /suppliers` | Lista los proveedores |
 | `GET /dashboard` | Resumen del panel (totales, ventas por producto y ciudad, recientes, semana) |
-| `GET /reports` | KPIs, ventas por producto, pedidos por estado, medios de pago, ranking de clientes |
+| `GET /reports` | KPIs, ventas por producto, pedidos por estado, medios de pago, ranking de clientes. Admite `?from=YYYY-MM-DD&to=YYYY-MM-DD` (ambos opcionales) para acotar el período por `pedido.fecha`; sin ellos, es de todo el histórico |
 
 `GET /uploads/products/<archivo>` sirve las imágenes subidas por el administrador.
 

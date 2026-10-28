@@ -3,9 +3,37 @@
 import { IconCoin, IconDownload, IconReceipt, IconRepeat, IconShoppingCart, IconShoppingCartX, IconUsers } from '@tabler/icons-vue'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 
 useHead({ title: 'Reportes | Sweet Love Admin' })
+
+// Fecha local en formato "YYYY-MM-DD" (evita el corrimiento de día de toISOString, que usa UTC), recibe date
+const toIsoDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+// Fecha de hoy menos cierta cantidad de días, recibe daysAgo
+const daysAgoIso = (daysAgo: number) => {
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  return toIsoDate(date)
+}
+
+// Rango de fechas del reporte: por defecto, el día de hoy
+const dateFrom = ref(toIsoDate(new Date()))
+const dateTo = ref(toIsoDate(new Date()))
+
+// Aplica un atajo de rango, recibe daysAgo (0 = hoy); null quita el filtro y muestra todo
+const applyPreset = (daysAgo: number | null) => {
+  if (daysAgo === null) {
+    dateFrom.value = ''
+    dateTo.value = ''
+    return
+  }
+  dateFrom.value = daysAgoIso(daysAgo)
+  dateTo.value = toIsoDate(new Date())
+}
 
 const { data } = await useFetch<{
   kpis: { approvedRevenue: number; orderValue: number; totalOrders: number; averageOrder: number; registeredCustomers: number; recurringCustomers: number; cancellationRate: number }
@@ -14,6 +42,10 @@ const { data } = await useFetch<{
   paymentMethods: Array<{ name: string; count: number; amount: number }>
   topCustomers: Array<{ name: string; orderCount: number; totalSpent: number }>
 }>('/api/reports', {
+  query: computed(() => ({
+    ...(dateFrom.value ? { from: dateFrom.value } : {}),
+    ...(dateTo.value ? { to: dateTo.value } : {}),
+  })),
   default: () => ({
     kpis: { approvedRevenue: 0, orderValue: 0, totalOrders: 0, averageOrder: 0, registeredCustomers: 0, recurringCustomers: 0, cancellationRate: 0 },
     productSales: [], ordersByStatus: [], paymentMethods: [], topCustomers: [],
@@ -47,6 +79,25 @@ const exportReport = () => {
       </div>
       <Button variant="outline" @click="exportReport"><IconDownload class="size-4" /> Exportar CSV</Button>
     </div>
+
+    <Card>
+      <CardContent class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-col gap-2">
+          <Label for="report-date-from">Desde</Label>
+          <Input id="report-date-from" v-model="dateFrom" type="date" class="w-40" />
+        </div>
+        <div class="flex flex-col gap-2">
+          <Label for="report-date-to">Hasta</Label>
+          <Input id="report-date-to" v-model="dateTo" type="date" class="w-40" />
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" @click="applyPreset(0)">Hoy</Button>
+          <Button type="button" variant="outline" size="sm" @click="applyPreset(6)">Últimos 7 días</Button>
+          <Button type="button" variant="outline" size="sm" @click="applyPreset(29)">Últimos 30 días</Button>
+          <Button type="button" variant="outline" size="sm" @click="applyPreset(null)">Todo</Button>
+        </div>
+      </CardContent>
+    </Card>
 
     <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       <Card><CardContent class="flex flex-col gap-2"><IconCoin class="size-5" /><span class="text-muted-foreground text-sm">Ingresos aprobados</span><strong class="text-2xl">{{ formatMoney(data.kpis.approvedRevenue) }}</strong></CardContent></Card>
