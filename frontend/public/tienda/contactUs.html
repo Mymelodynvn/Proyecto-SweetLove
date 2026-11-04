@@ -102,10 +102,10 @@
                     <p class="form__subtitle">Te responderemos lo antes posible</p>
 
                     <!-- Campo: nombre -->
-                    <input type="text" placeholder="Nombre" autocomplete="name" required>
+                    <input type="text" name="nombre" placeholder="Nombre" autocomplete="name" minlength="2" maxlength="50" pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .\-]{2,50}" title="Solo letras, entre 2 y 50 caracteres (sin números)" required>
 
                     <!-- Campo: celular -->
-                    <input type="tel" placeholder="Celular" autocomplete="tel" required>
+                    <input type="tel" name="celular" placeholder="Celular" autocomplete="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{7,10}" title="Solo números, entre 7 y 10 dígitos (sin letras)" required>
 
                     <!-- Campo: asunto -->
                     <input type="text" placeholder="Asunto" required>
@@ -157,6 +157,9 @@
 
     <!-- Monta los componentes en la página -->
     <script src="js/main.js"></script>
+
+    <!-- Validación del formulario de contacto (nombre solo letras, celular solo números) -->
+    <script src="js/contact-form.js"></script>
 </body>
 
 </html>

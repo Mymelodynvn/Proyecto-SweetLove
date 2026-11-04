@@ -32,5 +32,6 @@ useHead({ title: `Error ${props.error.statusCode} | Sweet Love Admin` })
       </p>
       <Button @click="goHome">Volver al panel</Button>
     </div>
+    <BackToTop />
   </div>
 </template>
