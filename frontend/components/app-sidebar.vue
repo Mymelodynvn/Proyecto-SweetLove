@@ -129,7 +129,7 @@ const isSectionOpen = (section: NavSection) =>
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
-            <NuxtLink to="/">
+            <NuxtLink to="/admin">
               <div class="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-full">
                 <IconCake class="size-5" />
               </div>

@@ -14,7 +14,7 @@ useHead({ title: 'Error 404 | Sweet Love Admin' })
       Lo sentimos, la página que buscas no existe o fue movida.
     </p>
     <Button as-child>
-      <NuxtLink to="/">Volver al panel</NuxtLink>
+      <NuxtLink to="/admin">Volver al panel</NuxtLink>
     </Button>
   </div>
 </template>

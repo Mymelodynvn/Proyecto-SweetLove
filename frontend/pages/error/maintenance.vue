@@ -17,7 +17,7 @@ useHead({ title: 'Mantenimiento | Sweet Love Admin' })
       Estamos horneando mejoras para el panel. Vuelve a intentarlo en unos minutos.
     </p>
     <Button as-child>
-      <NuxtLink to="/">Volver al panel</NuxtLink>
+      <NuxtLink to="/admin">Volver al panel</NuxtLink>
     </Button>
   </div>
 </template>

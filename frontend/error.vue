@@ -6,8 +6,8 @@ import { Button } from '~/components/ui/button'
 
 const props = defineProps<{ error: NuxtError }>()
 
-// Limpia el error actual y lleva a la persona al inicio
-const goHome = () => clearError({ redirect: '/' })
+// Limpia el error actual y lleva a la persona al inicio del panel
+const goHome = () => clearError({ redirect: '/admin' })
 
 useHead({ title: `Error ${props.error.statusCode} | Sweet Love Admin` })
 </script>
