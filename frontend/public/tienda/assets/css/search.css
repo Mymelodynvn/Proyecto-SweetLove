@@ -163,6 +163,18 @@
     background: var(--main_color-secundary);
     color: var(--color_text-primary);
 }
+/* Botón desactivado: producto agotado o ya con todas las unidades en el carrito */
+.search-modal__tile-add:disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.search-modal__tile-add:disabled:hover{
+    background: rgba(255, 253, 236, 0.92);
+    color: var(--color_text-secundary);
+}
+.search-modal__tile-add:disabled:active{
+    transform: none;
+}
 .search-modal__tile:hover{
     transform: translateY(-4px);
     box-shadow: var(--box_shadow-primary);

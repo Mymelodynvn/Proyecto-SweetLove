@@ -192,8 +192,8 @@
                             <!-- Nombre del producto -->
                             <h2>{{ product.name }}</h2>
 
-                            <!-- Botón "Agregar al carrito" (cambia a "¡Añadido!" un momento) -->
-                            <button type="button" class="btn__text-agg" :class="{ 'is-added': isAdded(product.id) }" @click.stop="addToCart(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ isAdded(product.id) ? '¡Añadido!' : 'Agregar al carrito' }}</button>
+                            <!-- Botón "Agregar al carrito" (cambia a "¡Añadido!" un momento; se desactiva si está agotado o ya tienes todas las unidades) -->
+                            <button type="button" class="btn__text-agg" :class="{ 'is-added': isAdded(product.id) }" :disabled="!canAdd(product)" @click.stop="addToCart(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ addLabel(product) }}</button>
                         </div>
                     </div>
                 </div>

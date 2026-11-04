@@ -8,6 +8,9 @@ const CART_MAX_PER_PRODUCT = 50;
 // Cuántas unidades de un producto se pueden tener en el carrito: su stock si se conoce (nunca más de lo que hay), si no, el tope general, recibe stock
 const quantityLimitFor = (stock) => (Number.isFinite(stock) ? Math.max(0, Math.min(stock, CART_MAX_PER_PRODUCT)) : CART_MAX_PER_PRODUCT);
 
+// Indica si un producto se puede comprar: tiene stock conocido y mayor que 0 (los del catálogo de respaldo no traen stock ni se pueden comprar), recibe product
+const isPurchasable = (product) => Number.isFinite(product?.stock) && product.stock > 0;
+
 // Devuelve la ruta de imagen lista para usar en la tienda, recibe imagePath
 const normalizeImagePath = (imagePath) => {
     if (!imagePath) return "assets/recursos/logo.png";
@@ -71,8 +74,22 @@ const cartStore = Vue.reactive({
         return quantityLimitFor(product?.stock);
     },
 
-    // Agrega un producto al carrito sin pasar de su stock; si ya está, suma las unidades, recibe product, quantity
+    // Indica si todavía se puede agregar al menos una unidad del producto (hay stock y no se alcanzó el máximo en el carrito), recibe product
+    canAdd(product) {
+        if (!isPurchasable(product)) {
+            return false;
+        }
+
+        const inCart = this.items.find((cartItem) => cartItem.id === product.id)?.quantity ?? 0;
+        return inCart < quantityLimitFor(product.stock);
+    },
+
+    // Agrega un producto al carrito sin pasar de su stock; si ya está, suma las unidades; devuelve true si agregó algo, recibe product, quantity
     addItem(product, quantity = 1) {
+        if (!this.canAdd(product)) {
+            return false;
+        }
+
         const limit = quantityLimitFor(product.stock);
         const existingItem = this.items.find((cartItem) => cartItem.id === product.id);
 
@@ -89,6 +106,7 @@ const cartStore = Vue.reactive({
         }
 
         this.persist();
+        return true;
     },
 
     // Suma o resta unidades de un producto sin pasar de su stock; si queda en 0 o menos, lo quita, recibe productId, quantityChange
@@ -122,20 +140,28 @@ const catalogStore = Vue.reactive({
     loaded: false
 });
 
-// Carga el catálogo real desde la API una sola vez; si falla, se conserva el de respaldo
-const loadCatalogFromApi = async () => {
+// Cada cuántos milisegundos y cuántas veces se reintenta cargar el catálogo si la API no respondió (por ejemplo, el servidor está despertando)
+const CATALOG_RETRY_MS = 4000;
+const CATALOG_MAX_RETRIES = 15;
+
+// Carga el catálogo real desde la API; si falla, muestra el de respaldo (sin poder comprar) y reintenta unos segundos después, recibe retriesLeft
+const loadCatalogFromApi = async (retriesLeft = CATALOG_MAX_RETRIES) => {
     if (catalogStore.loaded) return;
 
-    try {
-        const products = await loadProductCatalog();
-        catalogStore.products = products;
+    const products = await loadProductCatalog();
+    catalogStore.products = products;
 
-        // Con el catálogo real, quita del carrito los productos que no existen en la tienda (por ejemplo, los de respaldo guardados antes)
-        if (catalogLoadedFromApi) {
-            cartStore.items = cartStore.items.filter((item) => products.some((product) => product.id === item.id));
-            cartStore.persist();
-        }
-    } finally {
+    // Con el catálogo real, quita del carrito los productos que no existen en la tienda (por ejemplo, los de respaldo guardados antes)
+    if (catalogLoadedFromApi) {
+        cartStore.items = cartStore.items.filter((item) => products.some((product) => product.id === item.id));
+        cartStore.persist();
+        catalogStore.loaded = true;
+        return;
+    }
+
+    if (retriesLeft > 0) {
+        setTimeout(() => loadCatalogFromApi(retriesLeft - 1), CATALOG_RETRY_MS);
+    } else {
         catalogStore.loaded = true;
     }
 };
@@ -171,9 +197,11 @@ const addToCartMixin = {
     methods: {
         formatPrice,
 
-        // Agrega el producto al carrito y marca el botón como "agregado" durante 1,6 segundos, recibe product
+        // Agrega el producto al carrito y marca el botón como "agregado" durante 1,6 segundos; no hace nada si no hay más unidades, recibe product
         addToCart(product) {
-            cartStore.addItem(product);
+            if (!cartStore.addItem(product)) {
+                return;
+            }
 
             if (this.addedIds.includes(product.id)) {
                 return;
@@ -194,6 +222,20 @@ const addToCartMixin = {
         // Indica si el producto fue agregado hace poco (para mostrar el check), recibe productId
         isAdded(productId) {
             return this.addedIds.includes(productId);
+        },
+
+        // Indica si el botón de agregar debe estar activo (el check de "agregado" se muestra aunque ya no queden unidades), recibe product
+        canAdd(product) {
+            return this.isAdded(product.id) || cartStore.canAdd(product);
+        },
+
+        // Texto del botón de agregar según el estado del producto, recibe product
+        addLabel(product) {
+            if (this.isAdded(product.id)) return "¡Añadido!";
+            if (Number.isFinite(product.stock) && product.stock <= 0) return "Agotado";
+            if (!isPurchasable(product)) return "No disponible por ahora";
+            if (!cartStore.canAdd(product)) return "Ya tienes el máximo";
+            return "Agregar al carrito";
         }
     }
 };

@@ -624,6 +624,18 @@ header{
 .btn__text-agg.is-added{
     background: var(--main_color-secundary-dark);
 }
+/* Botón desactivado: producto agotado o ya con todas las unidades en el carrito */
+.btn__text-agg:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.btn__text-agg:disabled:hover{
+    background: var(--main_color-secundary);
+}
+.btn__text-agg:disabled:active{
+    transform: none;
+}
 
 /* Catálogo en pantallas medianas y pequeñas */
 @media (max-width: 1400px) {

@@ -35,14 +35,14 @@ const ProductModal = {
                     <!-- Precio del producto -->
                     <p class="product-modal__price">{{ formatPrice(product.price) }}</p>
 
-                    <!-- Disponibilidad: agotado o pocas unidades -->
-                    <p v-if="stockLabel" class="product-modal__stock" :class="{ 'product-modal__stock--out': soldOut }">{{ stockLabel }}</p>
+                    <!-- Disponibilidad: agotado, pocas unidades o ya tienes todas en el carrito -->
+                    <p v-if="stockLabel" class="product-modal__stock" :class="{ 'product-modal__stock--out': unavailable }">{{ stockLabel }}</p>
 
                     <!-- Descripción del producto -->
                     <p class="product-modal__description">{{ description }}</p>
 
-                    <!-- Selector de cantidad (se oculta si está agotado) -->
-                    <div v-if="!soldOut" class="product-modal__quantity">
+                    <!-- Selector de cantidad (se oculta si no hay unidades para agregar) -->
+                    <div v-if="!unavailable" class="product-modal__quantity">
                         <!-- Texto de la cantidad -->
                         <span>Cantidad</span>
 
@@ -60,7 +60,7 @@ const ProductModal = {
                     </div>
 
                     <!-- Botón para agregar al carrito (cambia a "¡Añadido!" un momento) -->
-                    <button type="button" class="btn__text-agg product-modal__add" :class="{ 'is-added': added }" :disabled="soldOut" @click="addToCart"><i :class="added ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ soldOut ? 'Agotado' : added ? '¡Añadido!' : 'Agregar al carrito' }}</button>
+                    <button type="button" class="btn__text-agg product-modal__add" :class="{ 'is-added': added }" :disabled="unavailable" @click="addToCart"><i :class="added ? 'fa-solid fa-check' : 'fa-solid fa-bag-shopping'"></i>{{ buttonLabel }}</button>
 
                     <!-- Enlace para ver el carrito (solo después de agregar) -->
                     <p v-if="added" class="product-modal__cart-link"><a href="#" @click.prevent="openCart">Ver mi carrito</a></p>
@@ -84,22 +84,46 @@ const ProductModal = {
             return Boolean(this.product);
         },
 
-        // Indica si el producto está agotado (solo se sabe si la API informó las existencias)
+        // Indica si el producto no se puede comprar: agotado, o sin existencias conocidas (catálogo de respaldo)
         soldOut() {
-            return Number.isFinite(this.product?.stock) && this.product.stock <= 0;
+            return !isPurchasable(this.product);
         },
 
-        // Cantidad máxima que se puede elegir: las existencias, hasta un tope
-        maxQuantity() {
+        // Unidades de este producto que ya están en el carrito
+        inCart() {
+            return cartStore.items.find((item) => item.id === this.product?.id)?.quantity ?? 0;
+        },
+
+        // Unidades que todavía se pueden agregar: las existencias menos las que ya están en el carrito
+        remaining() {
             const stock = this.product?.stock;
-            return Number.isFinite(stock) && stock > 0 ? Math.min(stock, PRODUCT_MAX_QUANTITY) : PRODUCT_MAX_QUANTITY;
+            return isPurchasable(this.product) ? Math.max(0, Math.min(stock, CART_MAX_PER_PRODUCT) - this.inCart) : 0;
         },
 
-        // Texto de disponibilidad: "Agotado", "Quedan N" o vacío si hay suficientes
+        // Cantidad máxima que se puede elegir de una vez: lo que queda disponible, hasta un tope
+        maxQuantity() {
+            return Math.max(1, Math.min(this.remaining, PRODUCT_MAX_QUANTITY));
+        },
+
+        // Indica si no se puede agregar nada más: no se puede comprar o ya está en el carrito todo el stock
+        unavailable() {
+            return this.soldOut || this.remaining === 0;
+        },
+
+        // Texto del botón de agregar según el estado del producto
+        buttonLabel() {
+            if (this.added) return "¡Añadido!";
+            if (this.soldOut) return Number.isFinite(this.product?.stock) ? "Agotado" : "No disponible por ahora";
+            if (this.remaining === 0) return "Ya tienes el máximo";
+            return "Agregar al carrito";
+        },
+
+        // Texto de disponibilidad: agotado, todo el stock en el carrito, "Quedan N" o vacío si hay suficientes
         stockLabel() {
             const stock = this.product?.stock;
-            if (!Number.isFinite(stock)) return "";
+            if (!Number.isFinite(stock)) return "No disponible por ahora";
             if (stock <= 0) return "Agotado por ahora";
+            if (this.remaining === 0) return "Ya tienes en tu carrito todas las unidades disponibles";
             return stock <= PRODUCT_LOW_STOCK ? `¡Quedan solo ${stock}!` : "";
         },
 
@@ -115,6 +139,11 @@ const ProductModal = {
             this.quantity = 1;
             this.added = false;
             clearTimeout(this.addedTimer);
+        },
+
+        // Si al agregar quedan menos unidades disponibles, la cantidad elegida baja con ellas
+        maxQuantity(max) {
+            if (this.quantity > max) this.quantity = max;
         }
     },
 
@@ -131,10 +160,10 @@ const ProductModal = {
             this.quantity = Math.min(this.maxQuantity, Math.max(1, this.quantity + delta));
         },
 
-        // Agrega al carrito la cantidad elegida y muestra "¡Añadido!" un momento
+        // Agrega al carrito la cantidad elegida (sin pasar del stock) y muestra "¡Añadido!" un momento
         addToCart() {
-            if (!this.product || this.soldOut) return;
-            cartStore.addItem(this.product, this.quantity);
+            if (!this.product || this.unavailable) return;
+            if (!cartStore.addItem(this.product, this.quantity)) return;
             this.added = true;
             clearTimeout(this.addedTimer);
             this.addedTimer = setTimeout(() => {

@@ -43,7 +43,7 @@ const SearchModal = {
                                 <span class="search-modal__tile-price">{{ formatPrice(product.price) }}</span>
 
                                 <!-- Botón para agregar al carrito -->
-                                <button type="button" class="search-modal__tile-add" :class="{ 'is-added': isAdded(product.id) }" @click.prevent.stop="addToCart(product)" aria-label="Agregar al carrito"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-plus'"></i></button>
+                                <button type="button" class="search-modal__tile-add" :class="{ 'is-added': isAdded(product.id) }" :disabled="!canAdd(product)" @click.prevent.stop="addToCart(product)" :aria-label="addLabel(product)" :title="addLabel(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-plus'"></i></button>
                             </a>
                         </div>
 
@@ -70,7 +70,7 @@ const SearchModal = {
                                 <span class="search-modal__tile-price">{{ formatPrice(product.price) }}</span>
 
                                 <!-- Botón para agregar al carrito -->
-                                <button type="button" class="search-modal__tile-add" :class="{ 'is-added': isAdded(product.id) }" @click.prevent.stop="addToCart(product)" aria-label="Agregar al carrito"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-plus'"></i></button>
+                                <button type="button" class="search-modal__tile-add" :class="{ 'is-added': isAdded(product.id) }" :disabled="!canAdd(product)" @click.prevent.stop="addToCart(product)" :aria-label="addLabel(product)" :title="addLabel(product)"><i :class="isAdded(product.id) ? 'fa-solid fa-check' : 'fa-solid fa-plus'"></i></button>
                             </a>
                         </div>
                     </div>
