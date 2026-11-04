@@ -14,6 +14,30 @@ const CHECKOUT_RULES = {
     address: (value) => (value.length >= 6 && value.length <= 150 ? "" : "Escribe la dirección de entrega con la ciudad (entre 6 y 150 caracteres).")
 };
 
+// Número de WhatsApp de Sweet Love (con código de país, sin el signo +)
+const CHECKOUT_WHATSAPP_NUMBER = "573215771432";
+
+// Mensaje que se envía por WhatsApp cuando el carrito está vacío: pide información de los productos
+const CHECKOUT_WHATSAPP_EMPTY_MESSAGE = "Hola, Sweet Love. Quisiera recibir más información sobre sus productos.";
+
+// Arma el mensaje de WhatsApp con el carrito, el total y los datos de entrega que ya se hayan escrito; si el carrito está vacío, pide información, recibe items, total, form
+const buildWhatsappMessage = (items, total, form) => {
+    if (items.length === 0) return CHECKOUT_WHATSAPP_EMPTY_MESSAGE;
+
+    const lines = ["Hola, Sweet Love. Quiero continuar mi compra por WhatsApp.", "", "Mi pedido:"];
+    items.forEach((item) => lines.push(`- ${item.quantity} x ${item.name}: ${formatPrice(item.price * item.quantity)}`));
+    lines.push("", `Total: ${formatPrice(total)} (IVA incluido)`);
+
+    const fullName = `${form.name} ${form.lastName}`.trim();
+    const details = [];
+    if (fullName) details.push(`Nombre: ${fullName}`);
+    if (form.phone) details.push(`Celular: ${form.phone}`);
+    if (form.address) details.push(`Dirección: ${form.address}`);
+    if (details.length > 0) lines.push("", "Mis datos:", ...details);
+
+    return lines.join("\n");
+};
+
 if (document.querySelector("#checkout-app")) {
     Vue.createApp({
         // Estado: carrito y sesión compartidos, datos del formulario, errores y estado del envío
@@ -28,6 +52,14 @@ if (document.querySelector("#checkout-app")) {
                 sending: false,
                 placed: null
             };
+        },
+
+        computed: {
+            // Enlace al chat de WhatsApp con el mensaje del carrito (o el de "más información" si no hay productos)
+            whatsappUrl() {
+                const message = buildWhatsappMessage(this.cart.items, this.cart.total, this.form);
+                return `https://wa.me/${CHECKOUT_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            }
         },
 
         watch: {

@@ -106,6 +106,22 @@ button.btn-checkout:disabled{
     opacity: 0.8;
 }
 
+/* Botón para continuar la compra (o pedir información) por WhatsApp */
+.btn-whatsapp{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-whatsapp i{
+    font-size: 20px;
+}
+.checkout__state .btn-whatsapp i{
+    margin: 0;
+    font-size: 20px;
+    color: inherit;
+}
+
 /* Mensajes de carrito vacío o de pedido sin enlace de pago */
 .checkout__state{
     max-width: 520px;

@@ -72,6 +72,9 @@
 
                     <!-- Botón para volver al catálogo -->
                     <a href="index.html#products-section" class="btn__text">Ver productos</a>
+
+                    <!-- Botón para pedir información de los productos por WhatsApp -->
+                    <a :href="whatsappUrl" target="_blank" rel="noopener" class="btn-continue btn-whatsapp"><i class="fa-brands fa-whatsapp"></i>Pedir información por WhatsApp</a>
                 </div>
 
                 <!-- Pedido registrado pero sin enlace de pago (Mercado Pago no respondió) -->
@@ -170,6 +173,9 @@
 
                         <!-- Aviso de seguridad -->
                         <p class="checkout__note"><i class="fa-solid fa-lock"></i> Te llevaremos a Mercado Pago para completar el pago. Tus datos de tarjeta no pasan por esta tienda.</p>
+
+                        <!-- Alternativa: continuar la compra por WhatsApp; abre el chat con el resumen del carrito -->
+                        <a :href="whatsappUrl" target="_blank" rel="noopener" class="btn-continue btn-whatsapp"><i class="fa-brands fa-whatsapp"></i>Continuar la compra por WhatsApp</a>
                     </form>
 
                     <!-- Resumen del pedido -->
