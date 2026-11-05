@@ -99,6 +99,16 @@ const exportReport = () => {
       </CardContent>
     </Card>
 
+    <Card v-if="data.kpis.totalOrders === 0 && (dateFrom || dateTo)">
+      <CardContent class="flex flex-wrap items-center justify-between gap-4">
+        <p class="text-muted-foreground">No hay pedidos en el rango de fechas elegido. Prueba con un período más amplio para ver los datos.</p>
+        <div class="flex flex-wrap gap-2">
+          <Button type="button" size="sm" @click="applyPreset(29)">Ver últimos 30 días</Button>
+          <Button type="button" variant="outline" size="sm" @click="applyPreset(null)">Ver todo</Button>
+        </div>
+      </CardContent>
+    </Card>
+
     <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       <Card><CardContent class="flex flex-col gap-2"><IconCoin class="size-5" /><span class="text-muted-foreground text-sm">Ingresos aprobados</span><strong class="text-2xl">{{ formatMoney(data.kpis.approvedRevenue) }}</strong></CardContent></Card>
       <Card><CardContent class="flex flex-col gap-2"><IconShoppingCart class="size-5" /><span class="text-muted-foreground text-sm">Pedidos</span><strong class="text-2xl">{{ data.kpis.totalOrders }}</strong></CardContent></Card>
@@ -115,14 +125,14 @@ const exportReport = () => {
       </CardContent></Card>
       <Card><CardHeader><CardTitle>Pedidos por estado</CardTitle></CardHeader><CardContent>
         <Table><TableHeader><TableRow><TableHead>Estado</TableHead><TableHead>Pedidos</TableHead></TableRow></TableHeader>
-        <TableBody><TableRow v-for="item in data.ordersByStatus" :key="item.status"><TableCell>{{ item.status }}</TableCell><TableCell>{{ item.count }}</TableCell></TableRow></TableBody></Table>
+        <TableBody><TableRow v-for="item in data.ordersByStatus" :key="item.status"><TableCell>{{ item.status }}</TableCell><TableCell>{{ item.count }}</TableCell></TableRow><TableRow v-if="!data.ordersByStatus.length"><TableCell colspan="2" class="text-center py-6">No hay pedidos en este período.</TableCell></TableRow></TableBody></Table>
       </CardContent></Card>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
       <Card><CardHeader><CardTitle>Medios de pago</CardTitle></CardHeader><CardContent>
         <Table><TableHeader><TableRow><TableHead>Medio</TableHead><TableHead>Operaciones</TableHead><TableHead>Monto</TableHead></TableRow></TableHeader>
-        <TableBody><TableRow v-for="item in data.paymentMethods" :key="item.name"><TableCell>{{ item.name }}</TableCell><TableCell>{{ item.count }}</TableCell><TableCell>{{ formatMoney(item.amount) }}</TableCell></TableRow></TableBody></Table>
+        <TableBody><TableRow v-for="item in data.paymentMethods" :key="item.name"><TableCell>{{ item.name }}</TableCell><TableCell>{{ item.count }}</TableCell><TableCell>{{ formatMoney(item.amount) }}</TableCell></TableRow><TableRow v-if="!data.paymentMethods.length"><TableCell colspan="3" class="text-center py-6">No hay pagos en este período.</TableCell></TableRow></TableBody></Table>
       </CardContent></Card>
       <Card><CardHeader><CardTitle>Clientes con mayor gasto</CardTitle></CardHeader><CardContent>
         <Table><TableHeader><TableRow><TableHead>Cliente</TableHead><TableHead>Pedidos</TableHead><TableHead>Total</TableHead></TableRow></TableHeader>
