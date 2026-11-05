@@ -70,7 +70,7 @@ const { profile, initials: profileInitials } = useProfile()
 const { isMobile } = useSidebar()
 
 const mainLinks: NavLink[] = [
-  { title: 'Panel', to: '/', icon: IconLayoutDashboard },
+  { title: 'Panel', to: '/admin', icon: IconLayoutDashboard },
   { title: 'Reportes', to: '/reports', icon: IconChartBar },
 ]
 
