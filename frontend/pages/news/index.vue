@@ -31,13 +31,11 @@ const reload = async () => {
   isRefreshing.value = false
 }
 
-// Da formato legible a la fecha del mensaje ("YYYY-MM-DD HH:MM" -> "4 nov 2026, 3:30 p. m."), recibe value
+// Da formato legible a la fecha UTC del mensaje, en la hora local de quien mira el panel (-> "4 nov 2026, 3:30 p. m."), recibe value
 const formatDate = (value: string) => {
-  const [datePart = '', timePart = ''] = value.split(' ')
-  const [year, month, day] = datePart.split('-').map(Number)
-  const [hour, minute] = timePart.split(':').map(Number)
-  if (!year || !month || !day) return value
-  return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(year, month - 1, day, hour || 0, minute || 0))
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
 }
 
 // Deja solo los dígitos del celular, para el enlace de llamada, recibe phone

@@ -5,7 +5,7 @@ export interface ContactMessage {
   phone: string
   subject: string
   message: string
-  // Fecha y hora del mensaje, "YYYY-MM-DD HH:MM"
+  // Fecha y hora del mensaje en UTC (ISO 8601, "YYYY-MM-DDTHH:MM:SSZ")
   createdAt: string
 }
 

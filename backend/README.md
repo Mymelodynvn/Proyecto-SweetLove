@@ -158,7 +158,7 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 | `PUT /suppliers/:id` | Actualiza proveedor (mismo body; lo que no se envía se conserva) |
 | `DELETE /suppliers/:id` | Elimina proveedor; los productos que lo tenían quedan sin proveedor (no se bloquea ni se borran) |
 | `GET /suppliers` | Lista los proveedores |
-| `GET /contact-messages` | Mensajes de «Contáctanos» (sección «Novedades» del panel), del más reciente al más antiguo: `id, name, phone, subject, message, createdAt` |
+| `GET /contact-messages` | Mensajes de «Contáctanos» (sección «Novedades» del panel), del más reciente al más antiguo: `id, name, phone, subject, message, createdAt` (`createdAt` en UTC, ISO 8601) |
 | `DELETE /contact-messages/:id` | Elimina un mensaje; `404` si no existe |
 | `GET /dashboard` | Resumen del panel (totales, ventas por producto y ciudad, recientes, semana) |
 | `GET /reports` | KPIs, ventas por producto, pedidos por estado, medios de pago, ranking de clientes. Admite `?from=YYYY-MM-DD&to=YYYY-MM-DD` (ambos opcionales) para acotar el período por `pedido.fecha`; sin ellos, es de todo el histórico |

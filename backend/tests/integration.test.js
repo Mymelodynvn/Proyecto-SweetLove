@@ -966,7 +966,9 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
       assert.equal(list.status, 200)
       const saved = list.data.find((item) => item.subject === subject)
       assert.ok(saved, 'el mensaje aparece en la lista')
-      assert.match(saved.createdAt, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)
+      // La hora sale en UTC y corresponde al momento real del envío, sin importar la zona horaria de la base
+      assert.match(saved.createdAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/)
+      assert.ok(Math.abs(Date.now() - Date.parse(saved.createdAt)) < 5 * 60 * 1000, `la hora ${saved.createdAt} no coincide con la actual`)
 
       assert.equal((await call(`/api/contact-messages/${saved.id}`, { method: 'DELETE', cookie: adminCookie })).status, 200)
       assert.equal((await call(`/api/contact-messages/${saved.id}`, { method: 'DELETE', cookie: adminCookie })).status, 404)
