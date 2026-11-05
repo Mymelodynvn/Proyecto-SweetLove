@@ -75,6 +75,32 @@ export const confirmLimiter = rateLimit({
   message: tooManyAttempts,
 })
 
+const tooManyMessages = { error: true, statusCode: 429, statusMessage: 'Enviaste muchos mensajes seguidos. Espera un rato e inténtalo de nuevo.' }
+
+// Normaliza el celular del cuerpo de la petición (solo dígitos) para usarlo como clave del límite, recibe req
+const phoneKey = (req) => String(req.body?.phone ?? '').replace(/\D/g, '')
+
+// Limita los mensajes de contacto por celular y por hora (frena el spam); solo cuentan los mensajes que sí se guardan
+export const contactPhoneLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  skipFailedRequests: true,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (req) => `contacto:${phoneKey(req) || ipKeyGenerator(req.ip)}`,
+  message: tooManyMessages,
+})
+
+// Limita los mensajes de contacto por IP (generoso, porque detrás del proxy muchos clientes comparten IP); solo cuentan los que sí se guardan
+export const contactIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  skipFailedRequests: true,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: tooManyMessages,
+})
+
 const tooManyOrders = { error: true, statusCode: 429, statusMessage: 'Hiciste muchos pedidos seguidos. Espera un rato e inténtalo de nuevo.' }
 
 // Limita los pedidos por correo y por hora (evita reservar el inventario en masa); solo cuentan los pedidos que sí se registran

@@ -15,6 +15,7 @@ SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 SET NAMES utf8mb4;
 
+DROP TABLE IF EXISTS mensaje_contacto;
 DROP TABLE IF EXISTS token_cuenta;
 DROP TABLE IF EXISTS envio;
 DROP TABLE IF EXISTS pago;
@@ -155,6 +156,18 @@ CREATE TABLE token_cuenta (
   KEY idx_token_usuario (idUser),
   CONSTRAINT token_cuenta_ibfk_1 FOREIGN KEY (idUser) REFERENCES usuario (idUser)
     ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Mensajes del formulario "Contáctanos" de la tienda (se muestran en "Novedades" del panel)
+CREATE TABLE mensaje_contacto (
+  idMensaje INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(100) NOT NULL,
+  celular VARCHAR(20) NOT NULL,
+  asunto VARCHAR(100) NOT NULL,
+  mensaje VARCHAR(1000) NOT NULL,
+  creadoEn DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (idMensaje),
+  KEY idx_mensaje_creado (creadoEn)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

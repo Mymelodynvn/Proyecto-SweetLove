@@ -36,6 +36,8 @@ describe('rutas de administrador sin sesión', () => {
     ['POST', '/api/suppliers'],
     ['PUT', '/api/suppliers/1'],
     ['DELETE', '/api/suppliers/1'],
+    ['GET', '/api/contact-messages'],
+    ['DELETE', '/api/contact-messages/1'],
     ['GET', '/api/dashboard'],
     ['GET', '/api/reports'],
   ]
@@ -87,6 +89,25 @@ describe('pedidos públicos: validación', () => {
     const response = await call('/api/orders', { method: 'POST', body: { email: 'ana@example.com', items: [{ productId: 1, quantity: 1 }] } })
     assert.equal(response.status, 400)
   })
+})
+
+describe('contacto público: validación', () => {
+  const valid = { name: 'Ana María', phone: '3001234567', subject: 'Pedido especial', message: 'Quiero una torta para un cumpleaños.' }
+
+  for (const [label, change] of [
+    ['un nombre con números', { name: 'Ana123' }],
+    ['un nombre muy corto', { name: 'A' }],
+    ['un celular con letras', { phone: '300abc4567' }],
+    ['un celular muy corto', { phone: '12345' }],
+    ['un asunto muy corto', { subject: 'Hi' }],
+    ['un mensaje muy corto', { message: 'Hola' }],
+    ['un mensaje de más de 1000 caracteres', { message: 'a'.repeat(1001) }],
+  ]) {
+    test(`rechaza ${label}`, async () => {
+      const response = await call('/api/contact', { method: 'POST', body: { ...valid, ...change } })
+      assert.equal(response.status, 400)
+    })
+  }
 })
 
 describe('CORS y errores', () => {

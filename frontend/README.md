@@ -35,7 +35,7 @@ public/tienda/            tienda pública (js/ = estado, componentes y carrito)
 
 | Módulo | Fuente |
 |---|---|
-| Dashboard, productos, pedidos, clientes, pagos, envíos, proveedores, reportes | API → MySQL |
+| Dashboard, productos, pedidos, clientes, pagos, envíos, proveedores, novedades (mensajes de contacto), reportes | API → MySQL |
 | Blog, equipo, perfil, ajustes | `localStorage` del navegador (aún sin tablas) |
 
 ## Comandos

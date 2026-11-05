@@ -29,6 +29,7 @@ rol 1 ───< usuario 1 ───< pedido 1 ───< itempedido >─── 
 | `pago` | Pago de un pedido: medio, monto, `estadoPago` |
 | `estadoenvio` / `envio` | Estados de envío (Pendiente, En camino, Entregado) y el envío asociado a un pago |
 | `token_cuenta` | Enlaces de un solo uso (verificar correo, restablecer contraseña); guarda solo el hash |
+| `mensaje_contacto` | Mensajes del formulario «Contáctanos» de la tienda (nombre, celular, asunto, mensaje); se ven y eliminan en «Novedades» del panel |
 | `schema_migrations` | Control de migraciones aplicadas (la crea el ejecutor) |
 
 Un pedido puede tener varios productos. `usuario` lleva `emailVerificado` y `esInvitado` (compras sin cuenta), y `pedido` guarda la hora de creación y la entrega (`nombreEnvio`, `celularEnvio`, `direccionEnvio`).

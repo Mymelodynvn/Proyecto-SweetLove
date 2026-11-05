@@ -1,6 +1,7 @@
 <!-- app-sidebar.vue — menú lateral del panel -->
 <script setup lang="ts">
 import {
+  IconBellRinging,
   IconCake,
   IconChartBar,
   IconChevronRight,
@@ -81,6 +82,7 @@ const storeLinks: NavLink[] = [
   { title: 'Productos', to: '/products', icon: IconCake },
   { title: 'Pedidos', to: '/orders', icon: IconShoppingCart },
   { title: 'Clientes', to: '/customers', icon: IconUsers },
+  { title: 'Novedades', to: '/news', icon: IconBellRinging },
   { title: 'Destacados', to: '/highlights', icon: IconStar },
   { title: 'Blog', to: '/blog', icon: IconNews },
 ]

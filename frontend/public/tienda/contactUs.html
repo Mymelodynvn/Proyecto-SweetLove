@@ -93,7 +93,7 @@
                     </ul>
                 </div>
 
-                <!-- Formulario de contacto: de ejemplo, todavía no envía el mensaje -->
+                <!-- Formulario de contacto: js/contact-form.js guarda el mensaje para que aparezca en "Novedades" del panel -->
                 <form action="#" class="contact__form">
                     <!-- Título del formulario -->
                     <h2>Escríbenos</h2>
@@ -108,10 +108,13 @@
                     <input type="tel" name="celular" placeholder="Celular" autocomplete="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{7,10}" title="Solo números, entre 7 y 10 dígitos (sin letras)" required>
 
                     <!-- Campo: asunto -->
-                    <input type="text" placeholder="Asunto" required>
+                    <input type="text" name="asunto" placeholder="Asunto" minlength="3" maxlength="100" required>
 
                     <!-- Campo: mensaje -->
-                    <textarea placeholder="Cuéntanos tu idea dulce" rows="5" required></textarea>
+                    <textarea name="mensaje" placeholder="Cuéntanos tu idea dulce" rows="5" minlength="10" maxlength="1000" required></textarea>
+
+                    <!-- Aviso del resultado del envío (enviado o con error) -->
+                    <p class="form__status" role="status" aria-live="polite" hidden></p>
 
                     <!-- Botón para enviar -->
                     <button type="submit" class="btn__form"><i class="fa-solid fa-paper-plane"></i>Enviar</button>

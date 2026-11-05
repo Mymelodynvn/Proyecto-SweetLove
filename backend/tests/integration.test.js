@@ -951,6 +951,45 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('mensajes de contacto', () => {
+    const contactBody = (subject, phone = '3001234567') => ({ name: 'María José', phone, subject, message: 'Quisiera cotizar una torta personalizada.' })
+
+    test('guarda el mensaje, el administrador lo ve en la lista y puede eliminarlo', async () => {
+      const subject = `Cotización ${Date.now()}`
+      const created = await call('/api/contact', { method: 'POST', body: contactBody(subject) })
+      assert.equal(created.status, 201, JSON.stringify(created.data))
+
+      const [[row]] = await getPool().query('SELECT nombre, celular, asunto, mensaje FROM mensaje_contacto WHERE asunto = ?', [subject])
+      assert.deepEqual(row, { nombre: 'María José', celular: '3001234567', asunto: subject, mensaje: 'Quisiera cotizar una torta personalizada.' })
+
+      const list = await call('/api/contact-messages', { cookie: adminCookie })
+      assert.equal(list.status, 200)
+      const saved = list.data.find((item) => item.subject === subject)
+      assert.ok(saved, 'el mensaje aparece en la lista')
+      assert.match(saved.createdAt, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)
+
+      assert.equal((await call(`/api/contact-messages/${saved.id}`, { method: 'DELETE', cookie: adminCookie })).status, 200)
+      assert.equal((await call(`/api/contact-messages/${saved.id}`, { method: 'DELETE', cookie: adminCookie })).status, 404)
+      const after = await call('/api/contact-messages', { cookie: adminCookie })
+      assert.ok(!after.data.some((item) => item.id === saved.id))
+    })
+
+    test('una cliente sin ser administradora no puede ver ni eliminar mensajes', async () => {
+      const created = await call('/api/contact', { method: 'POST', body: contactBody(`Privado ${Date.now()}`, '3005550001') })
+      assert.equal(created.status, 201)
+      assert.equal((await call('/api/contact-messages')).status, 401)
+      assert.equal((await call('/api/contact-messages/1', { method: 'DELETE' })).status, 401)
+    })
+
+    test('el mismo celular puede enviar 5 mensajes por hora; el sexto se frena', async () => {
+      const phone = '3109998877'
+      for (let attempt = 1; attempt <= 5; attempt += 1) {
+        assert.equal((await call('/api/contact', { method: 'POST', body: contactBody(`Seguimiento ${attempt}`, phone) })).status, 201, `mensaje ${attempt}`)
+      }
+      assert.equal((await call('/api/contact', { method: 'POST', body: contactBody('Seguimiento 6', phone) })).status, 429)
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)

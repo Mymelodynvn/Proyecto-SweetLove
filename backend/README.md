@@ -28,9 +28,9 @@ src/
 ├── app.js           arma Express (exporta createApp para las pruebas)
 ├── config/          env.js (variables) y database.js (pool MySQL, TLS opcional)
 ├── routes/          index.js: todas las URL y quién puede usarlas
-├── controllers/     validan la petición y responden (auth, product, order, supplier, panel, health)
+├── controllers/     validan la petición y responden (auth, product, order, supplier, contact, panel, health)
 ├── services/        orderService (checkout), accountService (registro, verificación y contraseñas), paymentService (concilia pagos y cancela pedidos vencidos), mercadoPagoService y mailer (correo)
-├── models/          SQL por tabla (user, token, product, order, payment, shipment, supplier, stats)
+├── models/          SQL por tabla (user, token, product, order, payment, shipment, supplier, contactMessage, stats)
 ├── middleware/      auth.js (requireAdmin) y errorHandler.js
 └── utils/           validate.js (celular, dirección, nombres), password.js (reglas de contraseña), httpError.js, product-image.js
 scripts/db.js        ejecutor de base de datos (init, migrate, status, baseline)
@@ -67,6 +67,7 @@ Códigos: 400 datos inválidos · 401 sin sesión o credenciales incorrectas · 
 | `GET /health` | Comprueba API y MySQL |
 | `GET /products` | Catálogo: `id, name, description, price, stock, image, active, supplierId` |
 | `POST /orders` | Crea un pedido. Body: `{ name, lastName?, email, phone, address, paymentMethod?, items: [{ productId, quantity }] }` (`phone` y `address` son obligatorios y se validan). Máximo 30 productos y 50 unidades por producto (las líneas repetidas se suman); `paymentMethod` solo admite `"Mercado Pago"` (el valor por defecto). Si no alcanza el stock responde `409` y nunca queda en negativo. Si el correo ya tiene una cuenta registrada y no hay sesión de esa cuenta, responde `409` con `code: LOGIN_REQUIRED` (los correos de compradores invitados sí pueden comprar sin sesión). Límites: 10 pedidos por correo cada hora y 100 por IP cada 15 minutos (`429`). Responde `201 { ok, idPedido, total, cantidadProductos, initPoint }`, con `initPoint` (enlace de pago) o `paymentError` si no se pudo crear |
+| `POST /contact` | Mensaje del formulario «Contáctanos». Body `{ name, phone, subject, message }`: `name` solo letras (2–100), `phone` de 7 a 10 números, `subject` de 3 a 100 y `message` de 10 a 1000 caracteres (`400` si no cumple). Se guarda en `mensaje_contacto` y aparece en «Novedades» del panel. Límites: 5 mensajes por celular cada hora y 60 por IP cada 15 minutos (`429`). Responde `201 { ok }` |
 | `POST /payments/webhook` | Aviso de Mercado Pago. Consulta el pago a su API y actualiza `pago.estadoPago` solo si el monto y la moneda coinciden con el pedido. Valida la firma `x-signature`; **en producción sin `MP_WEBHOOK_SECRET` rechaza todos los avisos** |
 | `POST /payments/confirm` | Body `{ orderId, token }`. La tienda lo llama al volver de Mercado Pago: el backend consulta el pago y actualiza el estado (respaldo del webhook). El `token` viaja en la dirección de regreso (`?pedido=…&t=…`); sin él o con uno falso responde `403`, así nadie consulta pedidos ajenos adivinando números. Responde `{ status }` |
 | `POST /auth/register` | Cuenta de cliente. Body `{ fullName, email, password }` (ver reglas de contraseña abajo). `201 { message, needsVerification }`. Con correo configurado la cuenta queda pendiente de verificar; si el correo era de una cuenta de invitado, se envía un enlace para activarla |
@@ -157,6 +158,8 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 | `PUT /suppliers/:id` | Actualiza proveedor (mismo body; lo que no se envía se conserva) |
 | `DELETE /suppliers/:id` | Elimina proveedor; los productos que lo tenían quedan sin proveedor (no se bloquea ni se borran) |
 | `GET /suppliers` | Lista los proveedores |
+| `GET /contact-messages` | Mensajes de «Contáctanos» (sección «Novedades» del panel), del más reciente al más antiguo: `id, name, phone, subject, message, createdAt` |
+| `DELETE /contact-messages/:id` | Elimina un mensaje; `404` si no existe |
 | `GET /dashboard` | Resumen del panel (totales, ventas por producto y ciudad, recientes, semana) |
 | `GET /reports` | KPIs, ventas por producto, pedidos por estado, medios de pago, ranking de clientes. Admite `?from=YYYY-MM-DD&to=YYYY-MM-DD` (ambos opcionales) para acotar el período por `pedido.fecha`; sin ellos, es de todo el histórico |
 
