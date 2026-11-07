@@ -38,6 +38,8 @@ describe('rutas de administrador sin sesión', () => {
     ['DELETE', '/api/suppliers/1'],
     ['GET', '/api/contact-messages'],
     ['DELETE', '/api/contact-messages/1'],
+    ['POST', '/api/admins'],
+    ['PATCH', '/api/admins/1'],
     ['GET', '/api/dashboard'],
     ['GET', '/api/reports'],
   ]

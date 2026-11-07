@@ -992,6 +992,104 @@ describe('integración con base de datos', { skip: !enabled && 'define TEST_DATA
     })
   })
 
+  describe('administradores (acceso al panel)', () => {
+    const grant = (body) => call('/api/admins', { method: 'POST', cookie: adminCookie, body: { name: 'Camila Rojas', phone: '3001234567', ...body } })
+    const userIdOf = async (email) => (await getPool().query('SELECT idUser FROM usuario WHERE email = ?', [email]))[0][0].idUser
+
+    test('crea una cuenta administradora nueva que inicia sesión y usa el panel', async () => {
+      const email = uniqueEmail('equipo')
+      const granted = await grant({ email, password: 'Equipo2026!x' })
+      assert.equal(granted.status, 201, JSON.stringify(granted.data))
+      assert.equal(granted.data.outcome, 'created')
+      assert.equal(granted.data.passwordSet, true)
+
+      const cookie = await login(email, 'Equipo2026!x')
+      assert.equal((await call('/api/auth/me', { cookie })).data.user.idRol, 1)
+      assert.equal((await call('/api/dashboard', { cookie })).status, 200)
+    })
+
+    test('rechaza contraseña débil, correo inválido y celular inválido', async () => {
+      assert.equal((await grant({ email: uniqueEmail('equipo'), password: 'abc' })).status, 400)
+      assert.equal((await grant({ email: uniqueEmail('equipo'), password: '' })).status, 400)
+      assert.equal((await grant({ email: 'no-es-correo', password: 'Equipo2026!x' })).status, 400)
+      assert.equal((await grant({ email: uniqueEmail('equipo'), password: 'Equipo2026!x', phone: 'abc' })).status, 400)
+    })
+
+    test('una clienta con el correo verificado pasa a administradora y conserva su propia contraseña', async () => {
+      const customer = await createVerifiedUser('ClaveSegura1!')
+      // La contraseña escrita en el formulario se ignora: la clienta ya eligió la suya
+      const granted = await grant({ email: customer.email, password: 'Ignorada1!zz' })
+      assert.equal(granted.status, 201, JSON.stringify(granted.data))
+      assert.equal(granted.data.outcome, 'promoted')
+      assert.equal(granted.data.passwordSet, false)
+
+      const cookie = await login(customer.email, customer.password)
+      assert.equal((await call('/api/auth/me', { cookie })).data.user.idRol, 1)
+      const typed = await call('/api/auth/login', { method: 'POST', body: { email: customer.email, password: 'Ignorada1!zz' } })
+      assert.equal(typed.status, 401)
+
+      // Sin contraseña en el formulario también funciona
+      const other = await createVerifiedUser('OtraClave2!')
+      assert.equal((await grant({ email: other.email, password: '' })).status, 201)
+    })
+
+    test('una cuenta sin verificar se convierte con la contraseña nueva y la del registro deja de valer', async () => {
+      const email = uniqueEmail('sinverificar')
+      assert.equal((await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password: 'ClaveRegistro1!' } })).status, 201)
+
+      assert.equal((await grant({ email, password: '' })).status, 400, 'sin contraseña no se convierte')
+      const granted = await grant({ email, password: 'ClaveNueva2026!a' })
+      assert.equal(granted.status, 201, JSON.stringify(granted.data))
+      assert.equal(granted.data.outcome, 'promoted')
+      assert.equal(granted.data.passwordSet, true)
+
+      const cookie = await login(email, 'ClaveNueva2026!a')
+      assert.equal((await call('/api/auth/me', { cookie })).data.user.idRol, 1)
+      assert.equal((await call('/api/auth/login', { method: 'POST', body: { email, password: 'ClaveRegistro1!' } })).status, 401)
+    })
+
+    test('si el correo ya es administrador no cambia nada', async () => {
+      const granted = await grant({ email: 'admin@example.com', password: '' })
+      assert.equal(granted.status, 201)
+      assert.equal(granted.data.outcome, 'already')
+      assert.equal(granted.data.passwordSet, false)
+      await login('admin@example.com', 'SweetLove2026')
+    })
+
+    test('quitar el acceso la pasa a cliente de inmediato y se puede volver a activar', async () => {
+      const email = uniqueEmail('equipo')
+      const { data } = await grant({ email, password: 'Equipo2026!x' })
+      const cookie = await login(email, 'Equipo2026!x')
+      assert.equal((await call('/api/dashboard', { cookie })).status, 200)
+
+      assert.equal((await call(`/api/admins/${data.userId}`, { method: 'PATCH', cookie: adminCookie, body: { active: false } })).status, 200)
+      // La misma sesión deja de valer para el panel sin esperar nada
+      assert.equal((await call('/api/dashboard', { cookie })).status, 403)
+      assert.equal((await call('/api/auth/me', { cookie })).data.user.idRol, 2)
+
+      assert.equal((await call(`/api/admins/${data.userId}`, { method: 'PATCH', cookie: adminCookie, body: { active: true } })).status, 200)
+      assert.equal((await call('/api/dashboard', { cookie })).status, 200)
+    })
+
+    test('no se puede quitar el propio acceso', async () => {
+      const me = await call('/api/auth/me', { cookie: adminCookie })
+      const own = await call(`/api/admins/${me.data.user.idUser}`, { method: 'PATCH', cookie: adminCookie, body: { active: false } })
+      assert.equal(own.status, 409)
+      assert.equal((await call('/api/dashboard', { cookie: adminCookie })).status, 200)
+    })
+
+    test('valida el cuerpo, la cuenta y no activa cuentas sin verificar', async () => {
+      const patch = (id, body) => call(`/api/admins/${id}`, { method: 'PATCH', cookie: adminCookie, body })
+      assert.equal((await patch(999999, { active: false })).status, 404)
+      assert.equal((await patch(1, { active: 'si' })).status, 400)
+      assert.equal((await patch('abc', { active: true })).status, 400)
+
+      const email = uniqueEmail('sinverificar')
+      await call('/api/auth/register', { method: 'POST', body: { fullName: 'Ana Prueba', email, password: 'ClaveRegistro1!' } })
+      assert.equal((await patch(await userIdOf(email), { active: true })).status, 409)
+    })
+  })
+
   describe('seguridad', () => {
     test('un formulario de otro sitio (text/plain) no crea pedidos ni cambia nada', async () => {
       const productId = await createProduct(2)

@@ -12,6 +12,7 @@ import * as health from '../controllers/healthController.js'
 import * as payments from '../controllers/paymentController.js'
 import * as suppliers from '../controllers/supplierController.js'
 import * as contact from '../controllers/contactController.js'
+import * as admins from '../controllers/adminController.js'
 
 const router = Router()
 
@@ -45,6 +46,8 @@ router.get('/suppliers', requireAdmin, suppliers.list)
 router.post('/suppliers', requireAdmin, suppliers.create)
 router.put('/suppliers/:id', requireAdmin, suppliers.update)
 router.delete('/suppliers/:id', requireAdmin, suppliers.remove)
+router.post('/admins', requireAdmin, admins.grant)
+router.patch('/admins/:id', requireAdmin, admins.setAccess)
 router.get('/contact-messages', requireAdmin, contact.list)
 router.delete('/contact-messages/:id', requireAdmin, contact.remove)
 router.get('/dashboard', requireAdmin, panel.dashboard)

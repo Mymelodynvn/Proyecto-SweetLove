@@ -89,6 +89,15 @@ export interface TeamMember {
   activity: MemberActivity[]
   // La persona propietaria de la tienda no puede eliminarse ni desactivarse.
   isOwner: boolean
+  // Cuenta real del panel (usuario.idUser) cuando el rol es Administrador; los miembros anteriores a esto no traen el campo
+  userId?: number | null
+}
+
+// Resultado de dar acceso al panel: qué pasó con la cuenta y si se fijó la contraseña escrita
+export interface AdminGrantResult {
+  userId: number
+  outcome: 'created' | 'promoted' | 'already'
+  passwordSet: boolean
 }
 
 // Campos editables desde el formulario (el resto lo asigna el sistema)
@@ -140,5 +149,13 @@ export const useTeam = () => {
     persist()
   }
 
-  return { members, loadFromStorage, addMember, updateMember, toggleMemberActive, removeMember }
+  // Da acceso al panel a un correo: el servidor crea la cuenta administradora o convierte la que ya existe, recibe data
+  const grantAdminAccess = (data: { name: string, email: string, phone: string, password: string }) =>
+    $fetch<AdminGrantResult>('/api/admins', { method: 'POST', body: data })
+
+  // Activa o quita el acceso al panel de una cuenta (al quitarlo pasa a ser cliente de la tienda), recibe userId, active
+  const setAdminAccess = (userId: number, active: boolean) =>
+    $fetch(`/api/admins/${userId}`, { method: 'PATCH', body: { active } })
+
+  return { members, loadFromStorage, addMember, updateMember, toggleMemberActive, removeMember, grantAdminAccess, setAdminAccess }
 }

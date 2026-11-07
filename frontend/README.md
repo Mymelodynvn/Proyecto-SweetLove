@@ -36,7 +36,8 @@ public/tienda/            tienda pública (js/ = estado, componentes y carrito)
 | Módulo | Fuente |
 |---|---|
 | Dashboard, productos, pedidos, clientes, pagos, envíos, proveedores, novedades (mensajes de contacto), reportes | API → MySQL |
-| Blog, equipo, perfil, ajustes | `localStorage` del navegador (aún sin tablas) |
+| Blog, lista del equipo, perfil, ajustes | `localStorage` del navegador (aún sin tablas) |
+| Cuentas de los administradores del equipo | API → MySQL: al agregar a alguien con rol Administrador se crea su cuenta (o se convierte la de tienda) y al quitarlo o suspenderlo pierde el acceso |
 
 ## Comandos
 

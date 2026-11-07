@@ -86,6 +86,23 @@ export const markEmailVerified = async (idUser) => {
   await getPool().execute('UPDATE usuario SET emailVerificado = 1 WHERE idUser = ?', [idUser])
 }
 
+// Datos de una cuenta para decidir si puede ser administradora (rol, correo verificado e invitado), recibe idUser
+export const findAccountState = async (idUser) => {
+  const [rows] = await getPool().query(
+    'SELECT idUser, idRol, emailVerificado, esInvitado FROM usuario WHERE idUser = ? LIMIT 1',
+    [idUser],
+  )
+  return rows[0]
+}
+
+// Cambia el rol de una cuenta por el nombre del rol (p. ej. "Administrador" o "Cliente"), recibe idUser, roleName
+export const setRole = async (idUser, roleName) => {
+  await getPool().execute(
+    'UPDATE usuario SET idRol = (SELECT idRol FROM rol WHERE nombre = ? LIMIT 1) WHERE idUser = ?',
+    [roleName, idUser],
+  )
+}
+
 // Lista los clientes con el total de pedidos y lo gastado (excluye pedidos cancelados)
 export const findCustomersWithTotals = async () => {
   const [rows] = await getPool().query(`

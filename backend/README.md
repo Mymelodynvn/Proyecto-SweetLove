@@ -28,8 +28,8 @@ src/
 ├── app.js           arma Express (exporta createApp para las pruebas)
 ├── config/          env.js (variables) y database.js (pool MySQL, TLS opcional)
 ├── routes/          index.js: todas las URL y quién puede usarlas
-├── controllers/     validan la petición y responden (auth, product, order, supplier, contact, panel, health)
-├── services/        orderService (checkout), accountService (registro, verificación y contraseñas), paymentService (concilia pagos y cancela pedidos vencidos), mercadoPagoService y mailer (correo)
+├── controllers/     validan la petición y responden (auth, product, order, supplier, contact, admin, panel, health)
+├── services/        orderService (checkout), accountService (registro, verificación y contraseñas), adminService (dar y quitar el acceso al panel), paymentService (concilia pagos y cancela pedidos vencidos), mercadoPagoService y mailer (correo)
 ├── models/          SQL por tabla (user, token, product, order, payment, shipment, supplier, contactMessage, stats)
 ├── middleware/      auth.js (requireAdmin) y errorHandler.js
 └── utils/           validate.js (celular, dirección, nombres), password.js (reglas de contraseña), httpError.js, product-image.js
@@ -158,6 +158,8 @@ Otros servidores SMTP funcionan con `SMTP_HOST` y `SMTP_PORT`. Los hosts gratuit
 | `PUT /suppliers/:id` | Actualiza proveedor (mismo body; lo que no se envía se conserva) |
 | `DELETE /suppliers/:id` | Elimina proveedor; los productos que lo tenían quedan sin proveedor (no se bloquea ni se borran) |
 | `GET /suppliers` | Lista los proveedores |
+| `POST /admins` | Da acceso al panel (lo usa **Equipo → Agregar miembro** con rol Administrador). Body `{ name, email, phone, password }`. Sin cuenta con ese correo: la crea como administradora con esa contraseña (`outcome: "created"`). Cuenta de tienda con el correo verificado: la convierte y **conserva su contraseña** (`"promoted"`, `password` opcional). Cuenta sin verificar o de invitado: la convierte y fija la contraseña dada (`"promoted"`, obligatoria). Si ya es administradora no cambia nada (`"already"`). Responde `201 { ok, userId, outcome, passwordSet }` |
+| `PATCH /admins/:id` | Body `{ active }`. `false` quita el acceso (la cuenta pasa a Cliente y conserva sus pedidos; rige en la siguiente petición, aunque tenga la sesión abierta); `true` lo devuelve, solo a cuentas con correo verificado que no sean de invitado (`409` si no). No se puede quitar el propio acceso (`409`) |
 | `GET /contact-messages` | Mensajes de «Contáctanos» (sección «Novedades» del panel), del más reciente al más antiguo: `id, name, phone, subject, message, createdAt` (`createdAt` en UTC, ISO 8601) |
 | `DELETE /contact-messages/:id` | Elimina un mensaje; `404` si no existe |
 | `GET /dashboard` | Resumen del panel (totales, ventas por producto y ciudad, recientes, semana) |

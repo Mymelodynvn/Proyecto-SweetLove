@@ -78,7 +78,7 @@ const safely = async (task) => {
 }
 
 // Separa el nombre completo en nombre (el primer término) y apellido (el resto, vacío si no hay) y comprueba que quepan, recibe fullName
-const splitFullName = (fullName) => {
+export const splitFullName = (fullName) => {
   const [nombre, ...rest] = fullName.split(/\s+/)
   const apellido = rest.join(' ')
   if (nombre.length > MAX_NAME_PART_LENGTH) throw new HttpError(400, `El nombre admite máximo ${MAX_NAME_PART_LENGTH} caracteres.`)
